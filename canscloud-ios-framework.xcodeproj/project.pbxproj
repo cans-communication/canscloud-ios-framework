@@ -11,6 +11,7 @@
 		2B4C0B3528DC6B1700F35838 /* canscloud_ios_framework.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 2B4C0B2A28DC6B1600F35838 /* canscloud_ios_framework.framework */; };
 		2B4C0B3A28DC6B1700F35838 /* canscloud_ios_frameworkTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 2B4C0B3928DC6B1700F35838 /* canscloud_ios_frameworkTests.swift */; };
 		2B4C0B3B28DC6B1700F35838 /* canscloud_ios_framework.h in Headers */ = {isa = PBXBuildFile; fileRef = 2B4C0B2D28DC6B1600F35838 /* canscloud_ios_framework.h */; settings = {ATTRIBUTES = (Public, ); }; };
+		52F67DA128EADD48003D2CE8 /* TestAccess.swift in Sources */ = {isa = PBXBuildFile; fileRef = 52F67DA028EADD48003D2CE8 /* TestAccess.swift */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXContainerItemProxy section */
@@ -29,6 +30,7 @@
 		2B4C0B2E28DC6B1600F35838 /* canscloud_ios_framework.docc */ = {isa = PBXFileReference; lastKnownFileType = folder.documentationcatalog; path = canscloud_ios_framework.docc; sourceTree = "<group>"; };
 		2B4C0B3428DC6B1700F35838 /* canscloud-ios-frameworkTests.xctest */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; includeInIndex = 0; path = "canscloud-ios-frameworkTests.xctest"; sourceTree = BUILT_PRODUCTS_DIR; };
 		2B4C0B3928DC6B1700F35838 /* canscloud_ios_frameworkTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = canscloud_ios_frameworkTests.swift; sourceTree = "<group>"; };
+		52F67DA028EADD48003D2CE8 /* TestAccess.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TestAccess.swift; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -73,6 +75,7 @@
 			children = (
 				2B4C0B2D28DC6B1600F35838 /* canscloud_ios_framework.h */,
 				2B4C0B2E28DC6B1600F35838 /* canscloud_ios_framework.docc */,
+				52F67DA028EADD48003D2CE8 /* TestAccess.swift */,
 			);
 			path = "canscloud-ios-framework";
 			sourceTree = "<group>";
@@ -195,6 +198,7 @@
 			buildActionMask = 2147483647;
 			files = (
 				2B4C0B2F28DC6B1600F35838 /* canscloud_ios_framework.docc in Sources */,
+				52F67DA128EADD48003D2CE8 /* TestAccess.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -396,6 +400,7 @@
 		2B4C0B4228DC6B1700F35838 /* Debug */ = {
 			isa = XCBuildConfiguration;
 			buildSettings = {
+				ALWAYS_EMBED_SWIFT_STANDARD_LIBRARIES = YES;
 				CODE_SIGN_STYLE = Automatic;
 				CURRENT_PROJECT_VERSION = 1;
 				DEVELOPMENT_TEAM = N27H9XFR3R;
@@ -412,6 +417,7 @@
 		2B4C0B4328DC6B1700F35838 /* Release */ = {
 			isa = XCBuildConfiguration;
 			buildSettings = {
+				ALWAYS_EMBED_SWIFT_STANDARD_LIBRARIES = YES;
 				CODE_SIGN_STYLE = Automatic;
 				CURRENT_PROJECT_VERSION = 1;
 				DEVELOPMENT_TEAM = N27H9XFR3R;

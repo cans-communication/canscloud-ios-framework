@@ -8,6 +8,11 @@
 import Foundation
 
 public class AllowAccess {
+    
+    public init() {
+        
+    }
+    
     public func display() {
         print("Can Access")
     }

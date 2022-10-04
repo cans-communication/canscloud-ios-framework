@@ -7,8 +7,8 @@
 
 import Foundation
 
-class AllowAccess {
-    func display() {
+public class AllowAccess {
+    public func display() {
         print("Can Access")
     }
     

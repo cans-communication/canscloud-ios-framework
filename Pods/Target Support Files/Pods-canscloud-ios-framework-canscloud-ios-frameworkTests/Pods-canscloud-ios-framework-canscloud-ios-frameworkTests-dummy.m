@@ -1,0 +1,5 @@
+#import <Foundation/Foundation.h>
+@interface PodsDummy_Pods_canscloud_ios_framework_canscloud_ios_frameworkTests : NSObject
+@end
+@implementation PodsDummy_Pods_canscloud_ios_framework_canscloud_ios_frameworkTests
+@end

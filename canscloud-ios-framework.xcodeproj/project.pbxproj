@@ -7,11 +7,14 @@
 	objects = {
 
 /* Begin PBXBuildFile section */
+		082BD0045A8B77E370FFDC3F /* Pods_canscloud_ios_framework_canscloud_ios_frameworkTests.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 8FF6FF893D1855E811BC3BAE /* Pods_canscloud_ios_framework_canscloud_ios_frameworkTests.framework */; };
 		2B4C0B2F28DC6B1600F35838 /* canscloud_ios_framework.docc in Sources */ = {isa = PBXBuildFile; fileRef = 2B4C0B2E28DC6B1600F35838 /* canscloud_ios_framework.docc */; };
 		2B4C0B3528DC6B1700F35838 /* canscloud_ios_framework.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 2B4C0B2A28DC6B1600F35838 /* canscloud_ios_framework.framework */; };
 		2B4C0B3A28DC6B1700F35838 /* canscloud_ios_frameworkTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 2B4C0B3928DC6B1700F35838 /* canscloud_ios_frameworkTests.swift */; };
 		2B4C0B3B28DC6B1700F35838 /* canscloud_ios_framework.h in Headers */ = {isa = PBXBuildFile; fileRef = 2B4C0B2D28DC6B1600F35838 /* canscloud_ios_framework.h */; settings = {ATTRIBUTES = (Public, ); }; };
-		52F67DA128EADD48003D2CE8 /* TestAccess.swift in Sources */ = {isa = PBXBuildFile; fileRef = 52F67DA028EADD48003D2CE8 /* TestAccess.swift */; };
+		52F5D74828EC4260003719E8 /* CdrHistoryWorker.swift in Sources */ = {isa = PBXBuildFile; fileRef = 52F5D74728EC4260003719E8 /* CdrHistoryWorker.swift */; };
+		52F5D74A28EC4289003719E8 /* CdrHistoryApi.swift in Sources */ = {isa = PBXBuildFile; fileRef = 52F5D74928EC4288003719E8 /* CdrHistoryApi.swift */; };
+		D37EB8AA81E48E24DAB39194 /* Pods_canscloud_ios_framework.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 35053146093401D9BB58F133 /* Pods_canscloud_ios_framework.framework */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXContainerItemProxy section */
@@ -30,7 +33,14 @@
 		2B4C0B2E28DC6B1600F35838 /* canscloud_ios_framework.docc */ = {isa = PBXFileReference; lastKnownFileType = folder.documentationcatalog; path = canscloud_ios_framework.docc; sourceTree = "<group>"; };
 		2B4C0B3428DC6B1700F35838 /* canscloud-ios-frameworkTests.xctest */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; includeInIndex = 0; path = "canscloud-ios-frameworkTests.xctest"; sourceTree = BUILT_PRODUCTS_DIR; };
 		2B4C0B3928DC6B1700F35838 /* canscloud_ios_frameworkTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = canscloud_ios_frameworkTests.swift; sourceTree = "<group>"; };
-		52F67DA028EADD48003D2CE8 /* TestAccess.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TestAccess.swift; sourceTree = "<group>"; };
+		35053146093401D9BB58F133 /* Pods_canscloud_ios_framework.framework */ = {isa = PBXFileReference; explicitFileType = wrapper.framework; includeInIndex = 0; path = Pods_canscloud_ios_framework.framework; sourceTree = BUILT_PRODUCTS_DIR; };
+		3E995AFF4FF2E6576BD763F6 /* Pods-canscloud-ios-framework.release.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; name = "Pods-canscloud-ios-framework.release.xcconfig"; path = "Target Support Files/Pods-canscloud-ios-framework/Pods-canscloud-ios-framework.release.xcconfig"; sourceTree = "<group>"; };
+		52F5D74728EC4260003719E8 /* CdrHistoryWorker.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = CdrHistoryWorker.swift; sourceTree = "<group>"; };
+		52F5D74928EC4288003719E8 /* CdrHistoryApi.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = CdrHistoryApi.swift; sourceTree = "<group>"; };
+		8FF6FF893D1855E811BC3BAE /* Pods_canscloud_ios_framework_canscloud_ios_frameworkTests.framework */ = {isa = PBXFileReference; explicitFileType = wrapper.framework; includeInIndex = 0; path = Pods_canscloud_ios_framework_canscloud_ios_frameworkTests.framework; sourceTree = BUILT_PRODUCTS_DIR; };
+		CB44FB5779C88AF271444EC2 /* Pods-canscloud-ios-framework-canscloud-ios-frameworkTests.release.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; name = "Pods-canscloud-ios-framework-canscloud-ios-frameworkTests.release.xcconfig"; path = "Target Support Files/Pods-canscloud-ios-framework-canscloud-ios-frameworkTests/Pods-canscloud-ios-framework-canscloud-ios-frameworkTests.release.xcconfig"; sourceTree = "<group>"; };
+		EA119665E61982436485F22F /* Pods-canscloud-ios-framework.debug.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; name = "Pods-canscloud-ios-framework.debug.xcconfig"; path = "Target Support Files/Pods-canscloud-ios-framework/Pods-canscloud-ios-framework.debug.xcconfig"; sourceTree = "<group>"; };
+		F194195A9B860A89520F73AB /* Pods-canscloud-ios-framework-canscloud-ios-frameworkTests.debug.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; name = "Pods-canscloud-ios-framework-canscloud-ios-frameworkTests.debug.xcconfig"; path = "Target Support Files/Pods-canscloud-ios-framework-canscloud-ios-frameworkTests/Pods-canscloud-ios-framework-canscloud-ios-frameworkTests.debug.xcconfig"; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -38,6 +48,7 @@
 			isa = PBXFrameworksBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				D37EB8AA81E48E24DAB39194 /* Pods_canscloud_ios_framework.framework in Frameworks */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -46,6 +57,7 @@
 			buildActionMask = 2147483647;
 			files = (
 				2B4C0B3528DC6B1700F35838 /* canscloud_ios_framework.framework in Frameworks */,
+				082BD0045A8B77E370FFDC3F /* Pods_canscloud_ios_framework_canscloud_ios_frameworkTests.framework in Frameworks */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -58,6 +70,8 @@
 				2B4C0B2C28DC6B1600F35838 /* canscloud-ios-framework */,
 				2B4C0B3828DC6B1700F35838 /* canscloud-ios-frameworkTests */,
 				2B4C0B2B28DC6B1600F35838 /* Products */,
+				95BA9C4979BCDDD948152030 /* Pods */,
+				71CF7959E35D0E2548364A84 /* Frameworks */,
 			);
 			sourceTree = "<group>";
 		};
@@ -73,9 +87,10 @@
 		2B4C0B2C28DC6B1600F35838 /* canscloud-ios-framework */ = {
 			isa = PBXGroup;
 			children = (
+				52F5D74928EC4288003719E8 /* CdrHistoryApi.swift */,
+				52F5D74728EC4260003719E8 /* CdrHistoryWorker.swift */,
 				2B4C0B2D28DC6B1600F35838 /* canscloud_ios_framework.h */,
 				2B4C0B2E28DC6B1600F35838 /* canscloud_ios_framework.docc */,
-				52F67DA028EADD48003D2CE8 /* TestAccess.swift */,
 			);
 			path = "canscloud-ios-framework";
 			sourceTree = "<group>";
@@ -86,6 +101,26 @@
 				2B4C0B3928DC6B1700F35838 /* canscloud_ios_frameworkTests.swift */,
 			);
 			path = "canscloud-ios-frameworkTests";
+			sourceTree = "<group>";
+		};
+		71CF7959E35D0E2548364A84 /* Frameworks */ = {
+			isa = PBXGroup;
+			children = (
+				35053146093401D9BB58F133 /* Pods_canscloud_ios_framework.framework */,
+				8FF6FF893D1855E811BC3BAE /* Pods_canscloud_ios_framework_canscloud_ios_frameworkTests.framework */,
+			);
+			name = Frameworks;
+			sourceTree = "<group>";
+		};
+		95BA9C4979BCDDD948152030 /* Pods */ = {
+			isa = PBXGroup;
+			children = (
+				EA119665E61982436485F22F /* Pods-canscloud-ios-framework.debug.xcconfig */,
+				3E995AFF4FF2E6576BD763F6 /* Pods-canscloud-ios-framework.release.xcconfig */,
+				F194195A9B860A89520F73AB /* Pods-canscloud-ios-framework-canscloud-ios-frameworkTests.debug.xcconfig */,
+				CB44FB5779C88AF271444EC2 /* Pods-canscloud-ios-framework-canscloud-ios-frameworkTests.release.xcconfig */,
+			);
+			path = Pods;
 			sourceTree = "<group>";
 		};
 /* End PBXGroup section */
@@ -106,6 +141,7 @@
 			isa = PBXNativeTarget;
 			buildConfigurationList = 2B4C0B3E28DC6B1700F35838 /* Build configuration list for PBXNativeTarget "canscloud-ios-framework" */;
 			buildPhases = (
+				BB88E0F94D46781681E862CF /* [CP] Check Pods Manifest.lock */,
 				2B4C0B2528DC6B1600F35838 /* Headers */,
 				2B4C0B2628DC6B1600F35838 /* Sources */,
 				2B4C0B2728DC6B1600F35838 /* Frameworks */,
@@ -124,9 +160,11 @@
 			isa = PBXNativeTarget;
 			buildConfigurationList = 2B4C0B4128DC6B1700F35838 /* Build configuration list for PBXNativeTarget "canscloud-ios-frameworkTests" */;
 			buildPhases = (
+				6AE2E9172BB4986D63ACF8FB /* [CP] Check Pods Manifest.lock */,
 				2B4C0B3028DC6B1700F35838 /* Sources */,
 				2B4C0B3128DC6B1700F35838 /* Frameworks */,
 				2B4C0B3228DC6B1700F35838 /* Resources */,
+				81450F4F22BED60FC61624A2 /* [CP] Embed Pods Frameworks */,
 			);
 			buildRules = (
 			);
@@ -192,13 +230,78 @@
 		};
 /* End PBXResourcesBuildPhase section */
 
+/* Begin PBXShellScriptBuildPhase section */
+		6AE2E9172BB4986D63ACF8FB /* [CP] Check Pods Manifest.lock */ = {
+			isa = PBXShellScriptBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			inputFileListPaths = (
+			);
+			inputPaths = (
+				"${PODS_PODFILE_DIR_PATH}/Podfile.lock",
+				"${PODS_ROOT}/Manifest.lock",
+			);
+			name = "[CP] Check Pods Manifest.lock";
+			outputFileListPaths = (
+			);
+			outputPaths = (
+				"$(DERIVED_FILE_DIR)/Pods-canscloud-ios-framework-canscloud-ios-frameworkTests-checkManifestLockResult.txt",
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+			shellPath = /bin/sh;
+			shellScript = "diff \"${PODS_PODFILE_DIR_PATH}/Podfile.lock\" \"${PODS_ROOT}/Manifest.lock\" > /dev/null\nif [ $? != 0 ] ; then\n    # print error to STDERR\n    echo \"error: The sandbox is not in sync with the Podfile.lock. Run 'pod install' or update your CocoaPods installation.\" >&2\n    exit 1\nfi\n# This output is used by Xcode 'outputs' to avoid re-running this script phase.\necho \"SUCCESS\" > \"${SCRIPT_OUTPUT_FILE_0}\"\n";
+			showEnvVarsInLog = 0;
+		};
+		81450F4F22BED60FC61624A2 /* [CP] Embed Pods Frameworks */ = {
+			isa = PBXShellScriptBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			inputFileListPaths = (
+				"${PODS_ROOT}/Target Support Files/Pods-canscloud-ios-framework-canscloud-ios-frameworkTests/Pods-canscloud-ios-framework-canscloud-ios-frameworkTests-frameworks-${CONFIGURATION}-input-files.xcfilelist",
+			);
+			name = "[CP] Embed Pods Frameworks";
+			outputFileListPaths = (
+				"${PODS_ROOT}/Target Support Files/Pods-canscloud-ios-framework-canscloud-ios-frameworkTests/Pods-canscloud-ios-framework-canscloud-ios-frameworkTests-frameworks-${CONFIGURATION}-output-files.xcfilelist",
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+			shellPath = /bin/sh;
+			shellScript = "\"${PODS_ROOT}/Target Support Files/Pods-canscloud-ios-framework-canscloud-ios-frameworkTests/Pods-canscloud-ios-framework-canscloud-ios-frameworkTests-frameworks.sh\"\n";
+			showEnvVarsInLog = 0;
+		};
+		BB88E0F94D46781681E862CF /* [CP] Check Pods Manifest.lock */ = {
+			isa = PBXShellScriptBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			inputFileListPaths = (
+			);
+			inputPaths = (
+				"${PODS_PODFILE_DIR_PATH}/Podfile.lock",
+				"${PODS_ROOT}/Manifest.lock",
+			);
+			name = "[CP] Check Pods Manifest.lock";
+			outputFileListPaths = (
+			);
+			outputPaths = (
+				"$(DERIVED_FILE_DIR)/Pods-canscloud-ios-framework-checkManifestLockResult.txt",
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+			shellPath = /bin/sh;
+			shellScript = "diff \"${PODS_PODFILE_DIR_PATH}/Podfile.lock\" \"${PODS_ROOT}/Manifest.lock\" > /dev/null\nif [ $? != 0 ] ; then\n    # print error to STDERR\n    echo \"error: The sandbox is not in sync with the Podfile.lock. Run 'pod install' or update your CocoaPods installation.\" >&2\n    exit 1\nfi\n# This output is used by Xcode 'outputs' to avoid re-running this script phase.\necho \"SUCCESS\" > \"${SCRIPT_OUTPUT_FILE_0}\"\n";
+			showEnvVarsInLog = 0;
+		};
+/* End PBXShellScriptBuildPhase section */
+
 /* Begin PBXSourcesBuildPhase section */
 		2B4C0B2628DC6B1600F35838 /* Sources */ = {
 			isa = PBXSourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				52F5D74828EC4260003719E8 /* CdrHistoryWorker.swift in Sources */,
+				52F5D74A28EC4289003719E8 /* CdrHistoryApi.swift in Sources */,
 				2B4C0B2F28DC6B1600F35838 /* canscloud_ios_framework.docc in Sources */,
-				52F67DA128EADD48003D2CE8 /* TestAccess.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -343,6 +446,7 @@
 		};
 		2B4C0B3F28DC6B1700F35838 /* Debug */ = {
 			isa = XCBuildConfiguration;
+			baseConfigurationReference = EA119665E61982436485F22F /* Pods-canscloud-ios-framework.debug.xcconfig */;
 			buildSettings = {
 				BUILD_LIBRARY_FOR_DISTRIBUTION = YES;
 				CODE_SIGN_STYLE = Automatic;
@@ -360,7 +464,7 @@
 					"@executable_path/Frameworks",
 					"@loader_path/Frameworks",
 				);
-				MARKETING_VERSION = 0.0.4;
+				MARKETING_VERSION = 0.1.0;
 				PRODUCT_BUNDLE_IDENTIFIER = "cc.cans.canscloud-ios-framework";
 				PRODUCT_NAME = "$(TARGET_NAME:c99extidentifier)";
 				SKIP_INSTALL = YES;
@@ -375,6 +479,7 @@
 		};
 		2B4C0B4028DC6B1700F35838 /* Release */ = {
 			isa = XCBuildConfiguration;
+			baseConfigurationReference = 3E995AFF4FF2E6576BD763F6 /* Pods-canscloud-ios-framework.release.xcconfig */;
 			buildSettings = {
 				BUILD_LIBRARY_FOR_DISTRIBUTION = YES;
 				CODE_SIGN_STYLE = Automatic;
@@ -392,7 +497,7 @@
 					"@executable_path/Frameworks",
 					"@loader_path/Frameworks",
 				);
-				MARKETING_VERSION = 0.0.4;
+				MARKETING_VERSION = 0.1.0;
 				PRODUCT_BUNDLE_IDENTIFIER = "cc.cans.canscloud-ios-framework";
 				PRODUCT_NAME = "$(TARGET_NAME:c99extidentifier)";
 				SKIP_INSTALL = YES;
@@ -407,6 +512,7 @@
 		};
 		2B4C0B4228DC6B1700F35838 /* Debug */ = {
 			isa = XCBuildConfiguration;
+			baseConfigurationReference = F194195A9B860A89520F73AB /* Pods-canscloud-ios-framework-canscloud-ios-frameworkTests.debug.xcconfig */;
 			buildSettings = {
 				ALWAYS_EMBED_SWIFT_STANDARD_LIBRARIES = YES;
 				CODE_SIGN_STYLE = Automatic;
@@ -424,6 +530,7 @@
 		};
 		2B4C0B4328DC6B1700F35838 /* Release */ = {
 			isa = XCBuildConfiguration;
+			baseConfigurationReference = CB44FB5779C88AF271444EC2 /* Pods-canscloud-ios-framework-canscloud-ios-frameworkTests.release.xcconfig */;
 			buildSettings = {
 				ALWAYS_EMBED_SWIFT_STANDARD_LIBRARIES = YES;
 				CODE_SIGN_STYLE = Automatic;

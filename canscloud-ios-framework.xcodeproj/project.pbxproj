@@ -7,14 +7,13 @@
 	objects = {
 
 /* Begin PBXBuildFile section */
-		082BD0045A8B77E370FFDC3F /* Pods_canscloud_ios_framework_canscloud_ios_frameworkTests.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 8FF6FF893D1855E811BC3BAE /* Pods_canscloud_ios_framework_canscloud_ios_frameworkTests.framework */; };
 		2B4C0B2F28DC6B1600F35838 /* canscloud_ios_framework.docc in Sources */ = {isa = PBXBuildFile; fileRef = 2B4C0B2E28DC6B1600F35838 /* canscloud_ios_framework.docc */; };
 		2B4C0B3528DC6B1700F35838 /* canscloud_ios_framework.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 2B4C0B2A28DC6B1600F35838 /* canscloud_ios_framework.framework */; };
 		2B4C0B3A28DC6B1700F35838 /* canscloud_ios_frameworkTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 2B4C0B3928DC6B1700F35838 /* canscloud_ios_frameworkTests.swift */; };
 		2B4C0B3B28DC6B1700F35838 /* canscloud_ios_framework.h in Headers */ = {isa = PBXBuildFile; fileRef = 2B4C0B2D28DC6B1600F35838 /* canscloud_ios_framework.h */; settings = {ATTRIBUTES = (Public, ); }; };
 		52F5D74828EC4260003719E8 /* CdrHistoryWorker.swift in Sources */ = {isa = PBXBuildFile; fileRef = 52F5D74728EC4260003719E8 /* CdrHistoryWorker.swift */; };
 		52F5D74A28EC4289003719E8 /* CdrHistoryApi.swift in Sources */ = {isa = PBXBuildFile; fileRef = 52F5D74928EC4288003719E8 /* CdrHistoryApi.swift */; };
-		D37EB8AA81E48E24DAB39194 /* Pods_canscloud_ios_framework.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 35053146093401D9BB58F133 /* Pods_canscloud_ios_framework.framework */; };
+		52F5D75728ED31AD003719E8 /* Alamofire in Frameworks */ = {isa = PBXBuildFile; productRef = 52F5D75628ED31AD003719E8 /* Alamofire */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXContainerItemProxy section */
@@ -33,14 +32,8 @@
 		2B4C0B2E28DC6B1600F35838 /* canscloud_ios_framework.docc */ = {isa = PBXFileReference; lastKnownFileType = folder.documentationcatalog; path = canscloud_ios_framework.docc; sourceTree = "<group>"; };
 		2B4C0B3428DC6B1700F35838 /* canscloud-ios-frameworkTests.xctest */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; includeInIndex = 0; path = "canscloud-ios-frameworkTests.xctest"; sourceTree = BUILT_PRODUCTS_DIR; };
 		2B4C0B3928DC6B1700F35838 /* canscloud_ios_frameworkTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = canscloud_ios_frameworkTests.swift; sourceTree = "<group>"; };
-		35053146093401D9BB58F133 /* Pods_canscloud_ios_framework.framework */ = {isa = PBXFileReference; explicitFileType = wrapper.framework; includeInIndex = 0; path = Pods_canscloud_ios_framework.framework; sourceTree = BUILT_PRODUCTS_DIR; };
-		3E995AFF4FF2E6576BD763F6 /* Pods-canscloud-ios-framework.release.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; name = "Pods-canscloud-ios-framework.release.xcconfig"; path = "Target Support Files/Pods-canscloud-ios-framework/Pods-canscloud-ios-framework.release.xcconfig"; sourceTree = "<group>"; };
 		52F5D74728EC4260003719E8 /* CdrHistoryWorker.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = CdrHistoryWorker.swift; sourceTree = "<group>"; };
 		52F5D74928EC4288003719E8 /* CdrHistoryApi.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = CdrHistoryApi.swift; sourceTree = "<group>"; };
-		8FF6FF893D1855E811BC3BAE /* Pods_canscloud_ios_framework_canscloud_ios_frameworkTests.framework */ = {isa = PBXFileReference; explicitFileType = wrapper.framework; includeInIndex = 0; path = Pods_canscloud_ios_framework_canscloud_ios_frameworkTests.framework; sourceTree = BUILT_PRODUCTS_DIR; };
-		CB44FB5779C88AF271444EC2 /* Pods-canscloud-ios-framework-canscloud-ios-frameworkTests.release.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; name = "Pods-canscloud-ios-framework-canscloud-ios-frameworkTests.release.xcconfig"; path = "Target Support Files/Pods-canscloud-ios-framework-canscloud-ios-frameworkTests/Pods-canscloud-ios-framework-canscloud-ios-frameworkTests.release.xcconfig"; sourceTree = "<group>"; };
-		EA119665E61982436485F22F /* Pods-canscloud-ios-framework.debug.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; name = "Pods-canscloud-ios-framework.debug.xcconfig"; path = "Target Support Files/Pods-canscloud-ios-framework/Pods-canscloud-ios-framework.debug.xcconfig"; sourceTree = "<group>"; };
-		F194195A9B860A89520F73AB /* Pods-canscloud-ios-framework-canscloud-ios-frameworkTests.debug.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; name = "Pods-canscloud-ios-framework-canscloud-ios-frameworkTests.debug.xcconfig"; path = "Target Support Files/Pods-canscloud-ios-framework-canscloud-ios-frameworkTests/Pods-canscloud-ios-framework-canscloud-ios-frameworkTests.debug.xcconfig"; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -48,7 +41,7 @@
 			isa = PBXFrameworksBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
-				D37EB8AA81E48E24DAB39194 /* Pods_canscloud_ios_framework.framework in Frameworks */,
+				52F5D75728ED31AD003719E8 /* Alamofire in Frameworks */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -57,7 +50,6 @@
 			buildActionMask = 2147483647;
 			files = (
 				2B4C0B3528DC6B1700F35838 /* canscloud_ios_framework.framework in Frameworks */,
-				082BD0045A8B77E370FFDC3F /* Pods_canscloud_ios_framework_canscloud_ios_frameworkTests.framework in Frameworks */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -70,8 +62,6 @@
 				2B4C0B2C28DC6B1600F35838 /* canscloud-ios-framework */,
 				2B4C0B3828DC6B1700F35838 /* canscloud-ios-frameworkTests */,
 				2B4C0B2B28DC6B1600F35838 /* Products */,
-				95BA9C4979BCDDD948152030 /* Pods */,
-				71CF7959E35D0E2548364A84 /* Frameworks */,
 			);
 			sourceTree = "<group>";
 		};
@@ -103,26 +93,6 @@
 			path = "canscloud-ios-frameworkTests";
 			sourceTree = "<group>";
 		};
-		71CF7959E35D0E2548364A84 /* Frameworks */ = {
-			isa = PBXGroup;
-			children = (
-				35053146093401D9BB58F133 /* Pods_canscloud_ios_framework.framework */,
-				8FF6FF893D1855E811BC3BAE /* Pods_canscloud_ios_framework_canscloud_ios_frameworkTests.framework */,
-			);
-			name = Frameworks;
-			sourceTree = "<group>";
-		};
-		95BA9C4979BCDDD948152030 /* Pods */ = {
-			isa = PBXGroup;
-			children = (
-				EA119665E61982436485F22F /* Pods-canscloud-ios-framework.debug.xcconfig */,
-				3E995AFF4FF2E6576BD763F6 /* Pods-canscloud-ios-framework.release.xcconfig */,
-				F194195A9B860A89520F73AB /* Pods-canscloud-ios-framework-canscloud-ios-frameworkTests.debug.xcconfig */,
-				CB44FB5779C88AF271444EC2 /* Pods-canscloud-ios-framework-canscloud-ios-frameworkTests.release.xcconfig */,
-			);
-			path = Pods;
-			sourceTree = "<group>";
-		};
 /* End PBXGroup section */
 
 /* Begin PBXHeadersBuildPhase section */
@@ -141,7 +111,6 @@
 			isa = PBXNativeTarget;
 			buildConfigurationList = 2B4C0B3E28DC6B1700F35838 /* Build configuration list for PBXNativeTarget "canscloud-ios-framework" */;
 			buildPhases = (
-				BB88E0F94D46781681E862CF /* [CP] Check Pods Manifest.lock */,
 				2B4C0B2528DC6B1600F35838 /* Headers */,
 				2B4C0B2628DC6B1600F35838 /* Sources */,
 				2B4C0B2728DC6B1600F35838 /* Frameworks */,
@@ -152,6 +121,9 @@
 			dependencies = (
 			);
 			name = "canscloud-ios-framework";
+			packageProductDependencies = (
+				52F5D75628ED31AD003719E8 /* Alamofire */,
+			);
 			productName = "canscloud-ios-framework";
 			productReference = 2B4C0B2A28DC6B1600F35838 /* canscloud_ios_framework.framework */;
 			productType = "com.apple.product-type.framework";
@@ -203,6 +175,9 @@
 				Base,
 			);
 			mainGroup = 2B4C0B2028DC6B1600F35838;
+			packageReferences = (
+				52F5D75528ED31AD003719E8 /* XCRemoteSwiftPackageReference "Alamofire" */,
+			);
 			productRefGroup = 2B4C0B2B28DC6B1600F35838 /* Products */;
 			projectDirPath = "";
 			projectRoot = "";
@@ -268,28 +243,6 @@
 			runOnlyForDeploymentPostprocessing = 0;
 			shellPath = /bin/sh;
 			shellScript = "\"${PODS_ROOT}/Target Support Files/Pods-canscloud-ios-framework-canscloud-ios-frameworkTests/Pods-canscloud-ios-framework-canscloud-ios-frameworkTests-frameworks.sh\"\n";
-			showEnvVarsInLog = 0;
-		};
-		BB88E0F94D46781681E862CF /* [CP] Check Pods Manifest.lock */ = {
-			isa = PBXShellScriptBuildPhase;
-			buildActionMask = 2147483647;
-			files = (
-			);
-			inputFileListPaths = (
-			);
-			inputPaths = (
-				"${PODS_PODFILE_DIR_PATH}/Podfile.lock",
-				"${PODS_ROOT}/Manifest.lock",
-			);
-			name = "[CP] Check Pods Manifest.lock";
-			outputFileListPaths = (
-			);
-			outputPaths = (
-				"$(DERIVED_FILE_DIR)/Pods-canscloud-ios-framework-checkManifestLockResult.txt",
-			);
-			runOnlyForDeploymentPostprocessing = 0;
-			shellPath = /bin/sh;
-			shellScript = "diff \"${PODS_PODFILE_DIR_PATH}/Podfile.lock\" \"${PODS_ROOT}/Manifest.lock\" > /dev/null\nif [ $? != 0 ] ; then\n    # print error to STDERR\n    echo \"error: The sandbox is not in sync with the Podfile.lock. Run 'pod install' or update your CocoaPods installation.\" >&2\n    exit 1\nfi\n# This output is used by Xcode 'outputs' to avoid re-running this script phase.\necho \"SUCCESS\" > \"${SCRIPT_OUTPUT_FILE_0}\"\n";
 			showEnvVarsInLog = 0;
 		};
 /* End PBXShellScriptBuildPhase section */
@@ -446,7 +399,6 @@
 		};
 		2B4C0B3F28DC6B1700F35838 /* Debug */ = {
 			isa = XCBuildConfiguration;
-			baseConfigurationReference = EA119665E61982436485F22F /* Pods-canscloud-ios-framework.debug.xcconfig */;
 			buildSettings = {
 				BUILD_LIBRARY_FOR_DISTRIBUTION = YES;
 				CODE_SIGN_STYLE = Automatic;
@@ -456,6 +408,7 @@
 				DYLIB_COMPATIBILITY_VERSION = 1;
 				DYLIB_CURRENT_VERSION = 1;
 				DYLIB_INSTALL_NAME_BASE = "@rpath";
+				EXCLUDED_ARCHS = "";
 				GENERATE_INFOPLIST_FILE = YES;
 				INFOPLIST_KEY_NSHumanReadableCopyright = "";
 				INSTALL_PATH = "$(LOCAL_LIBRARY_DIR)/Frameworks";
@@ -480,7 +433,6 @@
 		};
 		2B4C0B4028DC6B1700F35838 /* Release */ = {
 			isa = XCBuildConfiguration;
-			baseConfigurationReference = 3E995AFF4FF2E6576BD763F6 /* Pods-canscloud-ios-framework.release.xcconfig */;
 			buildSettings = {
 				BUILD_LIBRARY_FOR_DISTRIBUTION = YES;
 				CODE_SIGN_STYLE = Automatic;
@@ -490,6 +442,7 @@
 				DYLIB_COMPATIBILITY_VERSION = 1;
 				DYLIB_CURRENT_VERSION = 1;
 				DYLIB_INSTALL_NAME_BASE = "@rpath";
+				EXCLUDED_ARCHS = "";
 				GENERATE_INFOPLIST_FILE = YES;
 				INFOPLIST_KEY_NSHumanReadableCopyright = "";
 				INSTALL_PATH = "$(LOCAL_LIBRARY_DIR)/Frameworks";
@@ -514,7 +467,6 @@
 		};
 		2B4C0B4228DC6B1700F35838 /* Debug */ = {
 			isa = XCBuildConfiguration;
-			baseConfigurationReference = F194195A9B860A89520F73AB /* Pods-canscloud-ios-framework-canscloud-ios-frameworkTests.debug.xcconfig */;
 			buildSettings = {
 				ALWAYS_EMBED_SWIFT_STANDARD_LIBRARIES = YES;
 				CODE_SIGN_STYLE = Automatic;
@@ -532,7 +484,6 @@
 		};
 		2B4C0B4328DC6B1700F35838 /* Release */ = {
 			isa = XCBuildConfiguration;
-			baseConfigurationReference = CB44FB5779C88AF271444EC2 /* Pods-canscloud-ios-framework-canscloud-ios-frameworkTests.release.xcconfig */;
 			buildSettings = {
 				ALWAYS_EMBED_SWIFT_STANDARD_LIBRARIES = YES;
 				CODE_SIGN_STYLE = Automatic;
@@ -579,6 +530,25 @@
 			defaultConfigurationName = Release;
 		};
 /* End XCConfigurationList section */
+
+/* Begin XCRemoteSwiftPackageReference section */
+		52F5D75528ED31AD003719E8 /* XCRemoteSwiftPackageReference "Alamofire" */ = {
+			isa = XCRemoteSwiftPackageReference;
+			repositoryURL = "https://github.com/Alamofire/Alamofire";
+			requirement = {
+				branch = master;
+				kind = branch;
+			};
+		};
+/* End XCRemoteSwiftPackageReference section */
+
+/* Begin XCSwiftPackageProductDependency section */
+		52F5D75628ED31AD003719E8 /* Alamofire */ = {
+			isa = XCSwiftPackageProductDependency;
+			package = 52F5D75528ED31AD003719E8 /* XCRemoteSwiftPackageReference "Alamofire" */;
+			productName = Alamofire;
+		};
+/* End XCSwiftPackageProductDependency section */
 	};
 	rootObject = 2B4C0B2128DC6B1600F35838 /* Project object */;
 }

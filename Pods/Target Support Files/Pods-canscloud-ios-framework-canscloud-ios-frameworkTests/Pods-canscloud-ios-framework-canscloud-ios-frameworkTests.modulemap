@@ -1,6 +1,0 @@
-framework module Pods_canscloud_ios_framework_canscloud_ios_frameworkTests {
-  umbrella header "Pods-canscloud-ios-framework-canscloud-ios-frameworkTests-umbrella.h"
-
-  export *
-  module * { export * }
-}

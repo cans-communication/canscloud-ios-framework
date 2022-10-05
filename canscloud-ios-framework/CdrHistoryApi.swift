@@ -23,8 +23,15 @@ public struct CdrList: Decodable {
 }
 
 public struct CdrHistoryRequest {
-    public let domain: String
-    public let extensionSource: String
-    public let extensionDestination: String
-    public let page: Int
+    let domain: String
+    let extensionSource: String
+    let extensionDestination: String
+    let page: Int
+    
+    public init(domain: String, extensionSource: String, extensionDestination: String, page: Int) {
+        self.domain = domain
+        self.extensionSource = extensionSource
+        self.extensionDestination = extensionDestination
+        self.page = page
+    }
 }

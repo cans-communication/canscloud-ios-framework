@@ -13,7 +13,6 @@
 		2B4C0B3B28DC6B1700F35838 /* canscloud_ios_framework.h in Headers */ = {isa = PBXBuildFile; fileRef = 2B4C0B2D28DC6B1600F35838 /* canscloud_ios_framework.h */; settings = {ATTRIBUTES = (Public, ); }; };
 		52F5D74828EC4260003719E8 /* CdrHistoryWorker.swift in Sources */ = {isa = PBXBuildFile; fileRef = 52F5D74728EC4260003719E8 /* CdrHistoryWorker.swift */; };
 		52F5D74A28EC4289003719E8 /* CdrHistoryApi.swift in Sources */ = {isa = PBXBuildFile; fileRef = 52F5D74928EC4288003719E8 /* CdrHistoryApi.swift */; };
-		52F5D75728ED31AD003719E8 /* Alamofire in Frameworks */ = {isa = PBXBuildFile; productRef = 52F5D75628ED31AD003719E8 /* Alamofire */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXContainerItemProxy section */
@@ -41,7 +40,6 @@
 			isa = PBXFrameworksBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
-				52F5D75728ED31AD003719E8 /* Alamofire in Frameworks */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -122,7 +120,6 @@
 			);
 			name = "canscloud-ios-framework";
 			packageProductDependencies = (
-				52F5D75628ED31AD003719E8 /* Alamofire */,
 			);
 			productName = "canscloud-ios-framework";
 			productReference = 2B4C0B2A28DC6B1600F35838 /* canscloud_ios_framework.framework */;
@@ -176,7 +173,6 @@
 			);
 			mainGroup = 2B4C0B2028DC6B1600F35838;
 			packageReferences = (
-				52F5D75528ED31AD003719E8 /* XCRemoteSwiftPackageReference "Alamofire" */,
 			);
 			productRefGroup = 2B4C0B2B28DC6B1600F35838 /* Products */;
 			projectDirPath = "";
@@ -530,25 +526,6 @@
 			defaultConfigurationName = Release;
 		};
 /* End XCConfigurationList section */
-
-/* Begin XCRemoteSwiftPackageReference section */
-		52F5D75528ED31AD003719E8 /* XCRemoteSwiftPackageReference "Alamofire" */ = {
-			isa = XCRemoteSwiftPackageReference;
-			repositoryURL = "https://github.com/Alamofire/Alamofire";
-			requirement = {
-				branch = master;
-				kind = branch;
-			};
-		};
-/* End XCRemoteSwiftPackageReference section */
-
-/* Begin XCSwiftPackageProductDependency section */
-		52F5D75628ED31AD003719E8 /* Alamofire */ = {
-			isa = XCSwiftPackageProductDependency;
-			package = 52F5D75528ED31AD003719E8 /* XCRemoteSwiftPackageReference "Alamofire" */;
-			productName = Alamofire;
-		};
-/* End XCSwiftPackageProductDependency section */
 	};
 	rootObject = 2B4C0B2128DC6B1600F35838 /* Project object */;
 }

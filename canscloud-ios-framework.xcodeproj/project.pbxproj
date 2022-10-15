@@ -12,8 +12,7 @@
 		2B4C0B3528DC6B1700F35838 /* canscloud_ios_framework.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 2B4C0B2A28DC6B1600F35838 /* canscloud_ios_framework.framework */; };
 		2B4C0B3A28DC6B1700F35838 /* canscloud_ios_frameworkTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 2B4C0B3928DC6B1700F35838 /* canscloud_ios_frameworkTests.swift */; };
 		2B4C0B3B28DC6B1700F35838 /* canscloud_ios_framework.h in Headers */ = {isa = PBXBuildFile; fileRef = 2B4C0B2D28DC6B1600F35838 /* canscloud_ios_framework.h */; settings = {ATTRIBUTES = (Public, ); }; };
-		52F5D74828EC4260003719E8 /* CdrHistoryWorker.swift in Sources */ = {isa = PBXBuildFile; fileRef = 52F5D74728EC4260003719E8 /* CdrHistoryWorker.swift */; };
-		52F5D74A28EC4289003719E8 /* CdrHistoryApi.swift in Sources */ = {isa = PBXBuildFile; fileRef = 52F5D74928EC4288003719E8 /* CdrHistoryApi.swift */; };
+		52F5D74828EC4260003719E8 /* CansConnect.swift in Sources */ = {isa = PBXBuildFile; fileRef = 52F5D74728EC4260003719E8 /* CansConnect.swift */; };
 		6E3E25074965A829E834A4F1 /* Pods_canscloud_ios_framework_canscloud_ios_frameworkTests.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = A6F5EA61764367A8E2DA7459 /* Pods_canscloud_ios_framework_canscloud_ios_frameworkTests.framework */; };
 /* End PBXBuildFile section */
 
@@ -36,8 +35,7 @@
 		2B4C0B3428DC6B1700F35838 /* canscloud-ios-frameworkTests.xctest */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; includeInIndex = 0; path = "canscloud-ios-frameworkTests.xctest"; sourceTree = BUILT_PRODUCTS_DIR; };
 		2B4C0B3928DC6B1700F35838 /* canscloud_ios_frameworkTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = canscloud_ios_frameworkTests.swift; sourceTree = "<group>"; };
 		43557EAE810A460EA2D4A0EB /* Pods-canscloud-ios-framework.release.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; name = "Pods-canscloud-ios-framework.release.xcconfig"; path = "Target Support Files/Pods-canscloud-ios-framework/Pods-canscloud-ios-framework.release.xcconfig"; sourceTree = "<group>"; };
-		52F5D74728EC4260003719E8 /* CdrHistoryWorker.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = CdrHistoryWorker.swift; sourceTree = "<group>"; };
-		52F5D74928EC4288003719E8 /* CdrHistoryApi.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = CdrHistoryApi.swift; sourceTree = "<group>"; };
+		52F5D74728EC4260003719E8 /* CansConnect.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = CansConnect.swift; sourceTree = "<group>"; };
 		69EDA3F37C00D5ABE8A3590F /* Pods-canscloud-ios-framework.debug.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; name = "Pods-canscloud-ios-framework.debug.xcconfig"; path = "Target Support Files/Pods-canscloud-ios-framework/Pods-canscloud-ios-framework.debug.xcconfig"; sourceTree = "<group>"; };
 		7A260E6A9AF52676077EF63C /* Pods-canscloud-ios-framework-canscloud-ios-frameworkTests.debug.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; name = "Pods-canscloud-ios-framework-canscloud-ios-frameworkTests.debug.xcconfig"; path = "Target Support Files/Pods-canscloud-ios-framework-canscloud-ios-frameworkTests/Pods-canscloud-ios-framework-canscloud-ios-frameworkTests.debug.xcconfig"; sourceTree = "<group>"; };
 		A6F5EA61764367A8E2DA7459 /* Pods_canscloud_ios_framework_canscloud_ios_frameworkTests.framework */ = {isa = PBXFileReference; explicitFileType = wrapper.framework; includeInIndex = 0; path = Pods_canscloud_ios_framework_canscloud_ios_frameworkTests.framework; sourceTree = BUILT_PRODUCTS_DIR; };
@@ -87,8 +85,7 @@
 		2B4C0B2C28DC6B1600F35838 /* canscloud-ios-framework */ = {
 			isa = PBXGroup;
 			children = (
-				52F5D74928EC4288003719E8 /* CdrHistoryApi.swift */,
-				52F5D74728EC4260003719E8 /* CdrHistoryWorker.swift */,
+				52F5D74728EC4260003719E8 /* CansConnect.swift */,
 				2B4C0B2D28DC6B1600F35838 /* canscloud_ios_framework.h */,
 				2B4C0B2E28DC6B1600F35838 /* canscloud_ios_framework.docc */,
 			);
@@ -120,7 +117,6 @@
 				7A260E6A9AF52676077EF63C /* Pods-canscloud-ios-framework-canscloud-ios-frameworkTests.debug.xcconfig */,
 				1E2D18B759292E6E8C7170F6 /* Pods-canscloud-ios-framework-canscloud-ios-frameworkTests.release.xcconfig */,
 			);
-			name = Pods;
 			path = Pods;
 			sourceTree = "<group>";
 		};
@@ -300,8 +296,7 @@
 			isa = PBXSourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
-				52F5D74828EC4260003719E8 /* CdrHistoryWorker.swift in Sources */,
-				52F5D74A28EC4289003719E8 /* CdrHistoryApi.swift in Sources */,
+				52F5D74828EC4260003719E8 /* CansConnect.swift in Sources */,
 				2B4C0B2F28DC6B1600F35838 /* canscloud_ios_framework.docc in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;

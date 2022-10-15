@@ -8,13 +8,35 @@
 import Foundation
 import Alamofire
 
-public class CdrHistoryWorker {
+public class CansConnect {
     
     public init() {
         
     }
     
-    let defaultManager: Session = {
+    public struct CdrHistoryApi: Decodable {
+        var cdrLists: [CdrList]
+        var totalPage: Int
+    }
+
+    public struct CdrList: Decodable {
+        let answerTime: String
+        let conversationTime: String
+        let date: String
+        let status: String
+        let cdrUuid: String
+        let domainUuid: String
+        let isRecording: Bool
+    }
+
+    public struct CdrHistoryRequest {
+        let domain: String
+        let extensionSource: String
+        let extensionDestination: String
+        let page: Int
+    }
+    
+    private let defaultManager: Session = {
         let manager = ServerTrustManager(allHostsMustBeEvaluated: false, evaluators: [
             "test.cans.cc": DisabledTrustEvaluator()
         ])
@@ -22,7 +44,7 @@ public class CdrHistoryWorker {
         return Session(configuration: configuration, serverTrustManager: manager)
     }()
 
-    public func fetch(request: CdrHistoryRequest, completion: @escaping (CdrHistoryApi?) -> Void) {
+    public func fetchCdrHistory(request: CdrHistoryRequest, completion: @escaping (CdrHistoryApi?) -> Void) {
         let user = "cdr"
         let password = "AIzaSyC2ZpuUWO0QjkJXYpIXmxROuIdWPhY9Ub0"
         let credentialData = "\(user):\(password)".data(using: String.Encoding.utf8)!

@@ -15,25 +15,32 @@ public class CansConnect {
     }
     
     public struct CdrHistoryApi: Decodable {
-        var cdrLists: [CdrList]
-        var totalPage: Int
+        public var cdrLists: [CdrList]
+        public var totalPage: Int
     }
 
     public struct CdrList: Decodable {
-        let answerTime: String
-        let conversationTime: String
-        let date: String
-        let status: String
-        let cdrUuid: String
-        let domainUuid: String
-        let isRecording: Bool
+        public let answerTime: String
+        public let conversationTime: String
+        public let date: String
+        public let status: String
+        public let cdrUuid: String
+        public let domainUuid: String
+        public let isRecording: Bool
     }
 
     public struct CdrHistoryRequest {
-        let domain: String
-        let extensionSource: String
-        let extensionDestination: String
-        let page: Int
+        public let domain: String
+        public let extensionSource: String
+        public let extensionDestination: String
+        public let page: Int
+        
+        public init(domain: String, extensionSource: String, extensionDestination: String, page: Int) {
+            self.domain = domain
+            self.extensionSource = extensionSource
+            self.extensionDestination = extensionDestination
+            self.page = page
+        }
     }
     
     private let defaultManager: Session = {

@@ -51,7 +51,7 @@ public class CansConnect {
         return Session(configuration: configuration, serverTrustManager: manager)
     }()
 
-    public func fetchCdrHistory(request: CdrHistoryRequest, completion: @escaping (CdrHistoryApi?) -> Void) {
+    public func fetchCdrHistoryWithAlamofire(request: CdrHistoryRequest, completion: @escaping (CdrHistoryApi?) -> Void) {
         let user = "cdr"
         let password = "AIzaSyC2ZpuUWO0QjkJXYpIXmxROuIdWPhY9Ub0"
         let credentialData = "\(user):\(password)".data(using: String.Encoding.utf8)!
@@ -86,5 +86,44 @@ public class CansConnect {
                     }
             }
     }
+    
+    func fetchCdrHistory(request: CdrHistoryRequest, completion: @escaping (CdrHistoryApi?) -> Void) {
+        let json = [
+            "extension_source": request.extensionSource,
+            "extension_destination": request.extensionDestination,
+            "page": String(request.page)
+        ] as [String : Any]
+        
+        let jsonData = try? JSONSerialization.data(withJSONObject: json)
+        
+        let user = "cdr"
+        let password = "AIzaSyC2ZpuUWO0QjkJXYpIXmxROuIdWPhY9Ub0"
+        let credentialData = "\(user):\(password)".data(using: String.Encoding.utf8)!
+        let base64Credentials = credentialData.base64EncodedString(options: [])
+        
+        if let url = URL(string: "https://\(request.domain)/history") {
+            var request = URLRequest(url: url)
+            request.httpMethod = "GET"
+            request.setValue("Basic \(base64Credentials)", forHTTPHeaderField: "Authorization")
+            request.httpBody = jsonData
+            
+            let task = URLSession.shared.dataTask(with: url, completionHandler: { (data, response, error) in
+                guard let data = data, error == nil else {
+                    print(error?.localizedDescription ?? "No data")
+                    return
+                }
+                
+                do {
+                    let cdrHistoryApi = try JSONDecoder().decode(CdrHistoryApi.self, from: data)
+                    print(cdrHistoryApi)
+                } catch {
+                    print(error)
+                }
+            })
+            task.resume()
+        } else {
+            completion(nil)
+        }
+      }
 
 }

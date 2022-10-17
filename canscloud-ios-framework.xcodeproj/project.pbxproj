@@ -12,6 +12,12 @@
 		2B4C0B3528DC6B1700F35838 /* canscloud_ios_framework.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 2B4C0B2A28DC6B1600F35838 /* canscloud_ios_framework.framework */; };
 		2B4C0B3A28DC6B1700F35838 /* canscloud_ios_frameworkTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 2B4C0B3928DC6B1700F35838 /* canscloud_ios_frameworkTests.swift */; };
 		2B4C0B3B28DC6B1700F35838 /* canscloud_ios_framework.h in Headers */ = {isa = PBXBuildFile; fileRef = 2B4C0B2D28DC6B1600F35838 /* canscloud_ios_framework.h */; settings = {ATTRIBUTES = (Public, ); }; };
+		52AADA6328FD74F800BD40FE /* AppDelegate.swift in Sources */ = {isa = PBXBuildFile; fileRef = 52AADA6228FD74F800BD40FE /* AppDelegate.swift */; };
+		52AADA6528FD74F800BD40FE /* SceneDelegate.swift in Sources */ = {isa = PBXBuildFile; fileRef = 52AADA6428FD74F800BD40FE /* SceneDelegate.swift */; };
+		52AADA6728FD74F800BD40FE /* ViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = 52AADA6628FD74F800BD40FE /* ViewController.swift */; };
+		52AADA6A28FD74F800BD40FE /* Main.storyboard in Resources */ = {isa = PBXBuildFile; fileRef = 52AADA6828FD74F800BD40FE /* Main.storyboard */; };
+		52AADA6C28FD74FA00BD40FE /* Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = 52AADA6B28FD74FA00BD40FE /* Assets.xcassets */; };
+		52AADA6F28FD74FA00BD40FE /* LaunchScreen.storyboard in Resources */ = {isa = PBXBuildFile; fileRef = 52AADA6D28FD74FA00BD40FE /* LaunchScreen.storyboard */; };
 		52F5D74828EC4260003719E8 /* CansConnect.swift in Sources */ = {isa = PBXBuildFile; fileRef = 52F5D74728EC4260003719E8 /* CansConnect.swift */; };
 		6E3E25074965A829E834A4F1 /* Pods_canscloud_ios_framework_canscloud_ios_frameworkTests.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = A6F5EA61764367A8E2DA7459 /* Pods_canscloud_ios_framework_canscloud_ios_frameworkTests.framework */; };
 /* End PBXBuildFile section */
@@ -35,6 +41,14 @@
 		2B4C0B3428DC6B1700F35838 /* canscloud-ios-frameworkTests.xctest */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; includeInIndex = 0; path = "canscloud-ios-frameworkTests.xctest"; sourceTree = BUILT_PRODUCTS_DIR; };
 		2B4C0B3928DC6B1700F35838 /* canscloud_ios_frameworkTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = canscloud_ios_frameworkTests.swift; sourceTree = "<group>"; };
 		43557EAE810A460EA2D4A0EB /* Pods-canscloud-ios-framework.release.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; name = "Pods-canscloud-ios-framework.release.xcconfig"; path = "Target Support Files/Pods-canscloud-ios-framework/Pods-canscloud-ios-framework.release.xcconfig"; sourceTree = "<group>"; };
+		52AADA6028FD74F800BD40FE /* DemoApp.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = DemoApp.app; sourceTree = BUILT_PRODUCTS_DIR; };
+		52AADA6228FD74F800BD40FE /* AppDelegate.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AppDelegate.swift; sourceTree = "<group>"; };
+		52AADA6428FD74F800BD40FE /* SceneDelegate.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SceneDelegate.swift; sourceTree = "<group>"; };
+		52AADA6628FD74F800BD40FE /* ViewController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ViewController.swift; sourceTree = "<group>"; };
+		52AADA6928FD74F800BD40FE /* Base */ = {isa = PBXFileReference; lastKnownFileType = file.storyboard; name = Base; path = Base.lproj/Main.storyboard; sourceTree = "<group>"; };
+		52AADA6B28FD74FA00BD40FE /* Assets.xcassets */ = {isa = PBXFileReference; lastKnownFileType = folder.assetcatalog; path = Assets.xcassets; sourceTree = "<group>"; };
+		52AADA6E28FD74FA00BD40FE /* Base */ = {isa = PBXFileReference; lastKnownFileType = file.storyboard; name = Base; path = Base.lproj/LaunchScreen.storyboard; sourceTree = "<group>"; };
+		52AADA7028FD74FA00BD40FE /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = Info.plist; sourceTree = "<group>"; };
 		52F5D74728EC4260003719E8 /* CansConnect.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = CansConnect.swift; sourceTree = "<group>"; };
 		69EDA3F37C00D5ABE8A3590F /* Pods-canscloud-ios-framework.debug.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; name = "Pods-canscloud-ios-framework.debug.xcconfig"; path = "Target Support Files/Pods-canscloud-ios-framework/Pods-canscloud-ios-framework.debug.xcconfig"; sourceTree = "<group>"; };
 		7A260E6A9AF52676077EF63C /* Pods-canscloud-ios-framework-canscloud-ios-frameworkTests.debug.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; name = "Pods-canscloud-ios-framework-canscloud-ios-frameworkTests.debug.xcconfig"; path = "Target Support Files/Pods-canscloud-ios-framework-canscloud-ios-frameworkTests/Pods-canscloud-ios-framework-canscloud-ios-frameworkTests.debug.xcconfig"; sourceTree = "<group>"; };
@@ -59,6 +73,13 @@
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
+		52AADA5D28FD74F800BD40FE /* Frameworks */ = {
+			isa = PBXFrameworksBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
 /* End PBXFrameworksBuildPhase section */
 
 /* Begin PBXGroup section */
@@ -70,6 +91,7 @@
 				2B4C0B2B28DC6B1600F35838 /* Products */,
 				C088CA2419259902E1B67ACE /* Pods */,
 				BEE31E56C9947810F0E02019 /* Frameworks */,
+				52AADA6128FD74F800BD40FE /* DemoApp */,
 			);
 			sourceTree = "<group>";
 		};
@@ -78,6 +100,7 @@
 			children = (
 				2B4C0B2A28DC6B1600F35838 /* canscloud_ios_framework.framework */,
 				2B4C0B3428DC6B1700F35838 /* canscloud-ios-frameworkTests.xctest */,
+				52AADA6028FD74F800BD40FE /* DemoApp.app */,
 			);
 			name = Products;
 			sourceTree = "<group>";
@@ -98,6 +121,20 @@
 				2B4C0B3928DC6B1700F35838 /* canscloud_ios_frameworkTests.swift */,
 			);
 			path = "canscloud-ios-frameworkTests";
+			sourceTree = "<group>";
+		};
+		52AADA6128FD74F800BD40FE /* DemoApp */ = {
+			isa = PBXGroup;
+			children = (
+				52AADA6228FD74F800BD40FE /* AppDelegate.swift */,
+				52AADA6428FD74F800BD40FE /* SceneDelegate.swift */,
+				52AADA6628FD74F800BD40FE /* ViewController.swift */,
+				52AADA6828FD74F800BD40FE /* Main.storyboard */,
+				52AADA6B28FD74FA00BD40FE /* Assets.xcassets */,
+				52AADA6D28FD74FA00BD40FE /* LaunchScreen.storyboard */,
+				52AADA7028FD74FA00BD40FE /* Info.plist */,
+			);
+			path = DemoApp;
 			sourceTree = "<group>";
 		};
 		BEE31E56C9947810F0E02019 /* Frameworks */ = {
@@ -173,6 +210,23 @@
 			productReference = 2B4C0B3428DC6B1700F35838 /* canscloud-ios-frameworkTests.xctest */;
 			productType = "com.apple.product-type.bundle.unit-test";
 		};
+		52AADA5F28FD74F800BD40FE /* DemoApp */ = {
+			isa = PBXNativeTarget;
+			buildConfigurationList = 52AADA7328FD74FA00BD40FE /* Build configuration list for PBXNativeTarget "DemoApp" */;
+			buildPhases = (
+				52AADA5C28FD74F800BD40FE /* Sources */,
+				52AADA5D28FD74F800BD40FE /* Frameworks */,
+				52AADA5E28FD74F800BD40FE /* Resources */,
+			);
+			buildRules = (
+			);
+			dependencies = (
+			);
+			name = DemoApp;
+			productName = DemoApp;
+			productReference = 52AADA6028FD74F800BD40FE /* DemoApp.app */;
+			productType = "com.apple.product-type.application";
+		};
 /* End PBXNativeTarget section */
 
 /* Begin PBXProject section */
@@ -180,7 +234,7 @@
 			isa = PBXProject;
 			attributes = {
 				BuildIndependentTargetsInParallel = 1;
-				LastSwiftUpdateCheck = 1340;
+				LastSwiftUpdateCheck = 1400;
 				LastUpgradeCheck = 1340;
 				TargetAttributes = {
 					2B4C0B2928DC6B1600F35838 = {
@@ -188,6 +242,9 @@
 					};
 					2B4C0B3328DC6B1700F35838 = {
 						CreatedOnToolsVersion = 13.4.1;
+					};
+					52AADA5F28FD74F800BD40FE = {
+						CreatedOnToolsVersion = 14.0.1;
 					};
 				};
 			};
@@ -206,6 +263,7 @@
 			targets = (
 				2B4C0B2928DC6B1600F35838 /* canscloud-ios-framework */,
 				2B4C0B3328DC6B1700F35838 /* canscloud-ios-frameworkTests */,
+				52AADA5F28FD74F800BD40FE /* DemoApp */,
 			);
 		};
 /* End PBXProject section */
@@ -222,6 +280,16 @@
 			isa = PBXResourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+		52AADA5E28FD74F800BD40FE /* Resources */ = {
+			isa = PBXResourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				52AADA6F28FD74FA00BD40FE /* LaunchScreen.storyboard in Resources */,
+				52AADA6C28FD74FA00BD40FE /* Assets.xcassets in Resources */,
+				52AADA6A28FD74F800BD40FE /* Main.storyboard in Resources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -309,6 +377,16 @@
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
+		52AADA5C28FD74F800BD40FE /* Sources */ = {
+			isa = PBXSourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				52AADA6728FD74F800BD40FE /* ViewController.swift in Sources */,
+				52AADA6328FD74F800BD40FE /* AppDelegate.swift in Sources */,
+				52AADA6528FD74F800BD40FE /* SceneDelegate.swift in Sources */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
 /* End PBXSourcesBuildPhase section */
 
 /* Begin PBXTargetDependency section */
@@ -318,6 +396,25 @@
 			targetProxy = 2B4C0B3628DC6B1700F35838 /* PBXContainerItemProxy */;
 		};
 /* End PBXTargetDependency section */
+
+/* Begin PBXVariantGroup section */
+		52AADA6828FD74F800BD40FE /* Main.storyboard */ = {
+			isa = PBXVariantGroup;
+			children = (
+				52AADA6928FD74F800BD40FE /* Base */,
+			);
+			name = Main.storyboard;
+			sourceTree = "<group>";
+		};
+		52AADA6D28FD74FA00BD40FE /* LaunchScreen.storyboard */ = {
+			isa = PBXVariantGroup;
+			children = (
+				52AADA6E28FD74FA00BD40FE /* Base */,
+			);
+			name = LaunchScreen.storyboard;
+			sourceTree = "<group>";
+		};
+/* End PBXVariantGroup section */
 
 /* Begin XCBuildConfiguration section */
 		2B4C0B3C28DC6B1700F35838 /* Debug */ = {
@@ -546,6 +643,66 @@
 			};
 			name = Release;
 		};
+		52AADA7128FD74FA00BD40FE /* Debug */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
+				ASSETCATALOG_COMPILER_GLOBAL_ACCENT_COLOR_NAME = AccentColor;
+				CLANG_CXX_LANGUAGE_STANDARD = "gnu++20";
+				CODE_SIGN_STYLE = Automatic;
+				CURRENT_PROJECT_VERSION = 1;
+				DEVELOPMENT_TEAM = N27H9XFR3R;
+				GENERATE_INFOPLIST_FILE = YES;
+				INFOPLIST_FILE = DemoApp/Info.plist;
+				INFOPLIST_KEY_UIApplicationSupportsIndirectInputEvents = YES;
+				INFOPLIST_KEY_UILaunchStoryboardName = LaunchScreen;
+				INFOPLIST_KEY_UIMainStoryboardFile = Main;
+				INFOPLIST_KEY_UISupportedInterfaceOrientations_iPad = "UIInterfaceOrientationPortrait UIInterfaceOrientationPortraitUpsideDown UIInterfaceOrientationLandscapeLeft UIInterfaceOrientationLandscapeRight";
+				INFOPLIST_KEY_UISupportedInterfaceOrientations_iPhone = "UIInterfaceOrientationPortrait UIInterfaceOrientationLandscapeLeft UIInterfaceOrientationLandscapeRight";
+				IPHONEOS_DEPLOYMENT_TARGET = 16.0;
+				LD_RUNPATH_SEARCH_PATHS = (
+					"$(inherited)",
+					"@executable_path/Frameworks",
+				);
+				MARKETING_VERSION = 1.0;
+				PRODUCT_BUNDLE_IDENTIFIER = phusiraphop.DemoApp;
+				PRODUCT_NAME = "$(TARGET_NAME)";
+				SWIFT_EMIT_LOC_STRINGS = YES;
+				SWIFT_VERSION = 5.0;
+				TARGETED_DEVICE_FAMILY = "1,2";
+			};
+			name = Debug;
+		};
+		52AADA7228FD74FA00BD40FE /* Release */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
+				ASSETCATALOG_COMPILER_GLOBAL_ACCENT_COLOR_NAME = AccentColor;
+				CLANG_CXX_LANGUAGE_STANDARD = "gnu++20";
+				CODE_SIGN_STYLE = Automatic;
+				CURRENT_PROJECT_VERSION = 1;
+				DEVELOPMENT_TEAM = N27H9XFR3R;
+				GENERATE_INFOPLIST_FILE = YES;
+				INFOPLIST_FILE = DemoApp/Info.plist;
+				INFOPLIST_KEY_UIApplicationSupportsIndirectInputEvents = YES;
+				INFOPLIST_KEY_UILaunchStoryboardName = LaunchScreen;
+				INFOPLIST_KEY_UIMainStoryboardFile = Main;
+				INFOPLIST_KEY_UISupportedInterfaceOrientations_iPad = "UIInterfaceOrientationPortrait UIInterfaceOrientationPortraitUpsideDown UIInterfaceOrientationLandscapeLeft UIInterfaceOrientationLandscapeRight";
+				INFOPLIST_KEY_UISupportedInterfaceOrientations_iPhone = "UIInterfaceOrientationPortrait UIInterfaceOrientationLandscapeLeft UIInterfaceOrientationLandscapeRight";
+				IPHONEOS_DEPLOYMENT_TARGET = 16.0;
+				LD_RUNPATH_SEARCH_PATHS = (
+					"$(inherited)",
+					"@executable_path/Frameworks",
+				);
+				MARKETING_VERSION = 1.0;
+				PRODUCT_BUNDLE_IDENTIFIER = phusiraphop.DemoApp;
+				PRODUCT_NAME = "$(TARGET_NAME)";
+				SWIFT_EMIT_LOC_STRINGS = YES;
+				SWIFT_VERSION = 5.0;
+				TARGETED_DEVICE_FAMILY = "1,2";
+			};
+			name = Release;
+		};
 /* End XCBuildConfiguration section */
 
 /* Begin XCConfigurationList section */
@@ -572,6 +729,15 @@
 			buildConfigurations = (
 				2B4C0B4228DC6B1700F35838 /* Debug */,
 				2B4C0B4328DC6B1700F35838 /* Release */,
+			);
+			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Release;
+		};
+		52AADA7328FD74FA00BD40FE /* Build configuration list for PBXNativeTarget "DemoApp" */ = {
+			isa = XCConfigurationList;
+			buildConfigurations = (
+				52AADA7128FD74FA00BD40FE /* Debug */,
+				52AADA7228FD74FA00BD40FE /* Release */,
 			);
 			defaultConfigurationIsVisible = 0;
 			defaultConfigurationName = Release;

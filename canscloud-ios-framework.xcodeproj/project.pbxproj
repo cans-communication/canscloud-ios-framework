@@ -7,13 +7,21 @@
 	objects = {
 
 /* Begin PBXBuildFile section */
+		1129E842013C82F1AEDA7308 /* Pods_canscloud_ios_framework.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 22441334A78E1500F1509EDB /* Pods_canscloud_ios_framework.framework */; };
 		2B4C0B2F28DC6B1600F35838 /* canscloud_ios_framework.docc in Sources */ = {isa = PBXBuildFile; fileRef = 2B4C0B2E28DC6B1600F35838 /* canscloud_ios_framework.docc */; };
 		2B4C0B3528DC6B1700F35838 /* canscloud_ios_framework.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 2B4C0B2A28DC6B1600F35838 /* canscloud_ios_framework.framework */; };
 		2B4C0B3A28DC6B1700F35838 /* canscloud_ios_frameworkTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 2B4C0B3928DC6B1700F35838 /* canscloud_ios_frameworkTests.swift */; };
 		2B4C0B3B28DC6B1700F35838 /* canscloud_ios_framework.h in Headers */ = {isa = PBXBuildFile; fileRef = 2B4C0B2D28DC6B1600F35838 /* canscloud_ios_framework.h */; settings = {ATTRIBUTES = (Public, ); }; };
-		52F5D74828EC4260003719E8 /* CdrHistoryWorker.swift in Sources */ = {isa = PBXBuildFile; fileRef = 52F5D74728EC4260003719E8 /* CdrHistoryWorker.swift */; };
-		52F5D74A28EC4289003719E8 /* CdrHistoryApi.swift in Sources */ = {isa = PBXBuildFile; fileRef = 52F5D74928EC4288003719E8 /* CdrHistoryApi.swift */; };
-		52F5D75728ED31AD003719E8 /* Alamofire in Frameworks */ = {isa = PBXBuildFile; productRef = 52F5D75628ED31AD003719E8 /* Alamofire */; };
+		52AADA6328FD74F800BD40FE /* AppDelegate.swift in Sources */ = {isa = PBXBuildFile; fileRef = 52AADA6228FD74F800BD40FE /* AppDelegate.swift */; };
+		52AADA6528FD74F800BD40FE /* SceneDelegate.swift in Sources */ = {isa = PBXBuildFile; fileRef = 52AADA6428FD74F800BD40FE /* SceneDelegate.swift */; };
+		52AADA6728FD74F800BD40FE /* ViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = 52AADA6628FD74F800BD40FE /* ViewController.swift */; };
+		52AADA6A28FD74F800BD40FE /* Main.storyboard in Resources */ = {isa = PBXBuildFile; fileRef = 52AADA6828FD74F800BD40FE /* Main.storyboard */; };
+		52AADA6C28FD74FA00BD40FE /* Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = 52AADA6B28FD74FA00BD40FE /* Assets.xcassets */; };
+		52AADA6F28FD74FA00BD40FE /* LaunchScreen.storyboard in Resources */ = {isa = PBXBuildFile; fileRef = 52AADA6D28FD74FA00BD40FE /* LaunchScreen.storyboard */; };
+		52AADA7428FD792B00BD40FE /* canscloud_ios_framework.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 2B4C0B2A28DC6B1600F35838 /* canscloud_ios_framework.framework */; };
+		52AADA7528FD792B00BD40FE /* canscloud_ios_framework.framework in Embed Frameworks */ = {isa = PBXBuildFile; fileRef = 2B4C0B2A28DC6B1600F35838 /* canscloud_ios_framework.framework */; settings = {ATTRIBUTES = (CodeSignOnCopy, RemoveHeadersOnCopy, ); }; };
+		52F5D74828EC4260003719E8 /* CansConnect.swift in Sources */ = {isa = PBXBuildFile; fileRef = 52F5D74728EC4260003719E8 /* CansConnect.swift */; };
+		6E3E25074965A829E834A4F1 /* Pods_canscloud_ios_framework_canscloud_ios_frameworkTests.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = A6F5EA61764367A8E2DA7459 /* Pods_canscloud_ios_framework_canscloud_ios_frameworkTests.framework */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXContainerItemProxy section */
@@ -24,16 +32,50 @@
 			remoteGlobalIDString = 2B4C0B2928DC6B1600F35838;
 			remoteInfo = "canscloud-ios-framework";
 		};
+		52AADA7628FD792B00BD40FE /* PBXContainerItemProxy */ = {
+			isa = PBXContainerItemProxy;
+			containerPortal = 2B4C0B2128DC6B1600F35838 /* Project object */;
+			proxyType = 1;
+			remoteGlobalIDString = 2B4C0B2928DC6B1600F35838;
+			remoteInfo = "canscloud-ios-framework";
+		};
 /* End PBXContainerItemProxy section */
 
+/* Begin PBXCopyFilesBuildPhase section */
+		52AADA7828FD792B00BD40FE /* Embed Frameworks */ = {
+			isa = PBXCopyFilesBuildPhase;
+			buildActionMask = 2147483647;
+			dstPath = "";
+			dstSubfolderSpec = 10;
+			files = (
+				52AADA7528FD792B00BD40FE /* canscloud_ios_framework.framework in Embed Frameworks */,
+			);
+			name = "Embed Frameworks";
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+/* End PBXCopyFilesBuildPhase section */
+
 /* Begin PBXFileReference section */
+		1E2D18B759292E6E8C7170F6 /* Pods-canscloud-ios-framework-canscloud-ios-frameworkTests.release.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; name = "Pods-canscloud-ios-framework-canscloud-ios-frameworkTests.release.xcconfig"; path = "Target Support Files/Pods-canscloud-ios-framework-canscloud-ios-frameworkTests/Pods-canscloud-ios-framework-canscloud-ios-frameworkTests.release.xcconfig"; sourceTree = "<group>"; };
+		22441334A78E1500F1509EDB /* Pods_canscloud_ios_framework.framework */ = {isa = PBXFileReference; explicitFileType = wrapper.framework; includeInIndex = 0; path = Pods_canscloud_ios_framework.framework; sourceTree = BUILT_PRODUCTS_DIR; };
 		2B4C0B2A28DC6B1600F35838 /* canscloud_ios_framework.framework */ = {isa = PBXFileReference; explicitFileType = wrapper.framework; includeInIndex = 0; path = canscloud_ios_framework.framework; sourceTree = BUILT_PRODUCTS_DIR; };
 		2B4C0B2D28DC6B1600F35838 /* canscloud_ios_framework.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = canscloud_ios_framework.h; sourceTree = "<group>"; };
 		2B4C0B2E28DC6B1600F35838 /* canscloud_ios_framework.docc */ = {isa = PBXFileReference; lastKnownFileType = folder.documentationcatalog; path = canscloud_ios_framework.docc; sourceTree = "<group>"; };
 		2B4C0B3428DC6B1700F35838 /* canscloud-ios-frameworkTests.xctest */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; includeInIndex = 0; path = "canscloud-ios-frameworkTests.xctest"; sourceTree = BUILT_PRODUCTS_DIR; };
 		2B4C0B3928DC6B1700F35838 /* canscloud_ios_frameworkTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = canscloud_ios_frameworkTests.swift; sourceTree = "<group>"; };
-		52F5D74728EC4260003719E8 /* CdrHistoryWorker.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = CdrHistoryWorker.swift; sourceTree = "<group>"; };
-		52F5D74928EC4288003719E8 /* CdrHistoryApi.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = CdrHistoryApi.swift; sourceTree = "<group>"; };
+		43557EAE810A460EA2D4A0EB /* Pods-canscloud-ios-framework.release.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; name = "Pods-canscloud-ios-framework.release.xcconfig"; path = "Target Support Files/Pods-canscloud-ios-framework/Pods-canscloud-ios-framework.release.xcconfig"; sourceTree = "<group>"; };
+		52AADA6028FD74F800BD40FE /* DemoApp.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = DemoApp.app; sourceTree = BUILT_PRODUCTS_DIR; };
+		52AADA6228FD74F800BD40FE /* AppDelegate.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AppDelegate.swift; sourceTree = "<group>"; };
+		52AADA6428FD74F800BD40FE /* SceneDelegate.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SceneDelegate.swift; sourceTree = "<group>"; };
+		52AADA6628FD74F800BD40FE /* ViewController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ViewController.swift; sourceTree = "<group>"; };
+		52AADA6928FD74F800BD40FE /* Base */ = {isa = PBXFileReference; lastKnownFileType = file.storyboard; name = Base; path = Base.lproj/Main.storyboard; sourceTree = "<group>"; };
+		52AADA6B28FD74FA00BD40FE /* Assets.xcassets */ = {isa = PBXFileReference; lastKnownFileType = folder.assetcatalog; path = Assets.xcassets; sourceTree = "<group>"; };
+		52AADA6E28FD74FA00BD40FE /* Base */ = {isa = PBXFileReference; lastKnownFileType = file.storyboard; name = Base; path = Base.lproj/LaunchScreen.storyboard; sourceTree = "<group>"; };
+		52AADA7028FD74FA00BD40FE /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = Info.plist; sourceTree = "<group>"; };
+		52F5D74728EC4260003719E8 /* CansConnect.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = CansConnect.swift; sourceTree = "<group>"; };
+		69EDA3F37C00D5ABE8A3590F /* Pods-canscloud-ios-framework.debug.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; name = "Pods-canscloud-ios-framework.debug.xcconfig"; path = "Target Support Files/Pods-canscloud-ios-framework/Pods-canscloud-ios-framework.debug.xcconfig"; sourceTree = "<group>"; };
+		7A260E6A9AF52676077EF63C /* Pods-canscloud-ios-framework-canscloud-ios-frameworkTests.debug.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; name = "Pods-canscloud-ios-framework-canscloud-ios-frameworkTests.debug.xcconfig"; path = "Target Support Files/Pods-canscloud-ios-framework-canscloud-ios-frameworkTests/Pods-canscloud-ios-framework-canscloud-ios-frameworkTests.debug.xcconfig"; sourceTree = "<group>"; };
+		A6F5EA61764367A8E2DA7459 /* Pods_canscloud_ios_framework_canscloud_ios_frameworkTests.framework */ = {isa = PBXFileReference; explicitFileType = wrapper.framework; includeInIndex = 0; path = Pods_canscloud_ios_framework_canscloud_ios_frameworkTests.framework; sourceTree = BUILT_PRODUCTS_DIR; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -41,7 +83,7 @@
 			isa = PBXFrameworksBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
-				52F5D75728ED31AD003719E8 /* Alamofire in Frameworks */,
+				1129E842013C82F1AEDA7308 /* Pods_canscloud_ios_framework.framework in Frameworks */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -50,6 +92,15 @@
 			buildActionMask = 2147483647;
 			files = (
 				2B4C0B3528DC6B1700F35838 /* canscloud_ios_framework.framework in Frameworks */,
+				6E3E25074965A829E834A4F1 /* Pods_canscloud_ios_framework_canscloud_ios_frameworkTests.framework in Frameworks */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+		52AADA5D28FD74F800BD40FE /* Frameworks */ = {
+			isa = PBXFrameworksBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				52AADA7428FD792B00BD40FE /* canscloud_ios_framework.framework in Frameworks */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -62,6 +113,9 @@
 				2B4C0B2C28DC6B1600F35838 /* canscloud-ios-framework */,
 				2B4C0B3828DC6B1700F35838 /* canscloud-ios-frameworkTests */,
 				2B4C0B2B28DC6B1600F35838 /* Products */,
+				C088CA2419259902E1B67ACE /* Pods */,
+				BEE31E56C9947810F0E02019 /* Frameworks */,
+				52AADA6128FD74F800BD40FE /* DemoApp */,
 			);
 			sourceTree = "<group>";
 		};
@@ -70,6 +124,7 @@
 			children = (
 				2B4C0B2A28DC6B1600F35838 /* canscloud_ios_framework.framework */,
 				2B4C0B3428DC6B1700F35838 /* canscloud-ios-frameworkTests.xctest */,
+				52AADA6028FD74F800BD40FE /* DemoApp.app */,
 			);
 			name = Products;
 			sourceTree = "<group>";
@@ -77,8 +132,7 @@
 		2B4C0B2C28DC6B1600F35838 /* canscloud-ios-framework */ = {
 			isa = PBXGroup;
 			children = (
-				52F5D74928EC4288003719E8 /* CdrHistoryApi.swift */,
-				52F5D74728EC4260003719E8 /* CdrHistoryWorker.swift */,
+				52F5D74728EC4260003719E8 /* CansConnect.swift */,
 				2B4C0B2D28DC6B1600F35838 /* canscloud_ios_framework.h */,
 				2B4C0B2E28DC6B1600F35838 /* canscloud_ios_framework.docc */,
 			);
@@ -91,6 +145,40 @@
 				2B4C0B3928DC6B1700F35838 /* canscloud_ios_frameworkTests.swift */,
 			);
 			path = "canscloud-ios-frameworkTests";
+			sourceTree = "<group>";
+		};
+		52AADA6128FD74F800BD40FE /* DemoApp */ = {
+			isa = PBXGroup;
+			children = (
+				52AADA6228FD74F800BD40FE /* AppDelegate.swift */,
+				52AADA6428FD74F800BD40FE /* SceneDelegate.swift */,
+				52AADA6628FD74F800BD40FE /* ViewController.swift */,
+				52AADA6828FD74F800BD40FE /* Main.storyboard */,
+				52AADA6B28FD74FA00BD40FE /* Assets.xcassets */,
+				52AADA6D28FD74FA00BD40FE /* LaunchScreen.storyboard */,
+				52AADA7028FD74FA00BD40FE /* Info.plist */,
+			);
+			path = DemoApp;
+			sourceTree = "<group>";
+		};
+		BEE31E56C9947810F0E02019 /* Frameworks */ = {
+			isa = PBXGroup;
+			children = (
+				22441334A78E1500F1509EDB /* Pods_canscloud_ios_framework.framework */,
+				A6F5EA61764367A8E2DA7459 /* Pods_canscloud_ios_framework_canscloud_ios_frameworkTests.framework */,
+			);
+			name = Frameworks;
+			sourceTree = "<group>";
+		};
+		C088CA2419259902E1B67ACE /* Pods */ = {
+			isa = PBXGroup;
+			children = (
+				69EDA3F37C00D5ABE8A3590F /* Pods-canscloud-ios-framework.debug.xcconfig */,
+				43557EAE810A460EA2D4A0EB /* Pods-canscloud-ios-framework.release.xcconfig */,
+				7A260E6A9AF52676077EF63C /* Pods-canscloud-ios-framework-canscloud-ios-frameworkTests.debug.xcconfig */,
+				1E2D18B759292E6E8C7170F6 /* Pods-canscloud-ios-framework-canscloud-ios-frameworkTests.release.xcconfig */,
+			);
+			path = Pods;
 			sourceTree = "<group>";
 		};
 /* End PBXGroup section */
@@ -111,6 +199,7 @@
 			isa = PBXNativeTarget;
 			buildConfigurationList = 2B4C0B3E28DC6B1700F35838 /* Build configuration list for PBXNativeTarget "canscloud-ios-framework" */;
 			buildPhases = (
+				8113CC36CC494C5564B3CFF0 /* [CP] Check Pods Manifest.lock */,
 				2B4C0B2528DC6B1600F35838 /* Headers */,
 				2B4C0B2628DC6B1600F35838 /* Sources */,
 				2B4C0B2728DC6B1600F35838 /* Frameworks */,
@@ -121,9 +210,6 @@
 			dependencies = (
 			);
 			name = "canscloud-ios-framework";
-			packageProductDependencies = (
-				52F5D75628ED31AD003719E8 /* Alamofire */,
-			);
 			productName = "canscloud-ios-framework";
 			productReference = 2B4C0B2A28DC6B1600F35838 /* canscloud_ios_framework.framework */;
 			productType = "com.apple.product-type.framework";
@@ -136,7 +222,6 @@
 				2B4C0B3028DC6B1700F35838 /* Sources */,
 				2B4C0B3128DC6B1700F35838 /* Frameworks */,
 				2B4C0B3228DC6B1700F35838 /* Resources */,
-				81450F4F22BED60FC61624A2 /* [CP] Embed Pods Frameworks */,
 			);
 			buildRules = (
 			);
@@ -148,6 +233,25 @@
 			productReference = 2B4C0B3428DC6B1700F35838 /* canscloud-ios-frameworkTests.xctest */;
 			productType = "com.apple.product-type.bundle.unit-test";
 		};
+		52AADA5F28FD74F800BD40FE /* DemoApp */ = {
+			isa = PBXNativeTarget;
+			buildConfigurationList = 52AADA7328FD74FA00BD40FE /* Build configuration list for PBXNativeTarget "DemoApp" */;
+			buildPhases = (
+				52AADA5C28FD74F800BD40FE /* Sources */,
+				52AADA5D28FD74F800BD40FE /* Frameworks */,
+				52AADA5E28FD74F800BD40FE /* Resources */,
+				52AADA7828FD792B00BD40FE /* Embed Frameworks */,
+			);
+			buildRules = (
+			);
+			dependencies = (
+				52AADA7728FD792B00BD40FE /* PBXTargetDependency */,
+			);
+			name = DemoApp;
+			productName = DemoApp;
+			productReference = 52AADA6028FD74F800BD40FE /* DemoApp.app */;
+			productType = "com.apple.product-type.application";
+		};
 /* End PBXNativeTarget section */
 
 /* Begin PBXProject section */
@@ -155,7 +259,7 @@
 			isa = PBXProject;
 			attributes = {
 				BuildIndependentTargetsInParallel = 1;
-				LastSwiftUpdateCheck = 1340;
+				LastSwiftUpdateCheck = 1400;
 				LastUpgradeCheck = 1340;
 				TargetAttributes = {
 					2B4C0B2928DC6B1600F35838 = {
@@ -163,6 +267,9 @@
 					};
 					2B4C0B3328DC6B1700F35838 = {
 						CreatedOnToolsVersion = 13.4.1;
+					};
+					52AADA5F28FD74F800BD40FE = {
+						CreatedOnToolsVersion = 14.0.1;
 					};
 				};
 			};
@@ -175,15 +282,13 @@
 				Base,
 			);
 			mainGroup = 2B4C0B2028DC6B1600F35838;
-			packageReferences = (
-				52F5D75528ED31AD003719E8 /* XCRemoteSwiftPackageReference "Alamofire" */,
-			);
 			productRefGroup = 2B4C0B2B28DC6B1600F35838 /* Products */;
 			projectDirPath = "";
 			projectRoot = "";
 			targets = (
 				2B4C0B2928DC6B1600F35838 /* canscloud-ios-framework */,
 				2B4C0B3328DC6B1700F35838 /* canscloud-ios-frameworkTests */,
+				52AADA5F28FD74F800BD40FE /* DemoApp */,
 			);
 		};
 /* End PBXProject section */
@@ -200,6 +305,16 @@
 			isa = PBXResourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+		52AADA5E28FD74F800BD40FE /* Resources */ = {
+			isa = PBXResourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				52AADA6F28FD74FA00BD40FE /* LaunchScreen.storyboard in Resources */,
+				52AADA6C28FD74FA00BD40FE /* Assets.xcassets in Resources */,
+				52AADA6A28FD74F800BD40FE /* Main.storyboard in Resources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -228,21 +343,26 @@
 			shellScript = "diff \"${PODS_PODFILE_DIR_PATH}/Podfile.lock\" \"${PODS_ROOT}/Manifest.lock\" > /dev/null\nif [ $? != 0 ] ; then\n    # print error to STDERR\n    echo \"error: The sandbox is not in sync with the Podfile.lock. Run 'pod install' or update your CocoaPods installation.\" >&2\n    exit 1\nfi\n# This output is used by Xcode 'outputs' to avoid re-running this script phase.\necho \"SUCCESS\" > \"${SCRIPT_OUTPUT_FILE_0}\"\n";
 			showEnvVarsInLog = 0;
 		};
-		81450F4F22BED60FC61624A2 /* [CP] Embed Pods Frameworks */ = {
+		8113CC36CC494C5564B3CFF0 /* [CP] Check Pods Manifest.lock */ = {
 			isa = PBXShellScriptBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
 			);
 			inputFileListPaths = (
-				"${PODS_ROOT}/Target Support Files/Pods-canscloud-ios-framework-canscloud-ios-frameworkTests/Pods-canscloud-ios-framework-canscloud-ios-frameworkTests-frameworks-${CONFIGURATION}-input-files.xcfilelist",
 			);
-			name = "[CP] Embed Pods Frameworks";
+			inputPaths = (
+				"${PODS_PODFILE_DIR_PATH}/Podfile.lock",
+				"${PODS_ROOT}/Manifest.lock",
+			);
+			name = "[CP] Check Pods Manifest.lock";
 			outputFileListPaths = (
-				"${PODS_ROOT}/Target Support Files/Pods-canscloud-ios-framework-canscloud-ios-frameworkTests/Pods-canscloud-ios-framework-canscloud-ios-frameworkTests-frameworks-${CONFIGURATION}-output-files.xcfilelist",
+			);
+			outputPaths = (
+				"$(DERIVED_FILE_DIR)/Pods-canscloud-ios-framework-checkManifestLockResult.txt",
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 			shellPath = /bin/sh;
-			shellScript = "\"${PODS_ROOT}/Target Support Files/Pods-canscloud-ios-framework-canscloud-ios-frameworkTests/Pods-canscloud-ios-framework-canscloud-ios-frameworkTests-frameworks.sh\"\n";
+			shellScript = "diff \"${PODS_PODFILE_DIR_PATH}/Podfile.lock\" \"${PODS_ROOT}/Manifest.lock\" > /dev/null\nif [ $? != 0 ] ; then\n    # print error to STDERR\n    echo \"error: The sandbox is not in sync with the Podfile.lock. Run 'pod install' or update your CocoaPods installation.\" >&2\n    exit 1\nfi\n# This output is used by Xcode 'outputs' to avoid re-running this script phase.\necho \"SUCCESS\" > \"${SCRIPT_OUTPUT_FILE_0}\"\n";
 			showEnvVarsInLog = 0;
 		};
 /* End PBXShellScriptBuildPhase section */
@@ -252,8 +372,7 @@
 			isa = PBXSourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
-				52F5D74828EC4260003719E8 /* CdrHistoryWorker.swift in Sources */,
-				52F5D74A28EC4289003719E8 /* CdrHistoryApi.swift in Sources */,
+				52F5D74828EC4260003719E8 /* CansConnect.swift in Sources */,
 				2B4C0B2F28DC6B1600F35838 /* canscloud_ios_framework.docc in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
@@ -266,6 +385,16 @@
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
+		52AADA5C28FD74F800BD40FE /* Sources */ = {
+			isa = PBXSourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				52AADA6728FD74F800BD40FE /* ViewController.swift in Sources */,
+				52AADA6328FD74F800BD40FE /* AppDelegate.swift in Sources */,
+				52AADA6528FD74F800BD40FE /* SceneDelegate.swift in Sources */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
 /* End PBXSourcesBuildPhase section */
 
 /* Begin PBXTargetDependency section */
@@ -274,7 +403,31 @@
 			target = 2B4C0B2928DC6B1600F35838 /* canscloud-ios-framework */;
 			targetProxy = 2B4C0B3628DC6B1700F35838 /* PBXContainerItemProxy */;
 		};
+		52AADA7728FD792B00BD40FE /* PBXTargetDependency */ = {
+			isa = PBXTargetDependency;
+			target = 2B4C0B2928DC6B1600F35838 /* canscloud-ios-framework */;
+			targetProxy = 52AADA7628FD792B00BD40FE /* PBXContainerItemProxy */;
+		};
 /* End PBXTargetDependency section */
+
+/* Begin PBXVariantGroup section */
+		52AADA6828FD74F800BD40FE /* Main.storyboard */ = {
+			isa = PBXVariantGroup;
+			children = (
+				52AADA6928FD74F800BD40FE /* Base */,
+			);
+			name = Main.storyboard;
+			sourceTree = "<group>";
+		};
+		52AADA6D28FD74FA00BD40FE /* LaunchScreen.storyboard */ = {
+			isa = PBXVariantGroup;
+			children = (
+				52AADA6E28FD74FA00BD40FE /* Base */,
+			);
+			name = LaunchScreen.storyboard;
+			sourceTree = "<group>";
+		};
+/* End PBXVariantGroup section */
 
 /* Begin XCBuildConfiguration section */
 		2B4C0B3C28DC6B1700F35838 /* Debug */ = {
@@ -399,6 +552,7 @@
 		};
 		2B4C0B3F28DC6B1700F35838 /* Debug */ = {
 			isa = XCBuildConfiguration;
+			baseConfigurationReference = 69EDA3F37C00D5ABE8A3590F /* Pods-canscloud-ios-framework.debug.xcconfig */;
 			buildSettings = {
 				BUILD_LIBRARY_FOR_DISTRIBUTION = YES;
 				CODE_SIGN_STYLE = Automatic;
@@ -433,6 +587,7 @@
 		};
 		2B4C0B4028DC6B1700F35838 /* Release */ = {
 			isa = XCBuildConfiguration;
+			baseConfigurationReference = 43557EAE810A460EA2D4A0EB /* Pods-canscloud-ios-framework.release.xcconfig */;
 			buildSettings = {
 				BUILD_LIBRARY_FOR_DISTRIBUTION = YES;
 				CODE_SIGN_STYLE = Automatic;
@@ -467,6 +622,7 @@
 		};
 		2B4C0B4228DC6B1700F35838 /* Debug */ = {
 			isa = XCBuildConfiguration;
+			baseConfigurationReference = 7A260E6A9AF52676077EF63C /* Pods-canscloud-ios-framework-canscloud-ios-frameworkTests.debug.xcconfig */;
 			buildSettings = {
 				ALWAYS_EMBED_SWIFT_STANDARD_LIBRARIES = YES;
 				CODE_SIGN_STYLE = Automatic;
@@ -484,6 +640,7 @@
 		};
 		2B4C0B4328DC6B1700F35838 /* Release */ = {
 			isa = XCBuildConfiguration;
+			baseConfigurationReference = 1E2D18B759292E6E8C7170F6 /* Pods-canscloud-ios-framework-canscloud-ios-frameworkTests.release.xcconfig */;
 			buildSettings = {
 				ALWAYS_EMBED_SWIFT_STANDARD_LIBRARIES = YES;
 				CODE_SIGN_STYLE = Automatic;
@@ -494,6 +651,66 @@
 				PRODUCT_BUNDLE_IDENTIFIER = "cc.cans.canscloud-ios-frameworkTests";
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				SWIFT_EMIT_LOC_STRINGS = NO;
+				SWIFT_VERSION = 5.0;
+				TARGETED_DEVICE_FAMILY = "1,2";
+			};
+			name = Release;
+		};
+		52AADA7128FD74FA00BD40FE /* Debug */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
+				ASSETCATALOG_COMPILER_GLOBAL_ACCENT_COLOR_NAME = AccentColor;
+				CLANG_CXX_LANGUAGE_STANDARD = "gnu++20";
+				CODE_SIGN_STYLE = Automatic;
+				CURRENT_PROJECT_VERSION = 1;
+				DEVELOPMENT_TEAM = N27H9XFR3R;
+				GENERATE_INFOPLIST_FILE = YES;
+				INFOPLIST_FILE = DemoApp/Info.plist;
+				INFOPLIST_KEY_UIApplicationSupportsIndirectInputEvents = YES;
+				INFOPLIST_KEY_UILaunchStoryboardName = LaunchScreen;
+				INFOPLIST_KEY_UIMainStoryboardFile = Main;
+				INFOPLIST_KEY_UISupportedInterfaceOrientations_iPad = "UIInterfaceOrientationPortrait UIInterfaceOrientationPortraitUpsideDown UIInterfaceOrientationLandscapeLeft UIInterfaceOrientationLandscapeRight";
+				INFOPLIST_KEY_UISupportedInterfaceOrientations_iPhone = "UIInterfaceOrientationPortrait UIInterfaceOrientationLandscapeLeft UIInterfaceOrientationLandscapeRight";
+				IPHONEOS_DEPLOYMENT_TARGET = 16.0;
+				LD_RUNPATH_SEARCH_PATHS = (
+					"$(inherited)",
+					"@executable_path/Frameworks",
+				);
+				MARKETING_VERSION = 1.0;
+				PRODUCT_BUNDLE_IDENTIFIER = phusiraphop.DemoApp;
+				PRODUCT_NAME = "$(TARGET_NAME)";
+				SWIFT_EMIT_LOC_STRINGS = YES;
+				SWIFT_VERSION = 5.0;
+				TARGETED_DEVICE_FAMILY = "1,2";
+			};
+			name = Debug;
+		};
+		52AADA7228FD74FA00BD40FE /* Release */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
+				ASSETCATALOG_COMPILER_GLOBAL_ACCENT_COLOR_NAME = AccentColor;
+				CLANG_CXX_LANGUAGE_STANDARD = "gnu++20";
+				CODE_SIGN_STYLE = Automatic;
+				CURRENT_PROJECT_VERSION = 1;
+				DEVELOPMENT_TEAM = N27H9XFR3R;
+				GENERATE_INFOPLIST_FILE = YES;
+				INFOPLIST_FILE = DemoApp/Info.plist;
+				INFOPLIST_KEY_UIApplicationSupportsIndirectInputEvents = YES;
+				INFOPLIST_KEY_UILaunchStoryboardName = LaunchScreen;
+				INFOPLIST_KEY_UIMainStoryboardFile = Main;
+				INFOPLIST_KEY_UISupportedInterfaceOrientations_iPad = "UIInterfaceOrientationPortrait UIInterfaceOrientationPortraitUpsideDown UIInterfaceOrientationLandscapeLeft UIInterfaceOrientationLandscapeRight";
+				INFOPLIST_KEY_UISupportedInterfaceOrientations_iPhone = "UIInterfaceOrientationPortrait UIInterfaceOrientationLandscapeLeft UIInterfaceOrientationLandscapeRight";
+				IPHONEOS_DEPLOYMENT_TARGET = 16.0;
+				LD_RUNPATH_SEARCH_PATHS = (
+					"$(inherited)",
+					"@executable_path/Frameworks",
+				);
+				MARKETING_VERSION = 1.0;
+				PRODUCT_BUNDLE_IDENTIFIER = phusiraphop.DemoApp;
+				PRODUCT_NAME = "$(TARGET_NAME)";
+				SWIFT_EMIT_LOC_STRINGS = YES;
 				SWIFT_VERSION = 5.0;
 				TARGETED_DEVICE_FAMILY = "1,2";
 			};
@@ -529,26 +746,16 @@
 			defaultConfigurationIsVisible = 0;
 			defaultConfigurationName = Release;
 		};
+		52AADA7328FD74FA00BD40FE /* Build configuration list for PBXNativeTarget "DemoApp" */ = {
+			isa = XCConfigurationList;
+			buildConfigurations = (
+				52AADA7128FD74FA00BD40FE /* Debug */,
+				52AADA7228FD74FA00BD40FE /* Release */,
+			);
+			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Release;
+		};
 /* End XCConfigurationList section */
-
-/* Begin XCRemoteSwiftPackageReference section */
-		52F5D75528ED31AD003719E8 /* XCRemoteSwiftPackageReference "Alamofire" */ = {
-			isa = XCRemoteSwiftPackageReference;
-			repositoryURL = "https://github.com/Alamofire/Alamofire";
-			requirement = {
-				branch = master;
-				kind = branch;
-			};
-		};
-/* End XCRemoteSwiftPackageReference section */
-
-/* Begin XCSwiftPackageProductDependency section */
-		52F5D75628ED31AD003719E8 /* Alamofire */ = {
-			isa = XCSwiftPackageProductDependency;
-			package = 52F5D75528ED31AD003719E8 /* XCRemoteSwiftPackageReference "Alamofire" */;
-			productName = Alamofire;
-		};
-/* End XCSwiftPackageProductDependency section */
 	};
 	rootObject = 2B4C0B2128DC6B1600F35838 /* Project object */;
 }

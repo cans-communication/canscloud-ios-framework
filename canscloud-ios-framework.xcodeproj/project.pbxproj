@@ -152,26 +152,26 @@
 		5251AA44290257040018C80C /* marie_zrtp_ecdh255_rc in Resources */ = {isa = PBXBuildFile; fileRef = 5251A99C290257040018C80C /* marie_zrtp_ecdh255_rc */; };
 		5251AA45290257040018C80C /* marie_pauline_lime_x3dh_rc in Resources */ = {isa = PBXBuildFile; fileRef = 5251A99D290257040018C80C /* marie_pauline_lime_x3dh_rc */; };
 		5251AA46290257040018C80C /* laure_lime_x3dh_rc in Resources */ = {isa = PBXBuildFile; fileRef = 5251A99E290257040018C80C /* laure_lime_x3dh_rc */; };
-		5251AA47290257040018C80C /* belr.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 5251A9A0290257040018C80C /* belr.framework */; };
-		5251AA48290257040018C80C /* mediastreamer2.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 5251A9A1290257040018C80C /* mediastreamer2.framework */; };
-		5251AA49290257040018C80C /* msopenh264.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 5251A9A2290257040018C80C /* msopenh264.framework */; };
-		5251AA4A290257040018C80C /* bctoolbox.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 5251A9A3290257040018C80C /* bctoolbox.framework */; };
-		5251AA4B290257040018C80C /* mswebrtc.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 5251A9A4290257040018C80C /* mswebrtc.framework */; };
-		5251AA4C290257040018C80C /* msamr.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 5251A9A5290257040018C80C /* msamr.framework */; };
-		5251AA4D290257040018C80C /* belle-sip.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 5251A9A6290257040018C80C /* belle-sip.framework */; };
-		5251AA4E290257040018C80C /* linphonetester.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 5251A9A7290257040018C80C /* linphonetester.framework */; };
-		5251AA4F290257040018C80C /* bctoolbox-tester.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 5251A9A8290257040018C80C /* bctoolbox-tester.framework */; };
-		5251AA50290257040018C80C /* ortp.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 5251A9A9290257040018C80C /* ortp.framework */; };
-		5251AA51290257040018C80C /* limetester.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 5251A9AA290257040018C80C /* limetester.framework */; };
-		5251AA52290257040018C80C /* mscodec2.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 5251A9AB290257040018C80C /* mscodec2.framework */; };
-		5251AA53290257040018C80C /* mssilk.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 5251A9AC290257040018C80C /* mssilk.framework */; };
-		5251AA54290257040018C80C /* lime.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 5251A9AD290257040018C80C /* lime.framework */; };
-		5251AA55290257040018C80C /* belcard.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 5251A9AE290257040018C80C /* belcard.framework */; };
-		5251AA56290257040018C80C /* msx264.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 5251A9AF290257040018C80C /* msx264.framework */; };
-		5251AA57290257040018C80C /* bctoolbox-ios.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 5251A9B0290257040018C80C /* bctoolbox-ios.framework */; };
-		5251AA58290257040018C80C /* linphone.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 5251A9B1290257040018C80C /* linphone.framework */; };
 		5251AA59290257040018C80C /* LinphoneWrapper.cs in Resources */ = {isa = PBXBuildFile; fileRef = 5251A9B4290257040018C80C /* LinphoneWrapper.cs */; };
 		5251AA5A290257040018C80C /* LinphoneWrapper.swift in Sources */ = {isa = PBXBuildFile; fileRef = 5251A9B6290257040018C80C /* LinphoneWrapper.swift */; };
+		5251AA5B290277E30018C80C /* bctoolbox-ios.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 5251A9B0290257040018C80C /* bctoolbox-ios.framework */; };
+		5251AA5E290277E50018C80C /* bctoolbox-tester.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 5251A9A8290257040018C80C /* bctoolbox-tester.framework */; };
+		5251AA60290277E70018C80C /* bctoolbox.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 5251A9A3290257040018C80C /* bctoolbox.framework */; };
+		5251AA62290277E80018C80C /* belcard.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 5251A9AE290257040018C80C /* belcard.framework */; };
+		5251AA64290277EA0018C80C /* belle-sip.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 5251A9A6290257040018C80C /* belle-sip.framework */; };
+		5251AA66290277EC0018C80C /* belr.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 5251A9A0290257040018C80C /* belr.framework */; };
+		5251AA68290277EE0018C80C /* lime.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 5251A9AD290257040018C80C /* lime.framework */; };
+		5251AA6A290277F00018C80C /* limetester.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 5251A9AA290257040018C80C /* limetester.framework */; };
+		5251AA6C290277F10018C80C /* linphone.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 5251A9B1290257040018C80C /* linphone.framework */; };
+		5251AA6E290277F30018C80C /* linphonetester.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 5251A9A7290257040018C80C /* linphonetester.framework */; };
+		5251AA70290277F50018C80C /* mediastreamer2.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 5251A9A1290257040018C80C /* mediastreamer2.framework */; };
+		5251AA72290277F60018C80C /* msamr.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 5251A9A5290257040018C80C /* msamr.framework */; };
+		5251AA74290277F80018C80C /* mscodec2.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 5251A9AB290257040018C80C /* mscodec2.framework */; };
+		5251AA76290277F90018C80C /* msopenh264.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 5251A9A2290257040018C80C /* msopenh264.framework */; };
+		5251AA78290277FB0018C80C /* mssilk.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 5251A9AC290257040018C80C /* mssilk.framework */; };
+		5251AA7A290277FD0018C80C /* mswebrtc.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 5251A9A4290257040018C80C /* mswebrtc.framework */; };
+		5251AA7C290277FF0018C80C /* msx264.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 5251A9AF290257040018C80C /* msx264.framework */; };
+		5251AA7E290278030018C80C /* ortp.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 5251A9A9290257040018C80C /* ortp.framework */; };
 		52F5D74828EC4260003719E8 /* CansConnect.swift in Sources */ = {isa = PBXBuildFile; fileRef = 52F5D74728EC4260003719E8 /* CansConnect.swift */; };
 /* End PBXBuildFile section */
 
@@ -360,24 +360,24 @@
 			isa = PBXFrameworksBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
-				5251AA56290257040018C80C /* msx264.framework in Frameworks */,
-				5251AA4E290257040018C80C /* linphonetester.framework in Frameworks */,
-				5251AA4F290257040018C80C /* bctoolbox-tester.framework in Frameworks */,
-				5251AA53290257040018C80C /* mssilk.framework in Frameworks */,
-				5251AA57290257040018C80C /* bctoolbox-ios.framework in Frameworks */,
-				5251AA49290257040018C80C /* msopenh264.framework in Frameworks */,
-				5251AA50290257040018C80C /* ortp.framework in Frameworks */,
-				5251AA4B290257040018C80C /* mswebrtc.framework in Frameworks */,
-				5251AA47290257040018C80C /* belr.framework in Frameworks */,
-				5251AA58290257040018C80C /* linphone.framework in Frameworks */,
-				5251AA54290257040018C80C /* lime.framework in Frameworks */,
-				5251AA48290257040018C80C /* mediastreamer2.framework in Frameworks */,
-				5251AA55290257040018C80C /* belcard.framework in Frameworks */,
-				5251AA4D290257040018C80C /* belle-sip.framework in Frameworks */,
-				5251AA51290257040018C80C /* limetester.framework in Frameworks */,
-				5251AA4A290257040018C80C /* bctoolbox.framework in Frameworks */,
-				5251AA52290257040018C80C /* mscodec2.framework in Frameworks */,
-				5251AA4C290257040018C80C /* msamr.framework in Frameworks */,
+				5251AA62290277E80018C80C /* belcard.framework in Frameworks */,
+				5251AA66290277EC0018C80C /* belr.framework in Frameworks */,
+				5251AA78290277FB0018C80C /* mssilk.framework in Frameworks */,
+				5251AA64290277EA0018C80C /* belle-sip.framework in Frameworks */,
+				5251AA72290277F60018C80C /* msamr.framework in Frameworks */,
+				5251AA76290277F90018C80C /* msopenh264.framework in Frameworks */,
+				5251AA7A290277FD0018C80C /* mswebrtc.framework in Frameworks */,
+				5251AA6A290277F00018C80C /* limetester.framework in Frameworks */,
+				5251AA6E290277F30018C80C /* linphonetester.framework in Frameworks */,
+				5251AA74290277F80018C80C /* mscodec2.framework in Frameworks */,
+				5251AA70290277F50018C80C /* mediastreamer2.framework in Frameworks */,
+				5251AA7E290278030018C80C /* ortp.framework in Frameworks */,
+				5251AA6C290277F10018C80C /* linphone.framework in Frameworks */,
+				5251AA68290277EE0018C80C /* lime.framework in Frameworks */,
+				5251AA5E290277E50018C80C /* bctoolbox-tester.framework in Frameworks */,
+				5251AA60290277E70018C80C /* bctoolbox.framework in Frameworks */,
+				5251AA7C290277FF0018C80C /* msx264.framework in Frameworks */,
+				5251AA5B290277E30018C80C /* bctoolbox-ios.framework in Frameworks */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -1167,6 +1167,7 @@
 				DYLIB_CURRENT_VERSION = 1;
 				DYLIB_INSTALL_NAME_BASE = "@rpath";
 				EXCLUDED_ARCHS = "";
+				"EXCLUDED_ARCHS[sdk=iphonesimulator*]" = arm64;
 				FRAMEWORK_SEARCH_PATHS = (
 					"$(inherited)",
 					"$(PROJECT_DIR)/canscloud-ios-framework/linphone-sdk/apple-darwin/Frameworks",
@@ -1205,6 +1206,7 @@
 				DYLIB_CURRENT_VERSION = 1;
 				DYLIB_INSTALL_NAME_BASE = "@rpath";
 				EXCLUDED_ARCHS = "";
+				"EXCLUDED_ARCHS[sdk=iphonesimulator*]" = arm64;
 				FRAMEWORK_SEARCH_PATHS = (
 					"$(inherited)",
 					"$(PROJECT_DIR)/canscloud-ios-framework/linphone-sdk/apple-darwin/Frameworks",

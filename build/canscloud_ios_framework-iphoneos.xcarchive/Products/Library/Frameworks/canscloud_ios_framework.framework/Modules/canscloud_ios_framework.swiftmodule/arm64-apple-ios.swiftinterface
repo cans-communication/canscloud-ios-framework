@@ -1,0 +1,35 @@
+// swift-interface-format-version: 1.0
+// swift-compiler-version: Apple Swift version 5.6.1 (swiftlang-5.6.0.323.66 clang-1316.0.20.12)
+// swift-module-flags: -target arm64-apple-ios11.0 -enable-objc-interop -enable-library-evolution -swift-version 5 -enforce-exclusivity=checked -O -module-name canscloud_ios_framework
+import Foundation
+import Swift
+import _Concurrency
+@_exported import canscloud_ios_framework
+@objc @_inheritsConvenienceInitializers public class CansConnect : ObjectiveC.NSObject, Foundation.URLSessionDelegate {
+  @objc override dynamic public init()
+  public struct CdrHistoryApi : Swift.Decodable {
+    public var cdrLists: [canscloud_ios_framework.CansConnect.CdrList]
+    public var totalPage: Swift.Int
+    public init(from decoder: Swift.Decoder) throws
+  }
+  public struct CdrList : Swift.Decodable {
+    public let answerTime: Swift.String
+    public let conversationTime: Swift.String
+    public let date: Swift.String
+    public let status: Swift.String
+    public let cdrUuid: Swift.String
+    public let domainUuid: Swift.String
+    public let isRecording: Swift.Bool
+    public init(from decoder: Swift.Decoder) throws
+  }
+  public struct CdrHistoryRequest {
+    public let domain: Swift.String
+    public let extensionSource: Swift.String
+    public let extensionDestination: Swift.String
+    public let page: Swift.Int
+    public init(domain: Swift.String, extensionSource: Swift.String, extensionDestination: Swift.String, page: Swift.Int)
+  }
+  public func fetchCdrHistory(request: canscloud_ios_framework.CansConnect.CdrHistoryRequest, completion: @escaping (canscloud_ios_framework.CansConnect.CdrHistoryApi?) -> Swift.Void)
+  @objc public func urlSession(_ session: Foundation.URLSession, didReceive challenge: Foundation.URLAuthenticationChallenge, completionHandler: @escaping (Foundation.URLSession.AuthChallengeDisposition, Foundation.URLCredential?) -> Swift.Void)
+  @objc deinit
+}

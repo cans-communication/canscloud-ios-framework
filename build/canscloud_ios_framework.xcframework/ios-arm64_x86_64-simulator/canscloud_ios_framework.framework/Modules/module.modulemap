@@ -1,0 +1,11 @@
+framework module canscloud_ios_framework {
+  umbrella header "canscloud_ios_framework.h"
+
+  export *
+  module * { export * }
+}
+
+module canscloud_ios_framework.Swift {
+    header "canscloud_ios_framework-Swift.h"
+    requires objc
+}

@@ -11,6 +11,14 @@
 		2B4C0B3528DC6B1700F35838 /* canscloud_ios_framework.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 2B4C0B2A28DC6B1600F35838 /* canscloud_ios_framework.framework */; };
 		2B4C0B3A28DC6B1700F35838 /* canscloud_ios_frameworkTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 2B4C0B3928DC6B1700F35838 /* canscloud_ios_frameworkTests.swift */; };
 		2B4C0B3B28DC6B1700F35838 /* canscloud_ios_framework.h in Headers */ = {isa = PBXBuildFile; fileRef = 2B4C0B2D28DC6B1600F35838 /* canscloud_ios_framework.h */; settings = {ATTRIBUTES = (Public, ); }; };
+		52BD59302918DB5D0055F632 /* AppDelegate.swift in Sources */ = {isa = PBXBuildFile; fileRef = 52BD592F2918DB5D0055F632 /* AppDelegate.swift */; };
+		52BD59322918DB5D0055F632 /* SceneDelegate.swift in Sources */ = {isa = PBXBuildFile; fileRef = 52BD59312918DB5D0055F632 /* SceneDelegate.swift */; };
+		52BD59342918DB5D0055F632 /* ViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = 52BD59332918DB5D0055F632 /* ViewController.swift */; };
+		52BD59372918DB5D0055F632 /* Main.storyboard in Resources */ = {isa = PBXBuildFile; fileRef = 52BD59352918DB5D0055F632 /* Main.storyboard */; };
+		52BD59392918DB5E0055F632 /* Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = 52BD59382918DB5E0055F632 /* Assets.xcassets */; };
+		52BD593C2918DB5F0055F632 /* LaunchScreen.storyboard in Resources */ = {isa = PBXBuildFile; fileRef = 52BD593A2918DB5E0055F632 /* LaunchScreen.storyboard */; };
+		52BD59422918DBD20055F632 /* canscloud_ios_framework.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 2B4C0B2A28DC6B1600F35838 /* canscloud_ios_framework.framework */; };
+		52BD59432918DBD20055F632 /* canscloud_ios_framework.framework in Embed Frameworks */ = {isa = PBXBuildFile; fileRef = 2B4C0B2A28DC6B1600F35838 /* canscloud_ios_framework.framework */; settings = {ATTRIBUTES = (CodeSignOnCopy, RemoveHeadersOnCopy, ); }; };
 		52F5D74828EC4260003719E8 /* CansConnect.swift in Sources */ = {isa = PBXBuildFile; fileRef = 52F5D74728EC4260003719E8 /* CansConnect.swift */; };
 /* End PBXBuildFile section */
 
@@ -22,7 +30,28 @@
 			remoteGlobalIDString = 2B4C0B2928DC6B1600F35838;
 			remoteInfo = "canscloud-ios-framework";
 		};
+		52BD59442918DBD20055F632 /* PBXContainerItemProxy */ = {
+			isa = PBXContainerItemProxy;
+			containerPortal = 2B4C0B2128DC6B1600F35838 /* Project object */;
+			proxyType = 1;
+			remoteGlobalIDString = 2B4C0B2928DC6B1600F35838;
+			remoteInfo = "canscloud-ios-framework";
+		};
 /* End PBXContainerItemProxy section */
+
+/* Begin PBXCopyFilesBuildPhase section */
+		52BD59462918DBD20055F632 /* Embed Frameworks */ = {
+			isa = PBXCopyFilesBuildPhase;
+			buildActionMask = 2147483647;
+			dstPath = "";
+			dstSubfolderSpec = 10;
+			files = (
+				52BD59432918DBD20055F632 /* canscloud_ios_framework.framework in Embed Frameworks */,
+			);
+			name = "Embed Frameworks";
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+/* End PBXCopyFilesBuildPhase section */
 
 /* Begin PBXFileReference section */
 		2B4C0B2A28DC6B1600F35838 /* canscloud_ios_framework.framework */ = {isa = PBXFileReference; explicitFileType = wrapper.framework; includeInIndex = 0; path = canscloud_ios_framework.framework; sourceTree = BUILT_PRODUCTS_DIR; };
@@ -30,6 +59,14 @@
 		2B4C0B2E28DC6B1600F35838 /* canscloud_ios_framework.docc */ = {isa = PBXFileReference; lastKnownFileType = folder.documentationcatalog; path = canscloud_ios_framework.docc; sourceTree = "<group>"; };
 		2B4C0B3428DC6B1700F35838 /* canscloud-ios-frameworkTests.xctest */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; includeInIndex = 0; path = "canscloud-ios-frameworkTests.xctest"; sourceTree = BUILT_PRODUCTS_DIR; };
 		2B4C0B3928DC6B1700F35838 /* canscloud_ios_frameworkTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = canscloud_ios_frameworkTests.swift; sourceTree = "<group>"; };
+		52BD592D2918DB5D0055F632 /* DemoApp.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = DemoApp.app; sourceTree = BUILT_PRODUCTS_DIR; };
+		52BD592F2918DB5D0055F632 /* AppDelegate.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AppDelegate.swift; sourceTree = "<group>"; };
+		52BD59312918DB5D0055F632 /* SceneDelegate.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SceneDelegate.swift; sourceTree = "<group>"; };
+		52BD59332918DB5D0055F632 /* ViewController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ViewController.swift; sourceTree = "<group>"; };
+		52BD59362918DB5D0055F632 /* Base */ = {isa = PBXFileReference; lastKnownFileType = file.storyboard; name = Base; path = Base.lproj/Main.storyboard; sourceTree = "<group>"; };
+		52BD59382918DB5E0055F632 /* Assets.xcassets */ = {isa = PBXFileReference; lastKnownFileType = folder.assetcatalog; path = Assets.xcassets; sourceTree = "<group>"; };
+		52BD593B2918DB5E0055F632 /* Base */ = {isa = PBXFileReference; lastKnownFileType = file.storyboard; name = Base; path = Base.lproj/LaunchScreen.storyboard; sourceTree = "<group>"; };
+		52BD593D2918DB5F0055F632 /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = Info.plist; sourceTree = "<group>"; };
 		52F5D74728EC4260003719E8 /* CansConnect.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = CansConnect.swift; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
@@ -49,6 +86,14 @@
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
+		52BD592A2918DB5D0055F632 /* Frameworks */ = {
+			isa = PBXFrameworksBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				52BD59422918DBD20055F632 /* canscloud_ios_framework.framework in Frameworks */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
 /* End PBXFrameworksBuildPhase section */
 
 /* Begin PBXGroup section */
@@ -57,7 +102,9 @@
 			children = (
 				2B4C0B2C28DC6B1600F35838 /* canscloud-ios-framework */,
 				2B4C0B3828DC6B1700F35838 /* canscloud-ios-frameworkTests */,
+				52BD592E2918DB5D0055F632 /* DemoApp */,
 				2B4C0B2B28DC6B1600F35838 /* Products */,
+				52BD59412918DBD20055F632 /* Frameworks */,
 			);
 			sourceTree = "<group>";
 		};
@@ -66,6 +113,7 @@
 			children = (
 				2B4C0B2A28DC6B1600F35838 /* canscloud_ios_framework.framework */,
 				2B4C0B3428DC6B1700F35838 /* canscloud-ios-frameworkTests.xctest */,
+				52BD592D2918DB5D0055F632 /* DemoApp.app */,
 			);
 			name = Products;
 			sourceTree = "<group>";
@@ -86,6 +134,27 @@
 				2B4C0B3928DC6B1700F35838 /* canscloud_ios_frameworkTests.swift */,
 			);
 			path = "canscloud-ios-frameworkTests";
+			sourceTree = "<group>";
+		};
+		52BD592E2918DB5D0055F632 /* DemoApp */ = {
+			isa = PBXGroup;
+			children = (
+				52BD592F2918DB5D0055F632 /* AppDelegate.swift */,
+				52BD59312918DB5D0055F632 /* SceneDelegate.swift */,
+				52BD59332918DB5D0055F632 /* ViewController.swift */,
+				52BD59352918DB5D0055F632 /* Main.storyboard */,
+				52BD59382918DB5E0055F632 /* Assets.xcassets */,
+				52BD593A2918DB5E0055F632 /* LaunchScreen.storyboard */,
+				52BD593D2918DB5F0055F632 /* Info.plist */,
+			);
+			path = DemoApp;
+			sourceTree = "<group>";
+		};
+		52BD59412918DBD20055F632 /* Frameworks */ = {
+			isa = PBXGroup;
+			children = (
+			);
+			name = Frameworks;
 			sourceTree = "<group>";
 		};
 /* End PBXGroup section */
@@ -139,6 +208,25 @@
 			productReference = 2B4C0B3428DC6B1700F35838 /* canscloud-ios-frameworkTests.xctest */;
 			productType = "com.apple.product-type.bundle.unit-test";
 		};
+		52BD592C2918DB5D0055F632 /* DemoApp */ = {
+			isa = PBXNativeTarget;
+			buildConfigurationList = 52BD593E2918DB5F0055F632 /* Build configuration list for PBXNativeTarget "DemoApp" */;
+			buildPhases = (
+				52BD59292918DB5D0055F632 /* Sources */,
+				52BD592A2918DB5D0055F632 /* Frameworks */,
+				52BD592B2918DB5D0055F632 /* Resources */,
+				52BD59462918DBD20055F632 /* Embed Frameworks */,
+			);
+			buildRules = (
+			);
+			dependencies = (
+				52BD59452918DBD20055F632 /* PBXTargetDependency */,
+			);
+			name = DemoApp;
+			productName = DemoApp;
+			productReference = 52BD592D2918DB5D0055F632 /* DemoApp.app */;
+			productType = "com.apple.product-type.application";
+		};
 /* End PBXNativeTarget section */
 
 /* Begin PBXProject section */
@@ -146,7 +234,7 @@
 			isa = PBXProject;
 			attributes = {
 				BuildIndependentTargetsInParallel = 1;
-				LastSwiftUpdateCheck = 1400;
+				LastSwiftUpdateCheck = 1410;
 				LastUpgradeCheck = 1340;
 				TargetAttributes = {
 					2B4C0B2928DC6B1600F35838 = {
@@ -154,6 +242,9 @@
 					};
 					2B4C0B3328DC6B1700F35838 = {
 						CreatedOnToolsVersion = 13.4.1;
+					};
+					52BD592C2918DB5D0055F632 = {
+						CreatedOnToolsVersion = 14.1;
 					};
 				};
 			};
@@ -172,6 +263,7 @@
 			targets = (
 				2B4C0B2928DC6B1600F35838 /* canscloud-ios-framework */,
 				2B4C0B3328DC6B1700F35838 /* canscloud-ios-frameworkTests */,
+				52BD592C2918DB5D0055F632 /* DemoApp */,
 			);
 		};
 /* End PBXProject section */
@@ -188,6 +280,16 @@
 			isa = PBXResourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+		52BD592B2918DB5D0055F632 /* Resources */ = {
+			isa = PBXResourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				52BD593C2918DB5F0055F632 /* LaunchScreen.storyboard in Resources */,
+				52BD59392918DB5E0055F632 /* Assets.xcassets in Resources */,
+				52BD59372918DB5D0055F632 /* Main.storyboard in Resources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -236,6 +338,16 @@
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
+		52BD59292918DB5D0055F632 /* Sources */ = {
+			isa = PBXSourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				52BD59342918DB5D0055F632 /* ViewController.swift in Sources */,
+				52BD59302918DB5D0055F632 /* AppDelegate.swift in Sources */,
+				52BD59322918DB5D0055F632 /* SceneDelegate.swift in Sources */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
 /* End PBXSourcesBuildPhase section */
 
 /* Begin PBXTargetDependency section */
@@ -244,7 +356,31 @@
 			target = 2B4C0B2928DC6B1600F35838 /* canscloud-ios-framework */;
 			targetProxy = 2B4C0B3628DC6B1700F35838 /* PBXContainerItemProxy */;
 		};
+		52BD59452918DBD20055F632 /* PBXTargetDependency */ = {
+			isa = PBXTargetDependency;
+			target = 2B4C0B2928DC6B1600F35838 /* canscloud-ios-framework */;
+			targetProxy = 52BD59442918DBD20055F632 /* PBXContainerItemProxy */;
+		};
 /* End PBXTargetDependency section */
+
+/* Begin PBXVariantGroup section */
+		52BD59352918DB5D0055F632 /* Main.storyboard */ = {
+			isa = PBXVariantGroup;
+			children = (
+				52BD59362918DB5D0055F632 /* Base */,
+			);
+			name = Main.storyboard;
+			sourceTree = "<group>";
+		};
+		52BD593A2918DB5E0055F632 /* LaunchScreen.storyboard */ = {
+			isa = PBXVariantGroup;
+			children = (
+				52BD593B2918DB5E0055F632 /* Base */,
+			);
+			name = LaunchScreen.storyboard;
+			sourceTree = "<group>";
+		};
+/* End PBXVariantGroup section */
 
 /* Begin XCBuildConfiguration section */
 		2B4C0B3C28DC6B1700F35838 /* Debug */ = {
@@ -479,6 +615,74 @@
 			};
 			name = Release;
 		};
+		52BD593F2918DB5F0055F632 /* Debug */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
+				ASSETCATALOG_COMPILER_GLOBAL_ACCENT_COLOR_NAME = AccentColor;
+				CLANG_CXX_LANGUAGE_STANDARD = "gnu++20";
+				"CODE_SIGN_IDENTITY[sdk=iphoneos*]" = "iPhone Developer";
+				CODE_SIGN_STYLE = Manual;
+				CURRENT_PROJECT_VERSION = 1;
+				DEVELOPMENT_TEAM = "";
+				"DEVELOPMENT_TEAM[sdk=iphoneos*]" = N27H9XFR3R;
+				GENERATE_INFOPLIST_FILE = YES;
+				INFOPLIST_FILE = DemoApp/Info.plist;
+				INFOPLIST_KEY_UIApplicationSupportsIndirectInputEvents = YES;
+				INFOPLIST_KEY_UILaunchStoryboardName = LaunchScreen;
+				INFOPLIST_KEY_UIMainStoryboardFile = Main;
+				INFOPLIST_KEY_UISupportedInterfaceOrientations_iPad = "UIInterfaceOrientationPortrait UIInterfaceOrientationPortraitUpsideDown UIInterfaceOrientationLandscapeLeft UIInterfaceOrientationLandscapeRight";
+				INFOPLIST_KEY_UISupportedInterfaceOrientations_iPhone = "UIInterfaceOrientationPortrait UIInterfaceOrientationLandscapeLeft UIInterfaceOrientationLandscapeRight";
+				IPHONEOS_DEPLOYMENT_TARGET = 16.1;
+				LD_RUNPATH_SEARCH_PATHS = (
+					"$(inherited)",
+					"@executable_path/Frameworks",
+				);
+				MARKETING_VERSION = 1.0;
+				PRODUCT_BUNDLE_IDENTIFIER = cc.cans.demoapp;
+				PRODUCT_NAME = "$(TARGET_NAME)";
+				PROVISIONING_PROFILE_SPECIFIER = "";
+				"PROVISIONING_PROFILE_SPECIFIER[sdk=iphoneos*]" = "Demo App Development";
+				SWIFT_EMIT_LOC_STRINGS = YES;
+				SWIFT_VERSION = 5.0;
+				TARGETED_DEVICE_FAMILY = "1,2";
+			};
+			name = Debug;
+		};
+		52BD59402918DB5F0055F632 /* Release */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
+				ASSETCATALOG_COMPILER_GLOBAL_ACCENT_COLOR_NAME = AccentColor;
+				CLANG_CXX_LANGUAGE_STANDARD = "gnu++20";
+				"CODE_SIGN_IDENTITY[sdk=iphoneos*]" = "iPhone Developer";
+				CODE_SIGN_STYLE = Manual;
+				CURRENT_PROJECT_VERSION = 1;
+				DEVELOPMENT_TEAM = "";
+				"DEVELOPMENT_TEAM[sdk=iphoneos*]" = N27H9XFR3R;
+				GENERATE_INFOPLIST_FILE = YES;
+				INFOPLIST_FILE = DemoApp/Info.plist;
+				INFOPLIST_KEY_UIApplicationSupportsIndirectInputEvents = YES;
+				INFOPLIST_KEY_UILaunchStoryboardName = LaunchScreen;
+				INFOPLIST_KEY_UIMainStoryboardFile = Main;
+				INFOPLIST_KEY_UISupportedInterfaceOrientations_iPad = "UIInterfaceOrientationPortrait UIInterfaceOrientationPortraitUpsideDown UIInterfaceOrientationLandscapeLeft UIInterfaceOrientationLandscapeRight";
+				INFOPLIST_KEY_UISupportedInterfaceOrientations_iPhone = "UIInterfaceOrientationPortrait UIInterfaceOrientationLandscapeLeft UIInterfaceOrientationLandscapeRight";
+				IPHONEOS_DEPLOYMENT_TARGET = 16.1;
+				LD_RUNPATH_SEARCH_PATHS = (
+					"$(inherited)",
+					"@executable_path/Frameworks",
+				);
+				MARKETING_VERSION = 1.0;
+				PRODUCT_BUNDLE_IDENTIFIER = cc.cans.demoapp;
+				PRODUCT_NAME = "$(TARGET_NAME)";
+				PROVISIONING_PROFILE_SPECIFIER = "";
+				"PROVISIONING_PROFILE_SPECIFIER[sdk=iphoneos*]" = "Demo App Development";
+				SWIFT_EMIT_LOC_STRINGS = YES;
+				SWIFT_VERSION = 5.0;
+				TARGETED_DEVICE_FAMILY = "1,2";
+			};
+			name = Release;
+		};
 /* End XCBuildConfiguration section */
 
 /* Begin XCConfigurationList section */
@@ -505,6 +709,15 @@
 			buildConfigurations = (
 				2B4C0B4228DC6B1700F35838 /* Debug */,
 				2B4C0B4328DC6B1700F35838 /* Release */,
+			);
+			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Release;
+		};
+		52BD593E2918DB5F0055F632 /* Build configuration list for PBXNativeTarget "DemoApp" */ = {
+			isa = XCConfigurationList;
+			buildConfigurations = (
+				52BD593F2918DB5F0055F632 /* Debug */,
+				52BD59402918DB5F0055F632 /* Release */,
 			);
 			defaultConfigurationIsVisible = 0;
 			defaultConfigurationName = Release;

@@ -19,6 +19,186 @@
 		52BD593C2918DB5F0055F632 /* LaunchScreen.storyboard in Resources */ = {isa = PBXBuildFile; fileRef = 52BD593A2918DB5E0055F632 /* LaunchScreen.storyboard */; };
 		52BD59422918DBD20055F632 /* canscloud_ios_framework.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 2B4C0B2A28DC6B1600F35838 /* canscloud_ios_framework.framework */; };
 		52BD59432918DBD20055F632 /* canscloud_ios_framework.framework in Embed Frameworks */ = {isa = PBXBuildFile; fileRef = 2B4C0B2A28DC6B1600F35838 /* canscloud_ios_framework.framework */; settings = {ATTRIBUTES = (CodeSignOnCopy, RemoveHeadersOnCopy, ); }; };
+		52BD5B592918E0880055F632 /* deploy.sh in Resources */ = {isa = PBXBuildFile; fileRef = 52BD5AA52918E0870055F632 /* deploy.sh */; };
+		52BD5B5A2918E0880055F632 /* nowebcamVGA.jpg in Resources */ = {isa = PBXBuildFile; fileRef = 52BD5AA92918E0870055F632 /* nowebcamVGA.jpg */; };
+		52BD5B5B2918E0880055F632 /* nowebcamCIF.jpg in Resources */ = {isa = PBXBuildFile; fileRef = 52BD5AAA2918E0870055F632 /* nowebcamCIF.jpg */; };
+		52BD5B5C2918E0880055F632 /* linphonesiteqr_captured.jpg in Resources */ = {isa = PBXBuildFile; fileRef = 52BD5AAB2918E0870055F632 /* linphonesiteqr_captured.jpg */; };
+		52BD5B5D2918E0880055F632 /* linphonesiteqr.jpg in Resources */ = {isa = PBXBuildFile; fileRef = 52BD5AAC2918E0870055F632 /* linphonesiteqr.jpg */; };
+		52BD5B5E2918E0880055F632 /* linphone.svg in Resources */ = {isa = PBXBuildFile; fileRef = 52BD5AAD2918E0870055F632 /* linphone.svg */; };
+		52BD5B5F2918E0880055F632 /* local_tester_hosts in Resources */ = {isa = PBXBuildFile; fileRef = 52BD5AAE2918E0870055F632 /* local_tester_hosts */; };
+		52BD5B602918E0880055F632 /* thousand_vcards.vcf in Resources */ = {isa = PBXBuildFile; fileRef = 52BD5AB02918E0870055F632 /* thousand_vcards.vcf */; };
+		52BD5B612918E0880055F632 /* vcards.vcf in Resources */ = {isa = PBXBuildFile; fileRef = 52BD5AB12918E0870055F632 /* vcards.vcf */; };
+		52BD5B622918E0880055F632 /* agent.pem in Resources */ = {isa = PBXBuildFile; fileRef = 52BD5AB42918E0870055F632 /* agent.pem */; };
+		52BD5B632918E0880055F632 /* openssl-altname.cnf in Resources */ = {isa = PBXBuildFile; fileRef = 52BD5AB52918E0870055F632 /* openssl-altname.cnf */; };
+		52BD5B642918E0880055F632 /* cafile.pem in Resources */ = {isa = PBXBuildFile; fileRef = 52BD5AB62918E0870055F632 /* cafile.pem */; };
+		52BD5B652918E0880055F632 /* openssl-cn.cnf in Resources */ = {isa = PBXBuildFile; fileRef = 52BD5AB82918E0870055F632 /* openssl-cn.cnf */; };
+		52BD5B682918E0880055F632 /* user1_cert.pem in Resources */ = {isa = PBXBuildFile; fileRef = 52BD5ABC2918E0870055F632 /* user1_cert.pem */; };
+		52BD5B692918E0880055F632 /* cert2-signed-by-other-ca.pem in Resources */ = {isa = PBXBuildFile; fileRef = 52BD5ABD2918E0870055F632 /* cert2-signed-by-other-ca.pem */; };
+		52BD5B6A2918E0880055F632 /* user2_CN_key.pem in Resources */ = {isa = PBXBuildFile; fileRef = 52BD5ABE2918E0870055F632 /* user2_CN_key.pem */; };
+		52BD5B6B2918E0880055F632 /* user2_revoked_cert.pem in Resources */ = {isa = PBXBuildFile; fileRef = 52BD5ABF2918E0870055F632 /* user2_revoked_cert.pem */; };
+		52BD5B6C2918E0880055F632 /* user2_revoked_key.pem in Resources */ = {isa = PBXBuildFile; fileRef = 52BD5AC02918E0870055F632 /* user2_revoked_key.pem */; };
+		52BD5B6D2918E0880055F632 /* cert3.pem in Resources */ = {isa = PBXBuildFile; fileRef = 52BD5AC12918E0870055F632 /* cert3.pem */; };
+		52BD5B6E2918E0880055F632 /* cert2.pem in Resources */ = {isa = PBXBuildFile; fileRef = 52BD5AC22918E0870055F632 /* cert2.pem */; };
+		52BD5B6F2918E0880055F632 /* user1_multiple_aliases_key.pem in Resources */ = {isa = PBXBuildFile; fileRef = 52BD5AC32918E0870055F632 /* user1_multiple_aliases_key.pem */; };
+		52BD5B702918E0880055F632 /* key.pem in Resources */ = {isa = PBXBuildFile; fileRef = 52BD5AC42918E0870055F632 /* key.pem */; };
+		52BD5B712918E0880055F632 /* key3.pem in Resources */ = {isa = PBXBuildFile; fileRef = 52BD5AC52918E0870055F632 /* key3.pem */; };
+		52BD5B722918E0880055F632 /* key2.pem in Resources */ = {isa = PBXBuildFile; fileRef = 52BD5AC62918E0870055F632 /* key2.pem */; };
+		52BD5B732918E0880055F632 /* cert.pem in Resources */ = {isa = PBXBuildFile; fileRef = 52BD5AC72918E0870055F632 /* cert.pem */; };
+		52BD5B742918E0880055F632 /* user2_CN_cert.pem in Resources */ = {isa = PBXBuildFile; fileRef = 52BD5AC82918E0870055F632 /* user2_CN_cert.pem */; };
+		52BD5B752918E0880055F632 /* user1_key.pem in Resources */ = {isa = PBXBuildFile; fileRef = 52BD5AC92918E0870055F632 /* user1_key.pem */; };
+		52BD5B762918E0880055F632 /* user2_cert.pem in Resources */ = {isa = PBXBuildFile; fileRef = 52BD5ACA2918E0870055F632 /* user2_cert.pem */; };
+		52BD5B772918E0880055F632 /* user2_key.pem in Resources */ = {isa = PBXBuildFile; fileRef = 52BD5ACB2918E0870055F632 /* user2_key.pem */; };
+		52BD5B782918E0880055F632 /* key2-signed-by-other-ca.pem in Resources */ = {isa = PBXBuildFile; fileRef = 52BD5ACC2918E0870055F632 /* key2-signed-by-other-ca.pem */; };
+		52BD5B792918E0880055F632 /* user1_multiple_aliases_cert.pem in Resources */ = {isa = PBXBuildFile; fileRef = 52BD5ACD2918E0870055F632 /* user1_multiple_aliases_cert.pem */; };
+		52BD5B7A2918E0880055F632 /* hello8000.mkv in Resources */ = {isa = PBXBuildFile; fileRef = 52BD5ACF2918E0870055F632 /* hello8000.mkv */; };
+		52BD5B7B2918E0880055F632 /* hello44100.wav in Resources */ = {isa = PBXBuildFile; fileRef = 52BD5AD02918E0870055F632 /* hello44100.wav */; };
+		52BD5B7C2918E0880055F632 /* vrroom.wav in Resources */ = {isa = PBXBuildFile; fileRef = 52BD5AD12918E0870055F632 /* vrroom.wav */; };
+		52BD5B7D2918E0880055F632 /* ahbahouaismaisbon.wav in Resources */ = {isa = PBXBuildFile; fileRef = 52BD5AD22918E0870055F632 /* ahbahouaismaisbon.wav */; };
+		52BD5B7E2918E0880055F632 /* hello8000.wav in Resources */ = {isa = PBXBuildFile; fileRef = 52BD5AD32918E0870055F632 /* hello8000.wav */; };
+		52BD5B7F2918E0880055F632 /* sintel_trailer_opus_h264.mkv in Resources */ = {isa = PBXBuildFile; fileRef = 52BD5AD42918E0870055F632 /* sintel_trailer_opus_h264.mkv */; };
+		52BD5B802918E0880055F632 /* sintel_trailer_opus_vp8.mkv in Resources */ = {isa = PBXBuildFile; fileRef = 52BD5AD52918E0870055F632 /* sintel_trailer_opus_vp8.mkv */; };
+		52BD5B812918E0880055F632 /* continuous_48000_stereo.wav in Resources */ = {isa = PBXBuildFile; fileRef = 52BD5AD62918E0870055F632 /* continuous_48000_stereo.wav */; };
+		52BD5B822918E0880055F632 /* oldphone.wav in Resources */ = {isa = PBXBuildFile; fileRef = 52BD5AD72918E0870055F632 /* oldphone.wav */; };
+		52BD5B832918E0880055F632 /* ringback.wav in Resources */ = {isa = PBXBuildFile; fileRef = 52BD5AD82918E0870055F632 /* ringback.wav */; };
+		52BD5B842918E0880055F632 /* hello8000_mkv_ref.wav in Resources */ = {isa = PBXBuildFile; fileRef = 52BD5AD92918E0870055F632 /* hello8000_mkv_ref.wav */; };
+		52BD5B852918E0880055F632 /* sintel_trailer_pcmu_h264.mkv in Resources */ = {isa = PBXBuildFile; fileRef = 52BD5ADA2918E0870055F632 /* sintel_trailer_pcmu_h264.mkv */; };
+		52BD5B862918E0880055F632 /* tester_hosts in Resources */ = {isa = PBXBuildFile; fileRef = 52BD5ADB2918E0870055F632 /* tester_hosts */; };
+		52BD5B872918E0880055F632 /* messages.db in Resources */ = {isa = PBXBuildFile; fileRef = 52BD5ADD2918E0870055F632 /* messages.db */; };
+		52BD5B882918E0880055F632 /* linphone.db in Resources */ = {isa = PBXBuildFile; fileRef = 52BD5ADE2918E0870055F632 /* linphone.db */; };
+		52BD5B892918E0880055F632 /* friends.db in Resources */ = {isa = PBXBuildFile; fileRef = 52BD5ADF2918E0870055F632 /* friends.db */; };
+		52BD5B8A2918E0880055F632 /* chatrooms.db in Resources */ = {isa = PBXBuildFile; fileRef = 52BD5AE02918E0870055F632 /* chatrooms.db */; };
+		52BD5B8B2918E0880055F632 /* call_with_transfer_incoming_ringing_call.xml in Resources */ = {isa = PBXBuildFile; fileRef = 52BD5AE22918E0870055F632 /* call_with_transfer_incoming_ringing_call.xml */; };
+		52BD5B8C2918E0880055F632 /* sip_update_within_icoming_reinvite_with_no_sdp.xml in Resources */ = {isa = PBXBuildFile; fileRef = 52BD5AE32918E0870055F632 /* sip_update_within_icoming_reinvite_with_no_sdp.xml */; };
+		52BD5B8D2918E0880055F632 /* call_with_multiple_audio_mline_in_sdp.xml in Resources */ = {isa = PBXBuildFile; fileRef = 52BD5AE42918E0870055F632 /* call_with_multiple_audio_mline_in_sdp.xml */; };
+		52BD5B8E2918E0880055F632 /* call_with_video_mline_before_audio_in_sdp.xml in Resources */ = {isa = PBXBuildFile; fileRef = 52BD5AE52918E0870055F632 /* call_with_video_mline_before_audio_in_sdp.xml */; };
+		52BD5B8F2918E0880055F632 /* call_invite_200ok_without_contact_header.xml in Resources */ = {isa = PBXBuildFile; fileRef = 52BD5AE62918E0870055F632 /* call_invite_200ok_without_contact_header.xml */; };
+		52BD5B902918E0880055F632 /* call_with_audio_mline_before_video_in_sdp.xml in Resources */ = {isa = PBXBuildFile; fileRef = 52BD5AE72918E0870055F632 /* call_with_audio_mline_before_video_in_sdp.xml */; };
+		52BD5B912918E0880055F632 /* call_with_multiple_video_mline_in_sdp.xml in Resources */ = {isa = PBXBuildFile; fileRef = 52BD5AE82918E0870055F632 /* call_with_multiple_video_mline_in_sdp.xml */; };
+		52BD5B922918E0880055F632 /* marie_os_defined_rtp_ports_rc in Resources */ = {isa = PBXBuildFile; fileRef = 52BD5AEA2918E0870055F632 /* marie_os_defined_rtp_ports_rc */; };
+		52BD5B932918E0880055F632 /* marie_dependent_proxy_rc in Resources */ = {isa = PBXBuildFile; fileRef = 52BD5AEB2918E0870055F632 /* marie_dependent_proxy_rc */; };
+		52BD5B942918E0880055F632 /* pauline_zrtp_aes256_rc in Resources */ = {isa = PBXBuildFile; fileRef = 52BD5AEC2918E0870055F632 /* pauline_zrtp_aes256_rc */; };
+		52BD5B952918E0880055F632 /* marie_remote_default_values_rc in Resources */ = {isa = PBXBuildFile; fileRef = 52BD5AED2918E0870055F632 /* marie_remote_default_values_rc */; };
+		52BD5B962918E0880055F632 /* michelle_rc in Resources */ = {isa = PBXBuildFile; fileRef = 52BD5AEE2918E0870055F632 /* michelle_rc */; };
+		52BD5B972918E0880055F632 /* marie_remote_localfile_android_rc in Resources */ = {isa = PBXBuildFile; fileRef = 52BD5AEF2918E0870055F632 /* marie_remote_localfile_android_rc */; };
+		52BD5B982918E0880055F632 /* claire_sips_rc in Resources */ = {isa = PBXBuildFile; fileRef = 52BD5AF02918E0870055F632 /* claire_sips_rc */; };
+		52BD5B992918E0880055F632 /* empty_rc in Resources */ = {isa = PBXBuildFile; fileRef = 52BD5AF12918E0870055F632 /* empty_rc */; };
+		52BD5B9A2918E0880055F632 /* pauline_well_known_port_rc in Resources */ = {isa = PBXBuildFile; fileRef = 52BD5AF22918E0870055F632 /* pauline_well_known_port_rc */; };
+		52BD5B9B2918E0880055F632 /* lime_x3dh_xml_rc in Resources */ = {isa = PBXBuildFile; fileRef = 52BD5AF32918E0870055F632 /* lime_x3dh_xml_rc */; };
+		52BD5B9C2918E0880055F632 /* arthur_rc in Resources */ = {isa = PBXBuildFile; fileRef = 52BD5AF42918E0870055F632 /* arthur_rc */; };
+		52BD5B9D2918E0880055F632 /* groupchat_rc in Resources */ = {isa = PBXBuildFile; fileRef = 52BD5AF52918E0870055F632 /* groupchat_rc */; };
+		52BD5B9E2918E0880055F632 /* marie_zrtp_ecdh448_rc in Resources */ = {isa = PBXBuildFile; fileRef = 52BD5AF62918E0870055F632 /* marie_zrtp_ecdh448_rc */; };
+		52BD5B9F2918E0880055F632 /* zero_length_params_rc in Resources */ = {isa = PBXBuildFile; fileRef = 52BD5AF72918E0870055F632 /* zero_length_params_rc */; };
+		52BD5BA02918E0880055F632 /* marie_zrtp_srtpsuite_aes256_rc in Resources */ = {isa = PBXBuildFile; fileRef = 52BD5AF82918E0870055F632 /* marie_zrtp_srtpsuite_aes256_rc */; };
+		52BD5BA12918E0880055F632 /* marie_dtls_srtp_immediate_rc in Resources */ = {isa = PBXBuildFile; fileRef = 52BD5AF92918E0870055F632 /* marie_dtls_srtp_immediate_rc */; };
+		52BD5BA22918E0880055F632 /* marie_remote_localfile2_rc in Resources */ = {isa = PBXBuildFile; fileRef = 52BD5AFA2918E0870055F632 /* marie_remote_localfile2_rc */; };
+		52BD5BA32918E0880055F632 /* marie_remote_localfile_win10_rc in Resources */ = {isa = PBXBuildFile; fileRef = 52BD5AFB2918E0870055F632 /* marie_remote_localfile_win10_rc */; };
+		52BD5BA42918E0880055F632 /* stun_rc in Resources */ = {isa = PBXBuildFile; fileRef = 52BD5AFC2918E0870055F632 /* stun_rc */; };
+		52BD5BA52918E0880055F632 /* pauline_tcp_rc in Resources */ = {isa = PBXBuildFile; fileRef = 52BD5AFD2918E0870055F632 /* pauline_tcp_rc */; };
+		52BD5BA62918E0880055F632 /* marie_dual_proxy_2_rc in Resources */ = {isa = PBXBuildFile; fileRef = 52BD5AFE2918E0870055F632 /* marie_dual_proxy_2_rc */; };
+		52BD5BA72918E0880055F632 /* marie_h264_rc in Resources */ = {isa = PBXBuildFile; fileRef = 52BD5AFF2918E0870055F632 /* marie_h264_rc */; };
+		52BD5BA82918E0880055F632 /* marie_lime_x3dh_no_server_rc in Resources */ = {isa = PBXBuildFile; fileRef = 52BD5B002918E0870055F632 /* marie_lime_x3dh_no_server_rc */; };
+		52BD5BA92918E0880055F632 /* pauline_rtp_port_range_rc in Resources */ = {isa = PBXBuildFile; fileRef = 52BD5B012918E0870055F632 /* pauline_rtp_port_range_rc */; };
+		52BD5BAA2918E0880055F632 /* marie_remote_404_rc in Resources */ = {isa = PBXBuildFile; fileRef = 52BD5B022918E0870055F632 /* marie_remote_404_rc */; };
+		52BD5BAB2918E0880055F632 /* marie_session_timers_rc in Resources */ = {isa = PBXBuildFile; fileRef = 52BD5B032918E0870055F632 /* marie_session_timers_rc */; };
+		52BD5BAC2918E0880055F632 /* marie_rtp_port_range_rc in Resources */ = {isa = PBXBuildFile; fileRef = 52BD5B042918E0870055F632 /* marie_rtp_port_range_rc */; };
+		52BD5BAD2918E0880055F632 /* pauline_zrtp_ecdh448_rc in Resources */ = {isa = PBXBuildFile; fileRef = 52BD5B052918E0870055F632 /* pauline_zrtp_ecdh448_rc */; };
+		52BD5BAE2918E0880055F632 /* pauline_os_defined_rtp_ports_rc in Resources */ = {isa = PBXBuildFile; fileRef = 52BD5B062918E0870055F632 /* pauline_os_defined_rtp_ports_rc */; };
+		52BD5BAF2918E0880055F632 /* pauline_rc in Resources */ = {isa = PBXBuildFile; fileRef = 52BD5B072918E0870055F632 /* pauline_rc */; };
+		52BD5BB02918E0880055F632 /* marie_remote_https_rc in Resources */ = {isa = PBXBuildFile; fileRef = 52BD5B082918E0870055F632 /* marie_remote_https_rc */; };
+		52BD5BB12918E0880055F632 /* groupchat_lime_x3dh_rc in Resources */ = {isa = PBXBuildFile; fileRef = 52BD5B092918E0870055F632 /* groupchat_lime_x3dh_rc */; };
+		52BD5BB22918E0880055F632 /* pauline_as_friend_rc in Resources */ = {isa = PBXBuildFile; fileRef = 52BD5B0A2918E0870055F632 /* pauline_as_friend_rc */; };
+		52BD5BB32918E0880055F632 /* marie_remote_localfile_rc in Resources */ = {isa = PBXBuildFile; fileRef = 52BD5B0B2918E0870055F632 /* marie_remote_localfile_rc */; };
+		52BD5BB42918E0880055F632 /* pauline_zrtp_srtpsuite_aes256_rc in Resources */ = {isa = PBXBuildFile; fileRef = 52BD5B0C2918E0870055F632 /* pauline_zrtp_srtpsuite_aes256_rc */; };
+		52BD5BB52918E0880055F632 /* pauline_sips_rc in Resources */ = {isa = PBXBuildFile; fileRef = 52BD5B0D2918E0870055F632 /* pauline_sips_rc */; };
+		52BD5BB62918E0880055F632 /* laure_call_logs_rc in Resources */ = {isa = PBXBuildFile; fileRef = 52BD5B0E2918E0870055F632 /* laure_call_logs_rc */; };
+		52BD5BB72918E0880055F632 /* pauline_external_rc in Resources */ = {isa = PBXBuildFile; fileRef = 52BD5B0F2918E0870055F632 /* pauline_external_rc */; };
+		52BD5BB82918E0880055F632 /* invalid_friends_xml in Resources */ = {isa = PBXBuildFile; fileRef = 52BD5B102918E0870055F632 /* invalid_friends_xml */; };
+		52BD5BB92918E0880055F632 /* marie_early_rc in Resources */ = {isa = PBXBuildFile; fileRef = 52BD5B112918E0870055F632 /* marie_early_rc */; };
+		52BD5BBA2918E0880055F632 /* marie2_rc in Resources */ = {isa = PBXBuildFile; fileRef = 52BD5B122918E0870055F632 /* marie2_rc */; };
+		52BD5BBB2918E0880055F632 /* friends_rc in Resources */ = {isa = PBXBuildFile; fileRef = 52BD5B132918E0870055F632 /* friends_rc */; };
+		52BD5BBC2918E0880055F632 /* pauline_rc_rtcp_xr in Resources */ = {isa = PBXBuildFile; fileRef = 52BD5B142918E0870055F632 /* pauline_rc_rtcp_xr */; };
+		52BD5BBD2918E0880055F632 /* marie_rc_rtcp_xr in Resources */ = {isa = PBXBuildFile; fileRef = 52BD5B152918E0870055F632 /* marie_rc_rtcp_xr */; };
+		52BD5BBE2918E0880055F632 /* pauline_tunnel_verify_server_certificate_rc in Resources */ = {isa = PBXBuildFile; fileRef = 52BD5B162918E0870055F632 /* pauline_tunnel_verify_server_certificate_rc */; };
+		52BD5BBF2918E0880055F632 /* chloe_rc in Resources */ = {isa = PBXBuildFile; fileRef = 52BD5B172918E0870055F632 /* chloe_rc */; };
+		52BD5BC02918E0880055F632 /* account_creator_flexiapi_rc in Resources */ = {isa = PBXBuildFile; fileRef = 52BD5B182918E0870055F632 /* account_creator_flexiapi_rc */; };
+		52BD5BC12918E0880055F632 /* marie_zrtp_b256_rc in Resources */ = {isa = PBXBuildFile; fileRef = 52BD5B192918E0870055F632 /* marie_zrtp_b256_rc */; };
+		52BD5BC22918E0880055F632 /* marie_rc in Resources */ = {isa = PBXBuildFile; fileRef = 52BD5B1A2918E0870055F632 /* marie_rc */; };
+		52BD5BC32918E0880055F632 /* pauline_tls_client_rc in Resources */ = {isa = PBXBuildFile; fileRef = 52BD5B1B2918E0870055F632 /* pauline_tls_client_rc */; };
+		52BD5BC42918E0880055F632 /* pauline_zrtp_b256_rc in Resources */ = {isa = PBXBuildFile; fileRef = 52BD5B1C2918E0870055F632 /* pauline_zrtp_b256_rc */; };
+		52BD5BC52918E0880055F632 /* marie_dual_proxy_rc in Resources */ = {isa = PBXBuildFile; fileRef = 52BD5B1D2918E0870055F632 /* marie_dual_proxy_rc */; };
+		52BD5BC62918E0880055F632 /* invalid_friends_rc in Resources */ = {isa = PBXBuildFile; fileRef = 52BD5B1E2918E0870055F632 /* invalid_friends_rc */; };
+		52BD5BC72918E0880055F632 /* marie_sips_rc in Resources */ = {isa = PBXBuildFile; fileRef = 52BD5B1F2918E0870055F632 /* marie_sips_rc */; };
+		52BD5BC82918E0880055F632 /* pauline_nat64_rc in Resources */ = {isa = PBXBuildFile; fileRef = 52BD5B202918E0870055F632 /* pauline_nat64_rc */; };
+		52BD5BC92918E0880055F632 /* marie_well_known_port_rc in Resources */ = {isa = PBXBuildFile; fileRef = 52BD5B212918E0870055F632 /* marie_well_known_port_rc */; };
+		52BD5BCA2918E0880055F632 /* pauline_zrtp_ecdh255_rc in Resources */ = {isa = PBXBuildFile; fileRef = 52BD5B222918E0870055F632 /* pauline_zrtp_ecdh255_rc */; };
+		52BD5BCB2918E0880055F632 /* marie_remote_invalid_rc in Resources */ = {isa = PBXBuildFile; fileRef = 52BD5B232918E0870055F632 /* marie_remote_invalid_rc */; };
+		52BD5BCC2918E0880055F632 /* remote_zero_length_params_rc in Resources */ = {isa = PBXBuildFile; fileRef = 52BD5B242918E0870055F632 /* remote_zero_length_params_rc */; };
+		52BD5BCD2918E0880055F632 /* chloe_lime_x3dh_rc in Resources */ = {isa = PBXBuildFile; fileRef = 52BD5B252918E0870055F632 /* chloe_lime_x3dh_rc */; };
+		52BD5BCE2918E0880055F632 /* carddav_rc in Resources */ = {isa = PBXBuildFile; fileRef = 52BD5B262918E0870055F632 /* carddav_rc */; };
+		52BD5BCF2918E0880055F632 /* marie_remote_rc in Resources */ = {isa = PBXBuildFile; fileRef = 52BD5B272918E0870055F632 /* marie_remote_rc */; };
+		52BD5BD02918E0880055F632 /* claire_rc in Resources */ = {isa = PBXBuildFile; fileRef = 52BD5B282918E0870055F632 /* claire_rc */; };
+		52BD5BD12918E0880055F632 /* marie_transient_remote_rc in Resources */ = {isa = PBXBuildFile; fileRef = 52BD5B292918E0870055F632 /* marie_transient_remote_rc */; };
+		52BD5BD22918E0880055F632 /* pauline_lime_x3dh_rc in Resources */ = {isa = PBXBuildFile; fileRef = 52BD5B2A2918E0870055F632 /* pauline_lime_x3dh_rc */; };
+		52BD5BD32918E0880055F632 /* marie_bodyless_rc in Resources */ = {isa = PBXBuildFile; fileRef = 52BD5B2B2918E0870055F632 /* marie_bodyless_rc */; };
+		52BD5BD42918E0880055F632 /* marie_remote_invalid_uri_rc in Resources */ = {isa = PBXBuildFile; fileRef = 52BD5B2C2918E0870055F632 /* marie_remote_invalid_uri_rc */; };
+		52BD5BD52918E0880055F632 /* marie_lime_x3dh_rc in Resources */ = {isa = PBXBuildFile; fileRef = 52BD5B2D2918E0870055F632 /* marie_lime_x3dh_rc */; };
+		52BD5BD62918E0880055F632 /* laure_tcp_rc in Resources */ = {isa = PBXBuildFile; fileRef = 52BD5B2E2918E0870055F632 /* laure_tcp_rc */; };
+		52BD5BD72918E0880055F632 /* pauline_wild_rc in Resources */ = {isa = PBXBuildFile; fileRef = 52BD5B2F2918E0870055F632 /* pauline_wild_rc */; };
+		52BD5BD82918E0880055F632 /* assistant_create.rc in Resources */ = {isa = PBXBuildFile; fileRef = 52BD5B302918E0870055F632 /* assistant_create.rc */; };
+		52BD5BD92918E0880055F632 /* pauline_dtls_srtp_immediate_rc in Resources */ = {isa = PBXBuildFile; fileRef = 52BD5B312918E0870055F632 /* pauline_dtls_srtp_immediate_rc */; };
+		52BD5BDA2918E0880055F632 /* pauline_alt_rc in Resources */ = {isa = PBXBuildFile; fileRef = 52BD5B322918E0870055F632 /* pauline_alt_rc */; };
+		52BD5BDB2918E0880055F632 /* marie_nat64_rc in Resources */ = {isa = PBXBuildFile; fileRef = 52BD5B332918E0870055F632 /* marie_nat64_rc */; };
+		52BD5BDC2918E0880055F632 /* laure_rc_udp in Resources */ = {isa = PBXBuildFile; fileRef = 52BD5B342918E0870055F632 /* laure_rc_udp */; };
+		52BD5BDD2918E0880055F632 /* marie_quality_reporting_rc in Resources */ = {isa = PBXBuildFile; fileRef = 52BD5B352918E0870055F632 /* marie_quality_reporting_rc */; };
+		52BD5BDE2918E0880055F632 /* conference_focus_rc in Resources */ = {isa = PBXBuildFile; fileRef = 52BD5B362918E0870055F632 /* conference_focus_rc */; };
+		52BD5BDF2918E0880055F632 /* pauline_h264_rc in Resources */ = {isa = PBXBuildFile; fileRef = 52BD5B372918E0870055F632 /* pauline_h264_rc */; };
+		52BD5BE02918E0880055F632 /* marie_zrtp_aes256_rc in Resources */ = {isa = PBXBuildFile; fileRef = 52BD5B382918E0870055F632 /* marie_zrtp_aes256_rc */; };
+		52BD5BE12918E0880055F632 /* michelle_rc_udp in Resources */ = {isa = PBXBuildFile; fileRef = 52BD5B392918E0870055F632 /* michelle_rc_udp */; };
+		52BD5BE22918E0880055F632 /* multi_account_rc in Resources */ = {isa = PBXBuildFile; fileRef = 52BD5B3A2918E0870055F632 /* multi_account_rc */; };
+		52BD5BE32918E0880055F632 /* marie_v4proxy_rc in Resources */ = {isa = PBXBuildFile; fileRef = 52BD5B3B2918E0870055F632 /* marie_v4proxy_rc */; };
+		52BD5BE42918E0880055F632 /* account_creator_rc in Resources */ = {isa = PBXBuildFile; fileRef = 52BD5B3C2918E0870055F632 /* account_creator_rc */; };
+		52BD5BE52918E0880055F632 /* pauline_v4proxy_rc in Resources */ = {isa = PBXBuildFile; fileRef = 52BD5B3D2918E0870055F632 /* pauline_v4proxy_rc */; };
+		52BD5BE62918E0880055F632 /* marie_zrtp_ecdh255_rc in Resources */ = {isa = PBXBuildFile; fileRef = 52BD5B3E2918E0870055F632 /* marie_zrtp_ecdh255_rc */; };
+		52BD5BE72918E0880055F632 /* marie_pauline_lime_x3dh_rc in Resources */ = {isa = PBXBuildFile; fileRef = 52BD5B3F2918E0870055F632 /* marie_pauline_lime_x3dh_rc */; };
+		52BD5BE82918E0880055F632 /* laure_lime_x3dh_rc in Resources */ = {isa = PBXBuildFile; fileRef = 52BD5B402918E0870055F632 /* laure_lime_x3dh_rc */; };
+		52BD5BFB2918E0890055F632 /* LinphoneWrapper.cs in Resources */ = {isa = PBXBuildFile; fileRef = 52BD5B562918E0870055F632 /* LinphoneWrapper.cs */; };
+		52BD5BFC2918E0890055F632 /* LinphoneWrapper.swift in Sources */ = {isa = PBXBuildFile; fileRef = 52BD5B582918E0870055F632 /* LinphoneWrapper.swift */; };
+		52BD5BFD2918E0F70055F632 /* msx264.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 52BD5B512918E0870055F632 /* msx264.framework */; };
+		52BD5BFE2918E0F70055F632 /* msx264.framework in Embed Frameworks */ = {isa = PBXBuildFile; fileRef = 52BD5B512918E0870055F632 /* msx264.framework */; settings = {ATTRIBUTES = (CodeSignOnCopy, RemoveHeadersOnCopy, ); }; };
+		52BD5C002918E1090055F632 /* ortp.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 52BD5B4B2918E0870055F632 /* ortp.framework */; };
+		52BD5C012918E1090055F632 /* ortp.framework in Embed Frameworks */ = {isa = PBXBuildFile; fileRef = 52BD5B4B2918E0870055F632 /* ortp.framework */; settings = {ATTRIBUTES = (CodeSignOnCopy, RemoveHeadersOnCopy, ); }; };
+		52BD5C022918E10B0055F632 /* mswebrtc.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 52BD5B462918E0870055F632 /* mswebrtc.framework */; };
+		52BD5C032918E10B0055F632 /* mswebrtc.framework in Embed Frameworks */ = {isa = PBXBuildFile; fileRef = 52BD5B462918E0870055F632 /* mswebrtc.framework */; settings = {ATTRIBUTES = (CodeSignOnCopy, RemoveHeadersOnCopy, ); }; };
+		52BD5C042918E10D0055F632 /* mssilk.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 52BD5B4E2918E0870055F632 /* mssilk.framework */; };
+		52BD5C052918E10D0055F632 /* mssilk.framework in Embed Frameworks */ = {isa = PBXBuildFile; fileRef = 52BD5B4E2918E0870055F632 /* mssilk.framework */; settings = {ATTRIBUTES = (CodeSignOnCopy, RemoveHeadersOnCopy, ); }; };
+		52BD5C062918E10F0055F632 /* msopenh264.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 52BD5B442918E0870055F632 /* msopenh264.framework */; };
+		52BD5C072918E1100055F632 /* msopenh264.framework in Embed Frameworks */ = {isa = PBXBuildFile; fileRef = 52BD5B442918E0870055F632 /* msopenh264.framework */; settings = {ATTRIBUTES = (CodeSignOnCopy, RemoveHeadersOnCopy, ); }; };
+		52BD5C082918E1120055F632 /* mscodec2.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 52BD5B4D2918E0870055F632 /* mscodec2.framework */; };
+		52BD5C092918E1120055F632 /* mscodec2.framework in Embed Frameworks */ = {isa = PBXBuildFile; fileRef = 52BD5B4D2918E0870055F632 /* mscodec2.framework */; settings = {ATTRIBUTES = (CodeSignOnCopy, RemoveHeadersOnCopy, ); }; };
+		52BD5C0A2918E1140055F632 /* bctoolbox-ios.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 52BD5B522918E0870055F632 /* bctoolbox-ios.framework */; };
+		52BD5C0B2918E1140055F632 /* bctoolbox-ios.framework in Embed Frameworks */ = {isa = PBXBuildFile; fileRef = 52BD5B522918E0870055F632 /* bctoolbox-ios.framework */; settings = {ATTRIBUTES = (CodeSignOnCopy, RemoveHeadersOnCopy, ); }; };
+		52BD5C0C2918E1160055F632 /* bctoolbox-tester.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 52BD5B4A2918E0870055F632 /* bctoolbox-tester.framework */; };
+		52BD5C0D2918E1170055F632 /* bctoolbox-tester.framework in Embed Frameworks */ = {isa = PBXBuildFile; fileRef = 52BD5B4A2918E0870055F632 /* bctoolbox-tester.framework */; settings = {ATTRIBUTES = (CodeSignOnCopy, RemoveHeadersOnCopy, ); }; };
+		52BD5C0E2918E1190055F632 /* bctoolbox.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 52BD5B452918E0870055F632 /* bctoolbox.framework */; };
+		52BD5C0F2918E1190055F632 /* bctoolbox.framework in Embed Frameworks */ = {isa = PBXBuildFile; fileRef = 52BD5B452918E0870055F632 /* bctoolbox.framework */; settings = {ATTRIBUTES = (CodeSignOnCopy, RemoveHeadersOnCopy, ); }; };
+		52BD5C102918E11B0055F632 /* belcard.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 52BD5B502918E0870055F632 /* belcard.framework */; };
+		52BD5C112918E11C0055F632 /* belcard.framework in Embed Frameworks */ = {isa = PBXBuildFile; fileRef = 52BD5B502918E0870055F632 /* belcard.framework */; settings = {ATTRIBUTES = (CodeSignOnCopy, RemoveHeadersOnCopy, ); }; };
+		52BD5C122918E11E0055F632 /* belle-sip.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 52BD5B482918E0870055F632 /* belle-sip.framework */; };
+		52BD5C132918E11F0055F632 /* belle-sip.framework in Embed Frameworks */ = {isa = PBXBuildFile; fileRef = 52BD5B482918E0870055F632 /* belle-sip.framework */; settings = {ATTRIBUTES = (CodeSignOnCopy, RemoveHeadersOnCopy, ); }; };
+		52BD5C142918E1200055F632 /* belr.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 52BD5B422918E0870055F632 /* belr.framework */; };
+		52BD5C152918E1210055F632 /* belr.framework in Embed Frameworks */ = {isa = PBXBuildFile; fileRef = 52BD5B422918E0870055F632 /* belr.framework */; settings = {ATTRIBUTES = (CodeSignOnCopy, RemoveHeadersOnCopy, ); }; };
+		52BD5C162918E1230055F632 /* lime.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 52BD5B4F2918E0870055F632 /* lime.framework */; };
+		52BD5C172918E1230055F632 /* lime.framework in Embed Frameworks */ = {isa = PBXBuildFile; fileRef = 52BD5B4F2918E0870055F632 /* lime.framework */; settings = {ATTRIBUTES = (CodeSignOnCopy, RemoveHeadersOnCopy, ); }; };
+		52BD5C182918E1260055F632 /* limetester.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 52BD5B4C2918E0870055F632 /* limetester.framework */; };
+		52BD5C192918E1260055F632 /* limetester.framework in Embed Frameworks */ = {isa = PBXBuildFile; fileRef = 52BD5B4C2918E0870055F632 /* limetester.framework */; settings = {ATTRIBUTES = (CodeSignOnCopy, RemoveHeadersOnCopy, ); }; };
+		52BD5C1A2918E1280055F632 /* linphone.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 52BD5B532918E0870055F632 /* linphone.framework */; };
+		52BD5C1B2918E1290055F632 /* linphone.framework in Embed Frameworks */ = {isa = PBXBuildFile; fileRef = 52BD5B532918E0870055F632 /* linphone.framework */; settings = {ATTRIBUTES = (CodeSignOnCopy, RemoveHeadersOnCopy, ); }; };
+		52BD5C1C2918E12B0055F632 /* linphonetester.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 52BD5B492918E0870055F632 /* linphonetester.framework */; };
+		52BD5C1D2918E12B0055F632 /* linphonetester.framework in Embed Frameworks */ = {isa = PBXBuildFile; fileRef = 52BD5B492918E0870055F632 /* linphonetester.framework */; settings = {ATTRIBUTES = (CodeSignOnCopy, RemoveHeadersOnCopy, ); }; };
+		52BD5C1E2918E12E0055F632 /* mediastreamer2.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 52BD5B432918E0870055F632 /* mediastreamer2.framework */; };
+		52BD5C1F2918E12E0055F632 /* mediastreamer2.framework in Embed Frameworks */ = {isa = PBXBuildFile; fileRef = 52BD5B432918E0870055F632 /* mediastreamer2.framework */; settings = {ATTRIBUTES = (CodeSignOnCopy, RemoveHeadersOnCopy, ); }; };
+		52BD5C202918E1310055F632 /* msamr.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 52BD5B472918E0870055F632 /* msamr.framework */; };
+		52BD5C212918E1320055F632 /* msamr.framework in Embed Frameworks */ = {isa = PBXBuildFile; fileRef = 52BD5B472918E0870055F632 /* msamr.framework */; settings = {ATTRIBUTES = (CodeSignOnCopy, RemoveHeadersOnCopy, ); }; };
 		52F5D74828EC4260003719E8 /* CansConnect.swift in Sources */ = {isa = PBXBuildFile; fileRef = 52F5D74728EC4260003719E8 /* CansConnect.swift */; };
 /* End PBXBuildFile section */
 
@@ -51,6 +231,34 @@
 			name = "Embed Frameworks";
 			runOnlyForDeploymentPostprocessing = 0;
 		};
+		52BD5BFF2918E0F70055F632 /* Embed Frameworks */ = {
+			isa = PBXCopyFilesBuildPhase;
+			buildActionMask = 2147483647;
+			dstPath = "";
+			dstSubfolderSpec = 10;
+			files = (
+				52BD5BFE2918E0F70055F632 /* msx264.framework in Embed Frameworks */,
+				52BD5C0B2918E1140055F632 /* bctoolbox-ios.framework in Embed Frameworks */,
+				52BD5C0F2918E1190055F632 /* bctoolbox.framework in Embed Frameworks */,
+				52BD5C132918E11F0055F632 /* belle-sip.framework in Embed Frameworks */,
+				52BD5C032918E10B0055F632 /* mswebrtc.framework in Embed Frameworks */,
+				52BD5C212918E1320055F632 /* msamr.framework in Embed Frameworks */,
+				52BD5C172918E1230055F632 /* lime.framework in Embed Frameworks */,
+				52BD5C1F2918E12E0055F632 /* mediastreamer2.framework in Embed Frameworks */,
+				52BD5C1B2918E1290055F632 /* linphone.framework in Embed Frameworks */,
+				52BD5C112918E11C0055F632 /* belcard.framework in Embed Frameworks */,
+				52BD5C1D2918E12B0055F632 /* linphonetester.framework in Embed Frameworks */,
+				52BD5C012918E1090055F632 /* ortp.framework in Embed Frameworks */,
+				52BD5C152918E1210055F632 /* belr.framework in Embed Frameworks */,
+				52BD5C072918E1100055F632 /* msopenh264.framework in Embed Frameworks */,
+				52BD5C092918E1120055F632 /* mscodec2.framework in Embed Frameworks */,
+				52BD5C0D2918E1170055F632 /* bctoolbox-tester.framework in Embed Frameworks */,
+				52BD5C192918E1260055F632 /* limetester.framework in Embed Frameworks */,
+				52BD5C052918E10D0055F632 /* mssilk.framework in Embed Frameworks */,
+			);
+			name = "Embed Frameworks";
+			runOnlyForDeploymentPostprocessing = 0;
+		};
 /* End PBXCopyFilesBuildPhase section */
 
 /* Begin PBXFileReference section */
@@ -67,6 +275,168 @@
 		52BD59382918DB5E0055F632 /* Assets.xcassets */ = {isa = PBXFileReference; lastKnownFileType = folder.assetcatalog; path = Assets.xcassets; sourceTree = "<group>"; };
 		52BD593B2918DB5E0055F632 /* Base */ = {isa = PBXFileReference; lastKnownFileType = file.storyboard; name = Base; path = Base.lproj/LaunchScreen.storyboard; sourceTree = "<group>"; };
 		52BD593D2918DB5F0055F632 /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = Info.plist; sourceTree = "<group>"; };
+		52BD5AA52918E0870055F632 /* deploy.sh */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text.script.sh; path = deploy.sh; sourceTree = "<group>"; };
+		52BD5AA92918E0870055F632 /* nowebcamVGA.jpg */ = {isa = PBXFileReference; lastKnownFileType = image.jpeg; path = nowebcamVGA.jpg; sourceTree = "<group>"; };
+		52BD5AAA2918E0870055F632 /* nowebcamCIF.jpg */ = {isa = PBXFileReference; lastKnownFileType = image.jpeg; path = nowebcamCIF.jpg; sourceTree = "<group>"; };
+		52BD5AAB2918E0870055F632 /* linphonesiteqr_captured.jpg */ = {isa = PBXFileReference; lastKnownFileType = image.jpeg; path = linphonesiteqr_captured.jpg; sourceTree = "<group>"; };
+		52BD5AAC2918E0870055F632 /* linphonesiteqr.jpg */ = {isa = PBXFileReference; lastKnownFileType = image.jpeg; path = linphonesiteqr.jpg; sourceTree = "<group>"; };
+		52BD5AAD2918E0870055F632 /* linphone.svg */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text.xml; path = linphone.svg; sourceTree = "<group>"; };
+		52BD5AAE2918E0870055F632 /* local_tester_hosts */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text; path = local_tester_hosts; sourceTree = "<group>"; };
+		52BD5AB02918E0870055F632 /* thousand_vcards.vcf */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text; path = thousand_vcards.vcf; sourceTree = "<group>"; };
+		52BD5AB12918E0870055F632 /* vcards.vcf */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text; path = vcards.vcf; sourceTree = "<group>"; };
+		52BD5AB42918E0870055F632 /* agent.pem */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text; path = agent.pem; sourceTree = "<group>"; };
+		52BD5AB52918E0870055F632 /* openssl-altname.cnf */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text; path = "openssl-altname.cnf"; sourceTree = "<group>"; };
+		52BD5AB62918E0870055F632 /* cafile.pem */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text; path = cafile.pem; sourceTree = "<group>"; };
+		52BD5AB82918E0870055F632 /* openssl-cn.cnf */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text; path = "openssl-cn.cnf"; sourceTree = "<group>"; };
+		52BD5ABC2918E0870055F632 /* user1_cert.pem */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text; path = user1_cert.pem; sourceTree = "<group>"; };
+		52BD5ABD2918E0870055F632 /* cert2-signed-by-other-ca.pem */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text; path = "cert2-signed-by-other-ca.pem"; sourceTree = "<group>"; };
+		52BD5ABE2918E0870055F632 /* user2_CN_key.pem */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text; path = user2_CN_key.pem; sourceTree = "<group>"; };
+		52BD5ABF2918E0870055F632 /* user2_revoked_cert.pem */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text; path = user2_revoked_cert.pem; sourceTree = "<group>"; };
+		52BD5AC02918E0870055F632 /* user2_revoked_key.pem */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text; path = user2_revoked_key.pem; sourceTree = "<group>"; };
+		52BD5AC12918E0870055F632 /* cert3.pem */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text; path = cert3.pem; sourceTree = "<group>"; };
+		52BD5AC22918E0870055F632 /* cert2.pem */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text; path = cert2.pem; sourceTree = "<group>"; };
+		52BD5AC32918E0870055F632 /* user1_multiple_aliases_key.pem */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text; path = user1_multiple_aliases_key.pem; sourceTree = "<group>"; };
+		52BD5AC42918E0870055F632 /* key.pem */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text; path = key.pem; sourceTree = "<group>"; };
+		52BD5AC52918E0870055F632 /* key3.pem */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text; path = key3.pem; sourceTree = "<group>"; };
+		52BD5AC62918E0870055F632 /* key2.pem */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text; path = key2.pem; sourceTree = "<group>"; };
+		52BD5AC72918E0870055F632 /* cert.pem */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text; path = cert.pem; sourceTree = "<group>"; };
+		52BD5AC82918E0870055F632 /* user2_CN_cert.pem */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text; path = user2_CN_cert.pem; sourceTree = "<group>"; };
+		52BD5AC92918E0870055F632 /* user1_key.pem */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text; path = user1_key.pem; sourceTree = "<group>"; };
+		52BD5ACA2918E0870055F632 /* user2_cert.pem */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text; path = user2_cert.pem; sourceTree = "<group>"; };
+		52BD5ACB2918E0870055F632 /* user2_key.pem */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text; path = user2_key.pem; sourceTree = "<group>"; };
+		52BD5ACC2918E0870055F632 /* key2-signed-by-other-ca.pem */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text; path = "key2-signed-by-other-ca.pem"; sourceTree = "<group>"; };
+		52BD5ACD2918E0870055F632 /* user1_multiple_aliases_cert.pem */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text; path = user1_multiple_aliases_cert.pem; sourceTree = "<group>"; };
+		52BD5ACF2918E0870055F632 /* hello8000.mkv */ = {isa = PBXFileReference; lastKnownFileType = file; path = hello8000.mkv; sourceTree = "<group>"; };
+		52BD5AD02918E0870055F632 /* hello44100.wav */ = {isa = PBXFileReference; lastKnownFileType = audio.wav; path = hello44100.wav; sourceTree = "<group>"; };
+		52BD5AD12918E0870055F632 /* vrroom.wav */ = {isa = PBXFileReference; lastKnownFileType = audio.wav; path = vrroom.wav; sourceTree = "<group>"; };
+		52BD5AD22918E0870055F632 /* ahbahouaismaisbon.wav */ = {isa = PBXFileReference; lastKnownFileType = audio.wav; path = ahbahouaismaisbon.wav; sourceTree = "<group>"; };
+		52BD5AD32918E0870055F632 /* hello8000.wav */ = {isa = PBXFileReference; lastKnownFileType = audio.wav; path = hello8000.wav; sourceTree = "<group>"; };
+		52BD5AD42918E0870055F632 /* sintel_trailer_opus_h264.mkv */ = {isa = PBXFileReference; lastKnownFileType = file; path = sintel_trailer_opus_h264.mkv; sourceTree = "<group>"; };
+		52BD5AD52918E0870055F632 /* sintel_trailer_opus_vp8.mkv */ = {isa = PBXFileReference; lastKnownFileType = file; path = sintel_trailer_opus_vp8.mkv; sourceTree = "<group>"; };
+		52BD5AD62918E0870055F632 /* continuous_48000_stereo.wav */ = {isa = PBXFileReference; lastKnownFileType = audio.wav; path = continuous_48000_stereo.wav; sourceTree = "<group>"; };
+		52BD5AD72918E0870055F632 /* oldphone.wav */ = {isa = PBXFileReference; lastKnownFileType = audio.wav; path = oldphone.wav; sourceTree = "<group>"; };
+		52BD5AD82918E0870055F632 /* ringback.wav */ = {isa = PBXFileReference; lastKnownFileType = audio.wav; path = ringback.wav; sourceTree = "<group>"; };
+		52BD5AD92918E0870055F632 /* hello8000_mkv_ref.wav */ = {isa = PBXFileReference; lastKnownFileType = audio.wav; path = hello8000_mkv_ref.wav; sourceTree = "<group>"; };
+		52BD5ADA2918E0870055F632 /* sintel_trailer_pcmu_h264.mkv */ = {isa = PBXFileReference; lastKnownFileType = file; path = sintel_trailer_pcmu_h264.mkv; sourceTree = "<group>"; };
+		52BD5ADB2918E0870055F632 /* tester_hosts */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text; path = tester_hosts; sourceTree = "<group>"; };
+		52BD5ADD2918E0870055F632 /* messages.db */ = {isa = PBXFileReference; lastKnownFileType = file; path = messages.db; sourceTree = "<group>"; };
+		52BD5ADE2918E0870055F632 /* linphone.db */ = {isa = PBXFileReference; lastKnownFileType = file; path = linphone.db; sourceTree = "<group>"; };
+		52BD5ADF2918E0870055F632 /* friends.db */ = {isa = PBXFileReference; lastKnownFileType = file; path = friends.db; sourceTree = "<group>"; };
+		52BD5AE02918E0870055F632 /* chatrooms.db */ = {isa = PBXFileReference; lastKnownFileType = file; path = chatrooms.db; sourceTree = "<group>"; };
+		52BD5AE22918E0870055F632 /* call_with_transfer_incoming_ringing_call.xml */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text.xml; path = call_with_transfer_incoming_ringing_call.xml; sourceTree = "<group>"; };
+		52BD5AE32918E0870055F632 /* sip_update_within_icoming_reinvite_with_no_sdp.xml */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text.xml; path = sip_update_within_icoming_reinvite_with_no_sdp.xml; sourceTree = "<group>"; };
+		52BD5AE42918E0870055F632 /* call_with_multiple_audio_mline_in_sdp.xml */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text.xml; path = call_with_multiple_audio_mline_in_sdp.xml; sourceTree = "<group>"; };
+		52BD5AE52918E0870055F632 /* call_with_video_mline_before_audio_in_sdp.xml */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text.xml; path = call_with_video_mline_before_audio_in_sdp.xml; sourceTree = "<group>"; };
+		52BD5AE62918E0870055F632 /* call_invite_200ok_without_contact_header.xml */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text.xml; path = call_invite_200ok_without_contact_header.xml; sourceTree = "<group>"; };
+		52BD5AE72918E0870055F632 /* call_with_audio_mline_before_video_in_sdp.xml */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text.xml; path = call_with_audio_mline_before_video_in_sdp.xml; sourceTree = "<group>"; };
+		52BD5AE82918E0870055F632 /* call_with_multiple_video_mline_in_sdp.xml */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text.xml; path = call_with_multiple_video_mline_in_sdp.xml; sourceTree = "<group>"; };
+		52BD5AEA2918E0870055F632 /* marie_os_defined_rtp_ports_rc */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text; path = marie_os_defined_rtp_ports_rc; sourceTree = "<group>"; };
+		52BD5AEB2918E0870055F632 /* marie_dependent_proxy_rc */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text; path = marie_dependent_proxy_rc; sourceTree = "<group>"; };
+		52BD5AEC2918E0870055F632 /* pauline_zrtp_aes256_rc */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text; path = pauline_zrtp_aes256_rc; sourceTree = "<group>"; };
+		52BD5AED2918E0870055F632 /* marie_remote_default_values_rc */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text; path = marie_remote_default_values_rc; sourceTree = "<group>"; };
+		52BD5AEE2918E0870055F632 /* michelle_rc */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text; path = michelle_rc; sourceTree = "<group>"; };
+		52BD5AEF2918E0870055F632 /* marie_remote_localfile_android_rc */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text; path = marie_remote_localfile_android_rc; sourceTree = "<group>"; };
+		52BD5AF02918E0870055F632 /* claire_sips_rc */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text; path = claire_sips_rc; sourceTree = "<group>"; };
+		52BD5AF12918E0870055F632 /* empty_rc */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text; path = empty_rc; sourceTree = "<group>"; };
+		52BD5AF22918E0870055F632 /* pauline_well_known_port_rc */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text; path = pauline_well_known_port_rc; sourceTree = "<group>"; };
+		52BD5AF32918E0870055F632 /* lime_x3dh_xml_rc */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text.xml; path = lime_x3dh_xml_rc; sourceTree = "<group>"; };
+		52BD5AF42918E0870055F632 /* arthur_rc */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text; path = arthur_rc; sourceTree = "<group>"; };
+		52BD5AF52918E0870055F632 /* groupchat_rc */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text; path = groupchat_rc; sourceTree = "<group>"; };
+		52BD5AF62918E0870055F632 /* marie_zrtp_ecdh448_rc */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text; path = marie_zrtp_ecdh448_rc; sourceTree = "<group>"; };
+		52BD5AF72918E0870055F632 /* zero_length_params_rc */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text; path = zero_length_params_rc; sourceTree = "<group>"; };
+		52BD5AF82918E0870055F632 /* marie_zrtp_srtpsuite_aes256_rc */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text; path = marie_zrtp_srtpsuite_aes256_rc; sourceTree = "<group>"; };
+		52BD5AF92918E0870055F632 /* marie_dtls_srtp_immediate_rc */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text; path = marie_dtls_srtp_immediate_rc; sourceTree = "<group>"; };
+		52BD5AFA2918E0870055F632 /* marie_remote_localfile2_rc */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text.xml; path = marie_remote_localfile2_rc; sourceTree = "<group>"; };
+		52BD5AFB2918E0870055F632 /* marie_remote_localfile_win10_rc */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text; path = marie_remote_localfile_win10_rc; sourceTree = "<group>"; };
+		52BD5AFC2918E0870055F632 /* stun_rc */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text; path = stun_rc; sourceTree = "<group>"; };
+		52BD5AFD2918E0870055F632 /* pauline_tcp_rc */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text; path = pauline_tcp_rc; sourceTree = "<group>"; };
+		52BD5AFE2918E0870055F632 /* marie_dual_proxy_2_rc */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text; path = marie_dual_proxy_2_rc; sourceTree = "<group>"; };
+		52BD5AFF2918E0870055F632 /* marie_h264_rc */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text; path = marie_h264_rc; sourceTree = "<group>"; };
+		52BD5B002918E0870055F632 /* marie_lime_x3dh_no_server_rc */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text; path = marie_lime_x3dh_no_server_rc; sourceTree = "<group>"; };
+		52BD5B012918E0870055F632 /* pauline_rtp_port_range_rc */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text; path = pauline_rtp_port_range_rc; sourceTree = "<group>"; };
+		52BD5B022918E0870055F632 /* marie_remote_404_rc */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text; path = marie_remote_404_rc; sourceTree = "<group>"; };
+		52BD5B032918E0870055F632 /* marie_session_timers_rc */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text; path = marie_session_timers_rc; sourceTree = "<group>"; };
+		52BD5B042918E0870055F632 /* marie_rtp_port_range_rc */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text; path = marie_rtp_port_range_rc; sourceTree = "<group>"; };
+		52BD5B052918E0870055F632 /* pauline_zrtp_ecdh448_rc */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text; path = pauline_zrtp_ecdh448_rc; sourceTree = "<group>"; };
+		52BD5B062918E0870055F632 /* pauline_os_defined_rtp_ports_rc */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text; path = pauline_os_defined_rtp_ports_rc; sourceTree = "<group>"; };
+		52BD5B072918E0870055F632 /* pauline_rc */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text; path = pauline_rc; sourceTree = "<group>"; };
+		52BD5B082918E0870055F632 /* marie_remote_https_rc */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text; path = marie_remote_https_rc; sourceTree = "<group>"; };
+		52BD5B092918E0870055F632 /* groupchat_lime_x3dh_rc */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text; path = groupchat_lime_x3dh_rc; sourceTree = "<group>"; };
+		52BD5B0A2918E0870055F632 /* pauline_as_friend_rc */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text; path = pauline_as_friend_rc; sourceTree = "<group>"; };
+		52BD5B0B2918E0870055F632 /* marie_remote_localfile_rc */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text; path = marie_remote_localfile_rc; sourceTree = "<group>"; };
+		52BD5B0C2918E0870055F632 /* pauline_zrtp_srtpsuite_aes256_rc */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text; path = pauline_zrtp_srtpsuite_aes256_rc; sourceTree = "<group>"; };
+		52BD5B0D2918E0870055F632 /* pauline_sips_rc */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text; path = pauline_sips_rc; sourceTree = "<group>"; };
+		52BD5B0E2918E0870055F632 /* laure_call_logs_rc */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text; path = laure_call_logs_rc; sourceTree = "<group>"; };
+		52BD5B0F2918E0870055F632 /* pauline_external_rc */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text; path = pauline_external_rc; sourceTree = "<group>"; };
+		52BD5B102918E0870055F632 /* invalid_friends_xml */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text.xml; path = invalid_friends_xml; sourceTree = "<group>"; };
+		52BD5B112918E0870055F632 /* marie_early_rc */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text; path = marie_early_rc; sourceTree = "<group>"; };
+		52BD5B122918E0870055F632 /* marie2_rc */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text; path = marie2_rc; sourceTree = "<group>"; };
+		52BD5B132918E0870055F632 /* friends_rc */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text; path = friends_rc; sourceTree = "<group>"; };
+		52BD5B142918E0870055F632 /* pauline_rc_rtcp_xr */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text; path = pauline_rc_rtcp_xr; sourceTree = "<group>"; };
+		52BD5B152918E0870055F632 /* marie_rc_rtcp_xr */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text; path = marie_rc_rtcp_xr; sourceTree = "<group>"; };
+		52BD5B162918E0870055F632 /* pauline_tunnel_verify_server_certificate_rc */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text; path = pauline_tunnel_verify_server_certificate_rc; sourceTree = "<group>"; };
+		52BD5B172918E0870055F632 /* chloe_rc */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text; path = chloe_rc; sourceTree = "<group>"; };
+		52BD5B182918E0870055F632 /* account_creator_flexiapi_rc */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text; path = account_creator_flexiapi_rc; sourceTree = "<group>"; };
+		52BD5B192918E0870055F632 /* marie_zrtp_b256_rc */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text; path = marie_zrtp_b256_rc; sourceTree = "<group>"; };
+		52BD5B1A2918E0870055F632 /* marie_rc */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text; path = marie_rc; sourceTree = "<group>"; };
+		52BD5B1B2918E0870055F632 /* pauline_tls_client_rc */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text; path = pauline_tls_client_rc; sourceTree = "<group>"; };
+		52BD5B1C2918E0870055F632 /* pauline_zrtp_b256_rc */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text; path = pauline_zrtp_b256_rc; sourceTree = "<group>"; };
+		52BD5B1D2918E0870055F632 /* marie_dual_proxy_rc */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text; path = marie_dual_proxy_rc; sourceTree = "<group>"; };
+		52BD5B1E2918E0870055F632 /* invalid_friends_rc */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text; path = invalid_friends_rc; sourceTree = "<group>"; };
+		52BD5B1F2918E0870055F632 /* marie_sips_rc */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text; path = marie_sips_rc; sourceTree = "<group>"; };
+		52BD5B202918E0870055F632 /* pauline_nat64_rc */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text; path = pauline_nat64_rc; sourceTree = "<group>"; };
+		52BD5B212918E0870055F632 /* marie_well_known_port_rc */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text; path = marie_well_known_port_rc; sourceTree = "<group>"; };
+		52BD5B222918E0870055F632 /* pauline_zrtp_ecdh255_rc */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text; path = pauline_zrtp_ecdh255_rc; sourceTree = "<group>"; };
+		52BD5B232918E0870055F632 /* marie_remote_invalid_rc */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text; path = marie_remote_invalid_rc; sourceTree = "<group>"; };
+		52BD5B242918E0870055F632 /* remote_zero_length_params_rc */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text.xml; path = remote_zero_length_params_rc; sourceTree = "<group>"; };
+		52BD5B252918E0870055F632 /* chloe_lime_x3dh_rc */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text; path = chloe_lime_x3dh_rc; sourceTree = "<group>"; };
+		52BD5B262918E0870055F632 /* carddav_rc */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text; path = carddav_rc; sourceTree = "<group>"; };
+		52BD5B272918E0870055F632 /* marie_remote_rc */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text; path = marie_remote_rc; sourceTree = "<group>"; };
+		52BD5B282918E0870055F632 /* claire_rc */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text; path = claire_rc; sourceTree = "<group>"; };
+		52BD5B292918E0870055F632 /* marie_transient_remote_rc */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text; path = marie_transient_remote_rc; sourceTree = "<group>"; };
+		52BD5B2A2918E0870055F632 /* pauline_lime_x3dh_rc */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text; path = pauline_lime_x3dh_rc; sourceTree = "<group>"; };
+		52BD5B2B2918E0870055F632 /* marie_bodyless_rc */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text; path = marie_bodyless_rc; sourceTree = "<group>"; };
+		52BD5B2C2918E0870055F632 /* marie_remote_invalid_uri_rc */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text; path = marie_remote_invalid_uri_rc; sourceTree = "<group>"; };
+		52BD5B2D2918E0870055F632 /* marie_lime_x3dh_rc */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text; path = marie_lime_x3dh_rc; sourceTree = "<group>"; };
+		52BD5B2E2918E0870055F632 /* laure_tcp_rc */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text; path = laure_tcp_rc; sourceTree = "<group>"; };
+		52BD5B2F2918E0870055F632 /* pauline_wild_rc */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text; path = pauline_wild_rc; sourceTree = "<group>"; };
+		52BD5B302918E0870055F632 /* assistant_create.rc */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text.xml; path = assistant_create.rc; sourceTree = "<group>"; };
+		52BD5B312918E0870055F632 /* pauline_dtls_srtp_immediate_rc */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text; path = pauline_dtls_srtp_immediate_rc; sourceTree = "<group>"; };
+		52BD5B322918E0870055F632 /* pauline_alt_rc */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text; path = pauline_alt_rc; sourceTree = "<group>"; };
+		52BD5B332918E0870055F632 /* marie_nat64_rc */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text; path = marie_nat64_rc; sourceTree = "<group>"; };
+		52BD5B342918E0870055F632 /* laure_rc_udp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text; path = laure_rc_udp; sourceTree = "<group>"; };
+		52BD5B352918E0870055F632 /* marie_quality_reporting_rc */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text; path = marie_quality_reporting_rc; sourceTree = "<group>"; };
+		52BD5B362918E0870055F632 /* conference_focus_rc */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text; path = conference_focus_rc; sourceTree = "<group>"; };
+		52BD5B372918E0870055F632 /* pauline_h264_rc */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text; path = pauline_h264_rc; sourceTree = "<group>"; };
+		52BD5B382918E0870055F632 /* marie_zrtp_aes256_rc */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text; path = marie_zrtp_aes256_rc; sourceTree = "<group>"; };
+		52BD5B392918E0870055F632 /* michelle_rc_udp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text; path = michelle_rc_udp; sourceTree = "<group>"; };
+		52BD5B3A2918E0870055F632 /* multi_account_rc */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text; path = multi_account_rc; sourceTree = "<group>"; };
+		52BD5B3B2918E0870055F632 /* marie_v4proxy_rc */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text; path = marie_v4proxy_rc; sourceTree = "<group>"; };
+		52BD5B3C2918E0870055F632 /* account_creator_rc */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text; path = account_creator_rc; sourceTree = "<group>"; };
+		52BD5B3D2918E0870055F632 /* pauline_v4proxy_rc */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text; path = pauline_v4proxy_rc; sourceTree = "<group>"; };
+		52BD5B3E2918E0870055F632 /* marie_zrtp_ecdh255_rc */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text; path = marie_zrtp_ecdh255_rc; sourceTree = "<group>"; };
+		52BD5B3F2918E0870055F632 /* marie_pauline_lime_x3dh_rc */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text; path = marie_pauline_lime_x3dh_rc; sourceTree = "<group>"; };
+		52BD5B402918E0870055F632 /* laure_lime_x3dh_rc */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text; path = laure_lime_x3dh_rc; sourceTree = "<group>"; };
+		52BD5B422918E0870055F632 /* belr.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; path = belr.framework; sourceTree = "<group>"; };
+		52BD5B432918E0870055F632 /* mediastreamer2.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; path = mediastreamer2.framework; sourceTree = "<group>"; };
+		52BD5B442918E0870055F632 /* msopenh264.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; path = msopenh264.framework; sourceTree = "<group>"; };
+		52BD5B452918E0870055F632 /* bctoolbox.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; path = bctoolbox.framework; sourceTree = "<group>"; };
+		52BD5B462918E0870055F632 /* mswebrtc.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; path = mswebrtc.framework; sourceTree = "<group>"; };
+		52BD5B472918E0870055F632 /* msamr.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; path = msamr.framework; sourceTree = "<group>"; };
+		52BD5B482918E0870055F632 /* belle-sip.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; path = "belle-sip.framework"; sourceTree = "<group>"; };
+		52BD5B492918E0870055F632 /* linphonetester.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; path = linphonetester.framework; sourceTree = "<group>"; };
+		52BD5B4A2918E0870055F632 /* bctoolbox-tester.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; path = "bctoolbox-tester.framework"; sourceTree = "<group>"; };
+		52BD5B4B2918E0870055F632 /* ortp.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; path = ortp.framework; sourceTree = "<group>"; };
+		52BD5B4C2918E0870055F632 /* limetester.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; path = limetester.framework; sourceTree = "<group>"; };
+		52BD5B4D2918E0870055F632 /* mscodec2.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; path = mscodec2.framework; sourceTree = "<group>"; };
+		52BD5B4E2918E0870055F632 /* mssilk.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; path = mssilk.framework; sourceTree = "<group>"; };
+		52BD5B4F2918E0870055F632 /* lime.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; path = lime.framework; sourceTree = "<group>"; };
+		52BD5B502918E0870055F632 /* belcard.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; path = belcard.framework; sourceTree = "<group>"; };
+		52BD5B512918E0870055F632 /* msx264.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; path = msx264.framework; sourceTree = "<group>"; };
+		52BD5B522918E0870055F632 /* bctoolbox-ios.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; path = "bctoolbox-ios.framework"; sourceTree = "<group>"; };
+		52BD5B532918E0870055F632 /* linphone.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; path = linphone.framework; sourceTree = "<group>"; };
+		52BD5B562918E0870055F632 /* LinphoneWrapper.cs */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text; path = LinphoneWrapper.cs; sourceTree = "<group>"; };
+		52BD5B582918E0870055F632 /* LinphoneWrapper.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = LinphoneWrapper.swift; sourceTree = "<group>"; };
 		52F5D74728EC4260003719E8 /* CansConnect.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = CansConnect.swift; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
@@ -75,6 +445,24 @@
 			isa = PBXFrameworksBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				52BD5C102918E11B0055F632 /* belcard.framework in Frameworks */,
+				52BD5C142918E1200055F632 /* belr.framework in Frameworks */,
+				52BD5C122918E11E0055F632 /* belle-sip.framework in Frameworks */,
+				52BD5C042918E10D0055F632 /* mssilk.framework in Frameworks */,
+				52BD5C182918E1260055F632 /* limetester.framework in Frameworks */,
+				52BD5C202918E1310055F632 /* msamr.framework in Frameworks */,
+				52BD5C062918E10F0055F632 /* msopenh264.framework in Frameworks */,
+				52BD5C1C2918E12B0055F632 /* linphonetester.framework in Frameworks */,
+				52BD5C022918E10B0055F632 /* mswebrtc.framework in Frameworks */,
+				52BD5C1A2918E1280055F632 /* linphone.framework in Frameworks */,
+				52BD5C1E2918E12E0055F632 /* mediastreamer2.framework in Frameworks */,
+				52BD5C162918E1230055F632 /* lime.framework in Frameworks */,
+				52BD5C082918E1120055F632 /* mscodec2.framework in Frameworks */,
+				52BD5C0C2918E1160055F632 /* bctoolbox-tester.framework in Frameworks */,
+				52BD5C0E2918E1190055F632 /* bctoolbox.framework in Frameworks */,
+				52BD5C002918E1090055F632 /* ortp.framework in Frameworks */,
+				52BD5BFD2918E0F70055F632 /* msx264.framework in Frameworks */,
+				52BD5C0A2918E1140055F632 /* bctoolbox-ios.framework in Frameworks */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -121,6 +509,7 @@
 		2B4C0B2C28DC6B1600F35838 /* canscloud-ios-framework */ = {
 			isa = PBXGroup;
 			children = (
+				52BD5AA22918E0870055F632 /* linphone-sdk */,
 				52F5D74728EC4260003719E8 /* CansConnect.swift */,
 				2B4C0B2D28DC6B1600F35838 /* canscloud_ios_framework.h */,
 				2B4C0B2E28DC6B1600F35838 /* canscloud_ios_framework.docc */,
@@ -157,6 +546,319 @@
 			name = Frameworks;
 			sourceTree = "<group>";
 		};
+		52BD5AA22918E0870055F632 /* linphone-sdk */ = {
+			isa = PBXGroup;
+			children = (
+				52BD5AA32918E0870055F632 /* apple-darwin */,
+			);
+			path = "linphone-sdk";
+			sourceTree = "<group>";
+		};
+		52BD5AA32918E0870055F632 /* apple-darwin */ = {
+			isa = PBXGroup;
+			children = (
+				52BD5AA42918E0870055F632 /* Tools */,
+				52BD5AA62918E0870055F632 /* Resources */,
+				52BD5B412918E0870055F632 /* Frameworks */,
+				52BD5B542918E0870055F632 /* share */,
+			);
+			path = "apple-darwin";
+			sourceTree = "<group>";
+		};
+		52BD5AA42918E0870055F632 /* Tools */ = {
+			isa = PBXGroup;
+			children = (
+				52BD5AA52918E0870055F632 /* deploy.sh */,
+			);
+			path = Tools;
+			sourceTree = "<group>";
+		};
+		52BD5AA62918E0870055F632 /* Resources */ = {
+			isa = PBXGroup;
+			children = (
+				52BD5AA72918E0870055F632 /* liblinphone_tester */,
+			);
+			path = Resources;
+			sourceTree = "<group>";
+		};
+		52BD5AA72918E0870055F632 /* liblinphone_tester */ = {
+			isa = PBXGroup;
+			children = (
+				52BD5AA82918E0870055F632 /* images */,
+				52BD5AAE2918E0870055F632 /* local_tester_hosts */,
+				52BD5AAF2918E0870055F632 /* vcards */,
+				52BD5AB22918E0870055F632 /* certificates */,
+				52BD5ACE2918E0870055F632 /* sounds */,
+				52BD5ADB2918E0870055F632 /* tester_hosts */,
+				52BD5ADC2918E0870055F632 /* db */,
+				52BD5AE12918E0870055F632 /* sipp */,
+				52BD5AE92918E0870055F632 /* rcfiles */,
+			);
+			path = liblinphone_tester;
+			sourceTree = "<group>";
+		};
+		52BD5AA82918E0870055F632 /* images */ = {
+			isa = PBXGroup;
+			children = (
+				52BD5AA92918E0870055F632 /* nowebcamVGA.jpg */,
+				52BD5AAA2918E0870055F632 /* nowebcamCIF.jpg */,
+				52BD5AAB2918E0870055F632 /* linphonesiteqr_captured.jpg */,
+				52BD5AAC2918E0870055F632 /* linphonesiteqr.jpg */,
+				52BD5AAD2918E0870055F632 /* linphone.svg */,
+			);
+			path = images;
+			sourceTree = "<group>";
+		};
+		52BD5AAF2918E0870055F632 /* vcards */ = {
+			isa = PBXGroup;
+			children = (
+				52BD5AB02918E0870055F632 /* thousand_vcards.vcf */,
+				52BD5AB12918E0870055F632 /* vcards.vcf */,
+			);
+			path = vcards;
+			sourceTree = "<group>";
+		};
+		52BD5AB22918E0870055F632 /* certificates */ = {
+			isa = PBXGroup;
+			children = (
+				52BD5AB32918E0870055F632 /* altname */,
+				52BD5AB72918E0870055F632 /* cn */,
+				52BD5ABB2918E0870055F632 /* client */,
+			);
+			path = certificates;
+			sourceTree = "<group>";
+		};
+		52BD5AB32918E0870055F632 /* altname */ = {
+			isa = PBXGroup;
+			children = (
+				52BD5AB42918E0870055F632 /* agent.pem */,
+				52BD5AB52918E0870055F632 /* openssl-altname.cnf */,
+				52BD5AB62918E0870055F632 /* cafile.pem */,
+			);
+			path = altname;
+			sourceTree = "<group>";
+		};
+		52BD5AB72918E0870055F632 /* cn */ = {
+			isa = PBXGroup;
+			children = (
+				52BD5AB82918E0870055F632 /* openssl-cn.cnf */,
+			);
+			path = cn;
+			sourceTree = "<group>";
+		};
+		52BD5ABB2918E0870055F632 /* client */ = {
+			isa = PBXGroup;
+			children = (
+				52BD5ABC2918E0870055F632 /* user1_cert.pem */,
+				52BD5ABD2918E0870055F632 /* cert2-signed-by-other-ca.pem */,
+				52BD5ABE2918E0870055F632 /* user2_CN_key.pem */,
+				52BD5ABF2918E0870055F632 /* user2_revoked_cert.pem */,
+				52BD5AC02918E0870055F632 /* user2_revoked_key.pem */,
+				52BD5AC12918E0870055F632 /* cert3.pem */,
+				52BD5AC22918E0870055F632 /* cert2.pem */,
+				52BD5AC32918E0870055F632 /* user1_multiple_aliases_key.pem */,
+				52BD5AC42918E0870055F632 /* key.pem */,
+				52BD5AC52918E0870055F632 /* key3.pem */,
+				52BD5AC62918E0870055F632 /* key2.pem */,
+				52BD5AC72918E0870055F632 /* cert.pem */,
+				52BD5AC82918E0870055F632 /* user2_CN_cert.pem */,
+				52BD5AC92918E0870055F632 /* user1_key.pem */,
+				52BD5ACA2918E0870055F632 /* user2_cert.pem */,
+				52BD5ACB2918E0870055F632 /* user2_key.pem */,
+				52BD5ACC2918E0870055F632 /* key2-signed-by-other-ca.pem */,
+				52BD5ACD2918E0870055F632 /* user1_multiple_aliases_cert.pem */,
+			);
+			path = client;
+			sourceTree = "<group>";
+		};
+		52BD5ACE2918E0870055F632 /* sounds */ = {
+			isa = PBXGroup;
+			children = (
+				52BD5ACF2918E0870055F632 /* hello8000.mkv */,
+				52BD5AD02918E0870055F632 /* hello44100.wav */,
+				52BD5AD12918E0870055F632 /* vrroom.wav */,
+				52BD5AD22918E0870055F632 /* ahbahouaismaisbon.wav */,
+				52BD5AD32918E0870055F632 /* hello8000.wav */,
+				52BD5AD42918E0870055F632 /* sintel_trailer_opus_h264.mkv */,
+				52BD5AD52918E0870055F632 /* sintel_trailer_opus_vp8.mkv */,
+				52BD5AD62918E0870055F632 /* continuous_48000_stereo.wav */,
+				52BD5AD72918E0870055F632 /* oldphone.wav */,
+				52BD5AD82918E0870055F632 /* ringback.wav */,
+				52BD5AD92918E0870055F632 /* hello8000_mkv_ref.wav */,
+				52BD5ADA2918E0870055F632 /* sintel_trailer_pcmu_h264.mkv */,
+			);
+			path = sounds;
+			sourceTree = "<group>";
+		};
+		52BD5ADC2918E0870055F632 /* db */ = {
+			isa = PBXGroup;
+			children = (
+				52BD5ADD2918E0870055F632 /* messages.db */,
+				52BD5ADE2918E0870055F632 /* linphone.db */,
+				52BD5ADF2918E0870055F632 /* friends.db */,
+				52BD5AE02918E0870055F632 /* chatrooms.db */,
+			);
+			path = db;
+			sourceTree = "<group>";
+		};
+		52BD5AE12918E0870055F632 /* sipp */ = {
+			isa = PBXGroup;
+			children = (
+				52BD5AE22918E0870055F632 /* call_with_transfer_incoming_ringing_call.xml */,
+				52BD5AE32918E0870055F632 /* sip_update_within_icoming_reinvite_with_no_sdp.xml */,
+				52BD5AE42918E0870055F632 /* call_with_multiple_audio_mline_in_sdp.xml */,
+				52BD5AE52918E0870055F632 /* call_with_video_mline_before_audio_in_sdp.xml */,
+				52BD5AE62918E0870055F632 /* call_invite_200ok_without_contact_header.xml */,
+				52BD5AE72918E0870055F632 /* call_with_audio_mline_before_video_in_sdp.xml */,
+				52BD5AE82918E0870055F632 /* call_with_multiple_video_mline_in_sdp.xml */,
+			);
+			path = sipp;
+			sourceTree = "<group>";
+		};
+		52BD5AE92918E0870055F632 /* rcfiles */ = {
+			isa = PBXGroup;
+			children = (
+				52BD5AEA2918E0870055F632 /* marie_os_defined_rtp_ports_rc */,
+				52BD5AEB2918E0870055F632 /* marie_dependent_proxy_rc */,
+				52BD5AEC2918E0870055F632 /* pauline_zrtp_aes256_rc */,
+				52BD5AED2918E0870055F632 /* marie_remote_default_values_rc */,
+				52BD5AEE2918E0870055F632 /* michelle_rc */,
+				52BD5AEF2918E0870055F632 /* marie_remote_localfile_android_rc */,
+				52BD5AF02918E0870055F632 /* claire_sips_rc */,
+				52BD5AF12918E0870055F632 /* empty_rc */,
+				52BD5AF22918E0870055F632 /* pauline_well_known_port_rc */,
+				52BD5AF32918E0870055F632 /* lime_x3dh_xml_rc */,
+				52BD5AF42918E0870055F632 /* arthur_rc */,
+				52BD5AF52918E0870055F632 /* groupchat_rc */,
+				52BD5AF62918E0870055F632 /* marie_zrtp_ecdh448_rc */,
+				52BD5AF72918E0870055F632 /* zero_length_params_rc */,
+				52BD5AF82918E0870055F632 /* marie_zrtp_srtpsuite_aes256_rc */,
+				52BD5AF92918E0870055F632 /* marie_dtls_srtp_immediate_rc */,
+				52BD5AFA2918E0870055F632 /* marie_remote_localfile2_rc */,
+				52BD5AFB2918E0870055F632 /* marie_remote_localfile_win10_rc */,
+				52BD5AFC2918E0870055F632 /* stun_rc */,
+				52BD5AFD2918E0870055F632 /* pauline_tcp_rc */,
+				52BD5AFE2918E0870055F632 /* marie_dual_proxy_2_rc */,
+				52BD5AFF2918E0870055F632 /* marie_h264_rc */,
+				52BD5B002918E0870055F632 /* marie_lime_x3dh_no_server_rc */,
+				52BD5B012918E0870055F632 /* pauline_rtp_port_range_rc */,
+				52BD5B022918E0870055F632 /* marie_remote_404_rc */,
+				52BD5B032918E0870055F632 /* marie_session_timers_rc */,
+				52BD5B042918E0870055F632 /* marie_rtp_port_range_rc */,
+				52BD5B052918E0870055F632 /* pauline_zrtp_ecdh448_rc */,
+				52BD5B062918E0870055F632 /* pauline_os_defined_rtp_ports_rc */,
+				52BD5B072918E0870055F632 /* pauline_rc */,
+				52BD5B082918E0870055F632 /* marie_remote_https_rc */,
+				52BD5B092918E0870055F632 /* groupchat_lime_x3dh_rc */,
+				52BD5B0A2918E0870055F632 /* pauline_as_friend_rc */,
+				52BD5B0B2918E0870055F632 /* marie_remote_localfile_rc */,
+				52BD5B0C2918E0870055F632 /* pauline_zrtp_srtpsuite_aes256_rc */,
+				52BD5B0D2918E0870055F632 /* pauline_sips_rc */,
+				52BD5B0E2918E0870055F632 /* laure_call_logs_rc */,
+				52BD5B0F2918E0870055F632 /* pauline_external_rc */,
+				52BD5B102918E0870055F632 /* invalid_friends_xml */,
+				52BD5B112918E0870055F632 /* marie_early_rc */,
+				52BD5B122918E0870055F632 /* marie2_rc */,
+				52BD5B132918E0870055F632 /* friends_rc */,
+				52BD5B142918E0870055F632 /* pauline_rc_rtcp_xr */,
+				52BD5B152918E0870055F632 /* marie_rc_rtcp_xr */,
+				52BD5B162918E0870055F632 /* pauline_tunnel_verify_server_certificate_rc */,
+				52BD5B172918E0870055F632 /* chloe_rc */,
+				52BD5B182918E0870055F632 /* account_creator_flexiapi_rc */,
+				52BD5B192918E0870055F632 /* marie_zrtp_b256_rc */,
+				52BD5B1A2918E0870055F632 /* marie_rc */,
+				52BD5B1B2918E0870055F632 /* pauline_tls_client_rc */,
+				52BD5B1C2918E0870055F632 /* pauline_zrtp_b256_rc */,
+				52BD5B1D2918E0870055F632 /* marie_dual_proxy_rc */,
+				52BD5B1E2918E0870055F632 /* invalid_friends_rc */,
+				52BD5B1F2918E0870055F632 /* marie_sips_rc */,
+				52BD5B202918E0870055F632 /* pauline_nat64_rc */,
+				52BD5B212918E0870055F632 /* marie_well_known_port_rc */,
+				52BD5B222918E0870055F632 /* pauline_zrtp_ecdh255_rc */,
+				52BD5B232918E0870055F632 /* marie_remote_invalid_rc */,
+				52BD5B242918E0870055F632 /* remote_zero_length_params_rc */,
+				52BD5B252918E0870055F632 /* chloe_lime_x3dh_rc */,
+				52BD5B262918E0870055F632 /* carddav_rc */,
+				52BD5B272918E0870055F632 /* marie_remote_rc */,
+				52BD5B282918E0870055F632 /* claire_rc */,
+				52BD5B292918E0870055F632 /* marie_transient_remote_rc */,
+				52BD5B2A2918E0870055F632 /* pauline_lime_x3dh_rc */,
+				52BD5B2B2918E0870055F632 /* marie_bodyless_rc */,
+				52BD5B2C2918E0870055F632 /* marie_remote_invalid_uri_rc */,
+				52BD5B2D2918E0870055F632 /* marie_lime_x3dh_rc */,
+				52BD5B2E2918E0870055F632 /* laure_tcp_rc */,
+				52BD5B2F2918E0870055F632 /* pauline_wild_rc */,
+				52BD5B302918E0870055F632 /* assistant_create.rc */,
+				52BD5B312918E0870055F632 /* pauline_dtls_srtp_immediate_rc */,
+				52BD5B322918E0870055F632 /* pauline_alt_rc */,
+				52BD5B332918E0870055F632 /* marie_nat64_rc */,
+				52BD5B342918E0870055F632 /* laure_rc_udp */,
+				52BD5B352918E0870055F632 /* marie_quality_reporting_rc */,
+				52BD5B362918E0870055F632 /* conference_focus_rc */,
+				52BD5B372918E0870055F632 /* pauline_h264_rc */,
+				52BD5B382918E0870055F632 /* marie_zrtp_aes256_rc */,
+				52BD5B392918E0870055F632 /* michelle_rc_udp */,
+				52BD5B3A2918E0870055F632 /* multi_account_rc */,
+				52BD5B3B2918E0870055F632 /* marie_v4proxy_rc */,
+				52BD5B3C2918E0870055F632 /* account_creator_rc */,
+				52BD5B3D2918E0870055F632 /* pauline_v4proxy_rc */,
+				52BD5B3E2918E0870055F632 /* marie_zrtp_ecdh255_rc */,
+				52BD5B3F2918E0870055F632 /* marie_pauline_lime_x3dh_rc */,
+				52BD5B402918E0870055F632 /* laure_lime_x3dh_rc */,
+			);
+			path = rcfiles;
+			sourceTree = "<group>";
+		};
+		52BD5B412918E0870055F632 /* Frameworks */ = {
+			isa = PBXGroup;
+			children = (
+				52BD5B422918E0870055F632 /* belr.framework */,
+				52BD5B432918E0870055F632 /* mediastreamer2.framework */,
+				52BD5B442918E0870055F632 /* msopenh264.framework */,
+				52BD5B452918E0870055F632 /* bctoolbox.framework */,
+				52BD5B462918E0870055F632 /* mswebrtc.framework */,
+				52BD5B472918E0870055F632 /* msamr.framework */,
+				52BD5B482918E0870055F632 /* belle-sip.framework */,
+				52BD5B492918E0870055F632 /* linphonetester.framework */,
+				52BD5B4A2918E0870055F632 /* bctoolbox-tester.framework */,
+				52BD5B4B2918E0870055F632 /* ortp.framework */,
+				52BD5B4C2918E0870055F632 /* limetester.framework */,
+				52BD5B4D2918E0870055F632 /* mscodec2.framework */,
+				52BD5B4E2918E0870055F632 /* mssilk.framework */,
+				52BD5B4F2918E0870055F632 /* lime.framework */,
+				52BD5B502918E0870055F632 /* belcard.framework */,
+				52BD5B512918E0870055F632 /* msx264.framework */,
+				52BD5B522918E0870055F632 /* bctoolbox-ios.framework */,
+				52BD5B532918E0870055F632 /* linphone.framework */,
+			);
+			path = Frameworks;
+			sourceTree = "<group>";
+		};
+		52BD5B542918E0870055F632 /* share */ = {
+			isa = PBXGroup;
+			children = (
+				52BD5B552918E0870055F632 /* linphonecs */,
+				52BD5B572918E0870055F632 /* linphonesw */,
+			);
+			path = share;
+			sourceTree = "<group>";
+		};
+		52BD5B552918E0870055F632 /* linphonecs */ = {
+			isa = PBXGroup;
+			children = (
+				52BD5B562918E0870055F632 /* LinphoneWrapper.cs */,
+			);
+			path = linphonecs;
+			sourceTree = "<group>";
+		};
+		52BD5B572918E0870055F632 /* linphonesw */ = {
+			isa = PBXGroup;
+			children = (
+				52BD5B582918E0870055F632 /* LinphoneWrapper.swift */,
+			);
+			path = linphonesw;
+			sourceTree = "<group>";
+		};
 /* End PBXGroup section */
 
 /* Begin PBXHeadersBuildPhase section */
@@ -179,6 +881,7 @@
 				2B4C0B2628DC6B1600F35838 /* Sources */,
 				2B4C0B2728DC6B1600F35838 /* Frameworks */,
 				2B4C0B2828DC6B1600F35838 /* Resources */,
+				52BD5BFF2918E0F70055F632 /* Embed Frameworks */,
 			);
 			buildRules = (
 			);
@@ -273,6 +976,149 @@
 			isa = PBXResourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				52BD5B702918E0880055F632 /* key.pem in Resources */,
+				52BD5B602918E0880055F632 /* thousand_vcards.vcf in Resources */,
+				52BD5BA12918E0880055F632 /* marie_dtls_srtp_immediate_rc in Resources */,
+				52BD5B762918E0880055F632 /* user2_cert.pem in Resources */,
+				52BD5BC02918E0880055F632 /* account_creator_flexiapi_rc in Resources */,
+				52BD5BCD2918E0880055F632 /* chloe_lime_x3dh_rc in Resources */,
+				52BD5BDE2918E0880055F632 /* conference_focus_rc in Resources */,
+				52BD5BBB2918E0880055F632 /* friends_rc in Resources */,
+				52BD5B802918E0880055F632 /* sintel_trailer_opus_vp8.mkv in Resources */,
+				52BD5BAD2918E0880055F632 /* pauline_zrtp_ecdh448_rc in Resources */,
+				52BD5BD42918E0880055F632 /* marie_remote_invalid_uri_rc in Resources */,
+				52BD5B632918E0880055F632 /* openssl-altname.cnf in Resources */,
+				52BD5BD62918E0880055F632 /* laure_tcp_rc in Resources */,
+				52BD5B5D2918E0880055F632 /* linphonesiteqr.jpg in Resources */,
+				52BD5BB42918E0880055F632 /* pauline_zrtp_srtpsuite_aes256_rc in Resources */,
+				52BD5BC52918E0880055F632 /* marie_dual_proxy_rc in Resources */,
+				52BD5BA02918E0880055F632 /* marie_zrtp_srtpsuite_aes256_rc in Resources */,
+				52BD5B9D2918E0880055F632 /* groupchat_rc in Resources */,
+				52BD5BB52918E0880055F632 /* pauline_sips_rc in Resources */,
+				52BD5B5A2918E0880055F632 /* nowebcamVGA.jpg in Resources */,
+				52BD5B752918E0880055F632 /* user1_key.pem in Resources */,
+				52BD5B992918E0880055F632 /* empty_rc in Resources */,
+				52BD5B832918E0880055F632 /* ringback.wav in Resources */,
+				52BD5BC62918E0880055F632 /* invalid_friends_rc in Resources */,
+				52BD5B592918E0880055F632 /* deploy.sh in Resources */,
+				52BD5BC12918E0880055F632 /* marie_zrtp_b256_rc in Resources */,
+				52BD5B622918E0880055F632 /* agent.pem in Resources */,
+				52BD5B652918E0880055F632 /* openssl-cn.cnf in Resources */,
+				52BD5B932918E0880055F632 /* marie_dependent_proxy_rc in Resources */,
+				52BD5BA72918E0880055F632 /* marie_h264_rc in Resources */,
+				52BD5BA42918E0880055F632 /* stun_rc in Resources */,
+				52BD5BB02918E0880055F632 /* marie_remote_https_rc in Resources */,
+				52BD5B872918E0880055F632 /* messages.db in Resources */,
+				52BD5B8B2918E0880055F632 /* call_with_transfer_incoming_ringing_call.xml in Resources */,
+				52BD5B852918E0880055F632 /* sintel_trailer_pcmu_h264.mkv in Resources */,
+				52BD5B982918E0880055F632 /* claire_sips_rc in Resources */,
+				52BD5B942918E0880055F632 /* pauline_zrtp_aes256_rc in Resources */,
+				52BD5BDA2918E0880055F632 /* pauline_alt_rc in Resources */,
+				52BD5BE42918E0880055F632 /* account_creator_rc in Resources */,
+				52BD5B972918E0880055F632 /* marie_remote_localfile_android_rc in Resources */,
+				52BD5B642918E0880055F632 /* cafile.pem in Resources */,
+				52BD5B9A2918E0880055F632 /* pauline_well_known_port_rc in Resources */,
+				52BD5BBE2918E0880055F632 /* pauline_tunnel_verify_server_certificate_rc in Resources */,
+				52BD5BD22918E0880055F632 /* pauline_lime_x3dh_rc in Resources */,
+				52BD5BBA2918E0880055F632 /* marie2_rc in Resources */,
+				52BD5BCE2918E0880055F632 /* carddav_rc in Resources */,
+				52BD5B8C2918E0880055F632 /* sip_update_within_icoming_reinvite_with_no_sdp.xml in Resources */,
+				52BD5BB22918E0880055F632 /* pauline_as_friend_rc in Resources */,
+				52BD5B5C2918E0880055F632 /* linphonesiteqr_captured.jpg in Resources */,
+				52BD5B842918E0880055F632 /* hello8000_mkv_ref.wav in Resources */,
+				52BD5B822918E0880055F632 /* oldphone.wav in Resources */,
+				52BD5BD02918E0880055F632 /* claire_rc in Resources */,
+				52BD5B6C2918E0880055F632 /* user2_revoked_key.pem in Resources */,
+				52BD5BA22918E0880055F632 /* marie_remote_localfile2_rc in Resources */,
+				52BD5B6E2918E0880055F632 /* cert2.pem in Resources */,
+				52BD5BCF2918E0880055F632 /* marie_remote_rc in Resources */,
+				52BD5BBF2918E0880055F632 /* chloe_rc in Resources */,
+				52BD5B7B2918E0880055F632 /* hello44100.wav in Resources */,
+				52BD5BA92918E0880055F632 /* pauline_rtp_port_range_rc in Resources */,
+				52BD5B6B2918E0880055F632 /* user2_revoked_cert.pem in Resources */,
+				52BD5B5F2918E0880055F632 /* local_tester_hosts in Resources */,
+				52BD5B692918E0880055F632 /* cert2-signed-by-other-ca.pem in Resources */,
+				52BD5BDB2918E0880055F632 /* marie_nat64_rc in Resources */,
+				52BD5BD12918E0880055F632 /* marie_transient_remote_rc in Resources */,
+				52BD5BB12918E0880055F632 /* groupchat_lime_x3dh_rc in Resources */,
+				52BD5B7F2918E0880055F632 /* sintel_trailer_opus_h264.mkv in Resources */,
+				52BD5BD32918E0880055F632 /* marie_bodyless_rc in Resources */,
+				52BD5BC32918E0880055F632 /* pauline_tls_client_rc in Resources */,
+				52BD5BAA2918E0880055F632 /* marie_remote_404_rc in Resources */,
+				52BD5BE52918E0880055F632 /* pauline_v4proxy_rc in Resources */,
+				52BD5B912918E0880055F632 /* call_with_multiple_video_mline_in_sdp.xml in Resources */,
+				52BD5BD82918E0880055F632 /* assistant_create.rc in Resources */,
+				52BD5BA52918E0880055F632 /* pauline_tcp_rc in Resources */,
+				52BD5B902918E0880055F632 /* call_with_audio_mline_before_video_in_sdp.xml in Resources */,
+				52BD5BBC2918E0880055F632 /* pauline_rc_rtcp_xr in Resources */,
+				52BD5BD92918E0880055F632 /* pauline_dtls_srtp_immediate_rc in Resources */,
+				52BD5BC42918E0880055F632 /* pauline_zrtp_b256_rc in Resources */,
+				52BD5B952918E0880055F632 /* marie_remote_default_values_rc in Resources */,
+				52BD5BE72918E0880055F632 /* marie_pauline_lime_x3dh_rc in Resources */,
+				52BD5BB82918E0880055F632 /* invalid_friends_xml in Resources */,
+				52BD5BC72918E0880055F632 /* marie_sips_rc in Resources */,
+				52BD5BA82918E0880055F632 /* marie_lime_x3dh_no_server_rc in Resources */,
+				52BD5B682918E0880055F632 /* user1_cert.pem in Resources */,
+				52BD5BBD2918E0880055F632 /* marie_rc_rtcp_xr in Resources */,
+				52BD5BA62918E0880055F632 /* marie_dual_proxy_2_rc in Resources */,
+				52BD5BFB2918E0890055F632 /* LinphoneWrapper.cs in Resources */,
+				52BD5B6F2918E0880055F632 /* user1_multiple_aliases_key.pem in Resources */,
+				52BD5B8E2918E0880055F632 /* call_with_video_mline_before_audio_in_sdp.xml in Resources */,
+				52BD5B6D2918E0880055F632 /* cert3.pem in Resources */,
+				52BD5BB32918E0880055F632 /* marie_remote_localfile_rc in Resources */,
+				52BD5BAB2918E0880055F632 /* marie_session_timers_rc in Resources */,
+				52BD5B7A2918E0880055F632 /* hello8000.mkv in Resources */,
+				52BD5BC92918E0880055F632 /* marie_well_known_port_rc in Resources */,
+				52BD5BE02918E0880055F632 /* marie_zrtp_aes256_rc in Resources */,
+				52BD5B812918E0880055F632 /* continuous_48000_stereo.wav in Resources */,
+				52BD5B782918E0880055F632 /* key2-signed-by-other-ca.pem in Resources */,
+				52BD5B862918E0880055F632 /* tester_hosts in Resources */,
+				52BD5B9B2918E0880055F632 /* lime_x3dh_xml_rc in Resources */,
+				52BD5BC22918E0880055F632 /* marie_rc in Resources */,
+				52BD5B8F2918E0880055F632 /* call_invite_200ok_without_contact_header.xml in Resources */,
+				52BD5BA32918E0880055F632 /* marie_remote_localfile_win10_rc in Resources */,
+				52BD5B9C2918E0880055F632 /* arthur_rc in Resources */,
+				52BD5B5B2918E0880055F632 /* nowebcamCIF.jpg in Resources */,
+				52BD5B9E2918E0880055F632 /* marie_zrtp_ecdh448_rc in Resources */,
+				52BD5BAF2918E0880055F632 /* pauline_rc in Resources */,
+				52BD5B892918E0880055F632 /* friends.db in Resources */,
+				52BD5BE12918E0880055F632 /* michelle_rc_udp in Resources */,
+				52BD5B922918E0880055F632 /* marie_os_defined_rtp_ports_rc in Resources */,
+				52BD5B612918E0880055F632 /* vcards.vcf in Resources */,
+				52BD5BCC2918E0880055F632 /* remote_zero_length_params_rc in Resources */,
+				52BD5BB72918E0880055F632 /* pauline_external_rc in Resources */,
+				52BD5BCB2918E0880055F632 /* marie_remote_invalid_rc in Resources */,
+				52BD5BAE2918E0880055F632 /* pauline_os_defined_rtp_ports_rc in Resources */,
+				52BD5B712918E0880055F632 /* key3.pem in Resources */,
+				52BD5BDF2918E0880055F632 /* pauline_h264_rc in Resources */,
+				52BD5B732918E0880055F632 /* cert.pem in Resources */,
+				52BD5B5E2918E0880055F632 /* linphone.svg in Resources */,
+				52BD5B7D2918E0880055F632 /* ahbahouaismaisbon.wav in Resources */,
+				52BD5BB62918E0880055F632 /* laure_call_logs_rc in Resources */,
+				52BD5BDC2918E0880055F632 /* laure_rc_udp in Resources */,
+				52BD5B6A2918E0880055F632 /* user2_CN_key.pem in Resources */,
+				52BD5BE22918E0880055F632 /* multi_account_rc in Resources */,
+				52BD5B7C2918E0880055F632 /* vrroom.wav in Resources */,
+				52BD5BE32918E0880055F632 /* marie_v4proxy_rc in Resources */,
+				52BD5BB92918E0880055F632 /* marie_early_rc in Resources */,
+				52BD5BE62918E0880055F632 /* marie_zrtp_ecdh255_rc in Resources */,
+				52BD5B8D2918E0880055F632 /* call_with_multiple_audio_mline_in_sdp.xml in Resources */,
+				52BD5B7E2918E0880055F632 /* hello8000.wav in Resources */,
+				52BD5B792918E0880055F632 /* user1_multiple_aliases_cert.pem in Resources */,
+				52BD5BD52918E0880055F632 /* marie_lime_x3dh_rc in Resources */,
+				52BD5B882918E0880055F632 /* linphone.db in Resources */,
+				52BD5BCA2918E0880055F632 /* pauline_zrtp_ecdh255_rc in Resources */,
+				52BD5B722918E0880055F632 /* key2.pem in Resources */,
+				52BD5BAC2918E0880055F632 /* marie_rtp_port_range_rc in Resources */,
+				52BD5B962918E0880055F632 /* michelle_rc in Resources */,
+				52BD5B742918E0880055F632 /* user2_CN_cert.pem in Resources */,
+				52BD5B8A2918E0880055F632 /* chatrooms.db in Resources */,
+				52BD5B772918E0880055F632 /* user2_key.pem in Resources */,
+				52BD5BE82918E0880055F632 /* laure_lime_x3dh_rc in Resources */,
+				52BD5BC82918E0880055F632 /* pauline_nat64_rc in Resources */,
+				52BD5BD72918E0880055F632 /* pauline_wild_rc in Resources */,
+				52BD5BDD2918E0880055F632 /* marie_quality_reporting_rc in Resources */,
+				52BD5B9F2918E0880055F632 /* zero_length_params_rc in Resources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -326,6 +1172,7 @@
 			buildActionMask = 2147483647;
 			files = (
 				52F5D74828EC4260003719E8 /* CansConnect.swift in Sources */,
+				52BD5BFC2918E0890055F632 /* LinphoneWrapper.swift in Sources */,
 				2B4C0B2F28DC6B1600F35838 /* canscloud_ios_framework.docc in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;

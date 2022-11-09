@@ -11,13 +11,12 @@
 		2B4C0B3528DC6B1700F35838 /* canscloud_ios_framework.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 2B4C0B2A28DC6B1600F35838 /* canscloud_ios_framework.framework */; };
 		2B4C0B3A28DC6B1700F35838 /* canscloud_ios_frameworkTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 2B4C0B3928DC6B1700F35838 /* canscloud_ios_frameworkTests.swift */; };
 		2B4C0B3B28DC6B1700F35838 /* canscloud_ios_framework.h in Headers */ = {isa = PBXBuildFile; fileRef = 2B4C0B2D28DC6B1600F35838 /* canscloud_ios_framework.h */; settings = {ATTRIBUTES = (Public, ); }; };
-		522AC09E2919688D009FDF12 /* linphone-sdk-xcframeworks.sh in Resources */ = {isa = PBXBuildFile; fileRef = 522AC0742919688D009FDF12 /* linphone-sdk-xcframeworks.sh */; };
-		522AC09F2919688D009FDF12 /* linphone-sdk-Info.plist in Resources */ = {isa = PBXBuildFile; fileRef = 522AC0752919688D009FDF12 /* linphone-sdk-Info.plist */; };
-		522AC0A02919688D009FDF12 /* linphone-sdk.release.xcconfig in Resources */ = {isa = PBXBuildFile; fileRef = 522AC0762919688D009FDF12 /* linphone-sdk.release.xcconfig */; };
-		522AC0A12919688D009FDF12 /* linphone-sdk.debug.xcconfig in Resources */ = {isa = PBXBuildFile; fileRef = 522AC0772919688D009FDF12 /* linphone-sdk.debug.xcconfig */; };
-		522AC0A22919688D009FDF12 /* linphone-sdk-umbrella.h in Headers */ = {isa = PBXBuildFile; fileRef = 522AC0782919688D009FDF12 /* linphone-sdk-umbrella.h */; };
-		522AC0A32919688D009FDF12 /* linphone-sdk-dummy.m in Sources */ = {isa = PBXBuildFile; fileRef = 522AC07A2919688D009FDF12 /* linphone-sdk-dummy.m */; };
-		522AC0A42919688E009FDF12 /* linphone-sdk-prefix.pch in Headers */ = {isa = PBXBuildFile; fileRef = 522AC07B2919688D009FDF12 /* linphone-sdk-prefix.pch */; };
+		5273AF64291C074900BB5201 /* linphone-sdk-Info.plist in Resources */ = {isa = PBXBuildFile; fileRef = 5273AF5D291C074900BB5201 /* linphone-sdk-Info.plist */; };
+		5273AF65291C074900BB5201 /* linphone-sdk.release.xcconfig in Resources */ = {isa = PBXBuildFile; fileRef = 5273AF5E291C074900BB5201 /* linphone-sdk.release.xcconfig */; };
+		5273AF66291C074900BB5201 /* linphone-sdk.debug.xcconfig in Resources */ = {isa = PBXBuildFile; fileRef = 5273AF5F291C074900BB5201 /* linphone-sdk.debug.xcconfig */; };
+		5273AF67291C074900BB5201 /* linphone-sdk-umbrella.h in Headers */ = {isa = PBXBuildFile; fileRef = 5273AF60291C074900BB5201 /* linphone-sdk-umbrella.h */; };
+		5273AF68291C074900BB5201 /* linphone-sdk-dummy.m in Sources */ = {isa = PBXBuildFile; fileRef = 5273AF62291C074900BB5201 /* linphone-sdk-dummy.m */; };
+		5273AF69291C074900BB5201 /* linphone-sdk-prefix.pch in Headers */ = {isa = PBXBuildFile; fileRef = 5273AF63291C074900BB5201 /* linphone-sdk-prefix.pch */; };
 		52BD59302918DB5D0055F632 /* AppDelegate.swift in Sources */ = {isa = PBXBuildFile; fileRef = 52BD592F2918DB5D0055F632 /* AppDelegate.swift */; };
 		52BD59322918DB5D0055F632 /* SceneDelegate.swift in Sources */ = {isa = PBXBuildFile; fileRef = 52BD59312918DB5D0055F632 /* SceneDelegate.swift */; };
 		52BD59342918DB5D0055F632 /* ViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = 52BD59332918DB5D0055F632 /* ViewController.swift */; };
@@ -274,14 +273,13 @@
 		2B4C0B2E28DC6B1600F35838 /* canscloud_ios_framework.docc */ = {isa = PBXFileReference; lastKnownFileType = folder.documentationcatalog; path = canscloud_ios_framework.docc; sourceTree = "<group>"; };
 		2B4C0B3428DC6B1700F35838 /* canscloud-ios-frameworkTests.xctest */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; includeInIndex = 0; path = "canscloud-ios-frameworkTests.xctest"; sourceTree = BUILT_PRODUCTS_DIR; };
 		2B4C0B3928DC6B1700F35838 /* canscloud_ios_frameworkTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = canscloud_ios_frameworkTests.swift; sourceTree = "<group>"; };
-		522AC0742919688D009FDF12 /* linphone-sdk-xcframeworks.sh */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text.script.sh; path = "linphone-sdk-xcframeworks.sh"; sourceTree = "<group>"; };
-		522AC0752919688D009FDF12 /* linphone-sdk-Info.plist */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text.plist.xml; path = "linphone-sdk-Info.plist"; sourceTree = "<group>"; };
-		522AC0762919688D009FDF12 /* linphone-sdk.release.xcconfig */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text.xcconfig; path = "linphone-sdk.release.xcconfig"; sourceTree = "<group>"; };
-		522AC0772919688D009FDF12 /* linphone-sdk.debug.xcconfig */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text.xcconfig; path = "linphone-sdk.debug.xcconfig"; sourceTree = "<group>"; };
-		522AC0782919688D009FDF12 /* linphone-sdk-umbrella.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = "linphone-sdk-umbrella.h"; sourceTree = "<group>"; };
-		522AC0792919688D009FDF12 /* linphone-sdk.modulemap */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = "sourcecode.module-map"; path = "linphone-sdk.modulemap"; sourceTree = "<group>"; };
-		522AC07A2919688D009FDF12 /* linphone-sdk-dummy.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = "linphone-sdk-dummy.m"; sourceTree = "<group>"; };
-		522AC07B2919688D009FDF12 /* linphone-sdk-prefix.pch */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = "linphone-sdk-prefix.pch"; sourceTree = "<group>"; };
+		5273AF5D291C074900BB5201 /* linphone-sdk-Info.plist */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text.plist.xml; path = "linphone-sdk-Info.plist"; sourceTree = "<group>"; };
+		5273AF5E291C074900BB5201 /* linphone-sdk.release.xcconfig */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text.xcconfig; path = "linphone-sdk.release.xcconfig"; sourceTree = "<group>"; };
+		5273AF5F291C074900BB5201 /* linphone-sdk.debug.xcconfig */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text.xcconfig; path = "linphone-sdk.debug.xcconfig"; sourceTree = "<group>"; };
+		5273AF60291C074900BB5201 /* linphone-sdk-umbrella.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = "linphone-sdk-umbrella.h"; sourceTree = "<group>"; };
+		5273AF61291C074900BB5201 /* linphone-sdk.modulemap */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = "sourcecode.module-map"; path = "linphone-sdk.modulemap"; sourceTree = "<group>"; };
+		5273AF62291C074900BB5201 /* linphone-sdk-dummy.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = "linphone-sdk-dummy.m"; sourceTree = "<group>"; };
+		5273AF63291C074900BB5201 /* linphone-sdk-prefix.pch */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = "linphone-sdk-prefix.pch"; sourceTree = "<group>"; };
 		52BD592D2918DB5D0055F632 /* DemoApp.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = DemoApp.app; sourceTree = BUILT_PRODUCTS_DIR; };
 		52BD592F2918DB5D0055F632 /* AppDelegate.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AppDelegate.swift; sourceTree = "<group>"; };
 		52BD59312918DB5D0055F632 /* SceneDelegate.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SceneDelegate.swift; sourceTree = "<group>"; };
@@ -524,7 +522,7 @@
 		2B4C0B2C28DC6B1600F35838 /* canscloud-ios-framework */ = {
 			isa = PBXGroup;
 			children = (
-				522AC0482919688D009FDF12 /* TargetSupportFiles */,
+				5273AF5B291C074900BB5201 /* TargetSupportFiles */,
 				52BD5AA22918E0870055F632 /* linphone-sdk */,
 				52F5D74728EC4260003719E8 /* CansConnect.swift */,
 				2B4C0B2D28DC6B1600F35838 /* canscloud_ios_framework.h */,
@@ -541,26 +539,24 @@
 			path = "canscloud-ios-frameworkTests";
 			sourceTree = "<group>";
 		};
-		522AC0482919688D009FDF12 /* TargetSupportFiles */ = {
+		5273AF5B291C074900BB5201 /* TargetSupportFiles */ = {
 			isa = PBXGroup;
 			children = (
-				522AC0732919688D009FDF12 /* linphone-sdk */,
+				5273AF5C291C074900BB5201 /* linphone-sdk */,
 			);
-			name = TargetSupportFiles;
-			path = "../../../../Lab/Linphone/linphone-iphone/Pods/TargetSupportFiles";
+			path = TargetSupportFiles;
 			sourceTree = "<group>";
 		};
-		522AC0732919688D009FDF12 /* linphone-sdk */ = {
+		5273AF5C291C074900BB5201 /* linphone-sdk */ = {
 			isa = PBXGroup;
 			children = (
-				522AC0742919688D009FDF12 /* linphone-sdk-xcframeworks.sh */,
-				522AC0752919688D009FDF12 /* linphone-sdk-Info.plist */,
-				522AC0762919688D009FDF12 /* linphone-sdk.release.xcconfig */,
-				522AC0772919688D009FDF12 /* linphone-sdk.debug.xcconfig */,
-				522AC0782919688D009FDF12 /* linphone-sdk-umbrella.h */,
-				522AC0792919688D009FDF12 /* linphone-sdk.modulemap */,
-				522AC07A2919688D009FDF12 /* linphone-sdk-dummy.m */,
-				522AC07B2919688D009FDF12 /* linphone-sdk-prefix.pch */,
+				5273AF5D291C074900BB5201 /* linphone-sdk-Info.plist */,
+				5273AF5E291C074900BB5201 /* linphone-sdk.release.xcconfig */,
+				5273AF5F291C074900BB5201 /* linphone-sdk.debug.xcconfig */,
+				5273AF60291C074900BB5201 /* linphone-sdk-umbrella.h */,
+				5273AF61291C074900BB5201 /* linphone-sdk.modulemap */,
+				5273AF62291C074900BB5201 /* linphone-sdk-dummy.m */,
+				5273AF63291C074900BB5201 /* linphone-sdk-prefix.pch */,
 			);
 			path = "linphone-sdk";
 			sourceTree = "<group>";
@@ -906,9 +902,9 @@
 			isa = PBXHeadersBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
-				522AC0A22919688D009FDF12 /* linphone-sdk-umbrella.h in Headers */,
+				5273AF67291C074900BB5201 /* linphone-sdk-umbrella.h in Headers */,
+				5273AF69291C074900BB5201 /* linphone-sdk-prefix.pch in Headers */,
 				2B4C0B3B28DC6B1700F35838 /* canscloud_ios_framework.h in Headers */,
-				522AC0A42919688E009FDF12 /* linphone-sdk-prefix.pch in Headers */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -1023,10 +1019,10 @@
 				52BD5BA12918E0880055F632 /* marie_dtls_srtp_immediate_rc in Resources */,
 				52BD5B762918E0880055F632 /* user2_cert.pem in Resources */,
 				52BD5BC02918E0880055F632 /* account_creator_flexiapi_rc in Resources */,
+				5273AF66291C074900BB5201 /* linphone-sdk.debug.xcconfig in Resources */,
 				52BD5BCD2918E0880055F632 /* chloe_lime_x3dh_rc in Resources */,
 				52BD5BDE2918E0880055F632 /* conference_focus_rc in Resources */,
 				52BD5BBB2918E0880055F632 /* friends_rc in Resources */,
-				522AC09E2919688D009FDF12 /* linphone-sdk-xcframeworks.sh in Resources */,
 				52BD5B802918E0880055F632 /* sintel_trailer_opus_vp8.mkv in Resources */,
 				52BD5BAD2918E0880055F632 /* pauline_zrtp_ecdh448_rc in Resources */,
 				52BD5BD42918E0880055F632 /* marie_remote_invalid_uri_rc in Resources */,
@@ -1035,6 +1031,7 @@
 				52BD5B5D2918E0880055F632 /* linphonesiteqr.jpg in Resources */,
 				52BD5BB42918E0880055F632 /* pauline_zrtp_srtpsuite_aes256_rc in Resources */,
 				52BD5BC52918E0880055F632 /* marie_dual_proxy_rc in Resources */,
+				5273AF65291C074900BB5201 /* linphone-sdk.release.xcconfig in Resources */,
 				52BD5BA02918E0880055F632 /* marie_zrtp_srtpsuite_aes256_rc in Resources */,
 				52BD5B9D2918E0880055F632 /* groupchat_rc in Resources */,
 				52BD5BB52918E0880055F632 /* pauline_sips_rc in Resources */,
@@ -1059,7 +1056,6 @@
 				52BD5BDA2918E0880055F632 /* pauline_alt_rc in Resources */,
 				52BD5BE42918E0880055F632 /* account_creator_rc in Resources */,
 				52BD5B972918E0880055F632 /* marie_remote_localfile_android_rc in Resources */,
-				522AC09F2919688D009FDF12 /* linphone-sdk-Info.plist in Resources */,
 				52BD5B642918E0880055F632 /* cafile.pem in Resources */,
 				52BD5B9A2918E0880055F632 /* pauline_well_known_port_rc in Resources */,
 				52BD5BBE2918E0880055F632 /* pauline_tunnel_verify_server_certificate_rc in Resources */,
@@ -1080,7 +1076,6 @@
 				52BD5B7B2918E0880055F632 /* hello44100.wav in Resources */,
 				52BD5BA92918E0880055F632 /* pauline_rtp_port_range_rc in Resources */,
 				52BD5B6B2918E0880055F632 /* user2_revoked_cert.pem in Resources */,
-				522AC0A02919688D009FDF12 /* linphone-sdk.release.xcconfig in Resources */,
 				52BD5B5F2918E0880055F632 /* local_tester_hosts in Resources */,
 				52BD5B692918E0880055F632 /* cert2-signed-by-other-ca.pem in Resources */,
 				52BD5BDB2918E0880055F632 /* marie_nat64_rc in Resources */,
@@ -1115,7 +1110,6 @@
 				52BD5B7A2918E0880055F632 /* hello8000.mkv in Resources */,
 				52BD5BC92918E0880055F632 /* marie_well_known_port_rc in Resources */,
 				52BD5BE02918E0880055F632 /* marie_zrtp_aes256_rc in Resources */,
-				522AC0A12919688D009FDF12 /* linphone-sdk.debug.xcconfig in Resources */,
 				52BD5B812918E0880055F632 /* continuous_48000_stereo.wav in Resources */,
 				52BD5B782918E0880055F632 /* key2-signed-by-other-ca.pem in Resources */,
 				52BD5B862918E0880055F632 /* tester_hosts in Resources */,
@@ -1156,6 +1150,7 @@
 				52BD5BCA2918E0880055F632 /* pauline_zrtp_ecdh255_rc in Resources */,
 				52BD5B722918E0880055F632 /* key2.pem in Resources */,
 				52BD5BAC2918E0880055F632 /* marie_rtp_port_range_rc in Resources */,
+				5273AF64291C074900BB5201 /* linphone-sdk-Info.plist in Resources */,
 				52BD5B962918E0880055F632 /* michelle_rc in Resources */,
 				52BD5B742918E0880055F632 /* user2_CN_cert.pem in Resources */,
 				52BD5B8A2918E0880055F632 /* chatrooms.db in Resources */,
@@ -1217,9 +1212,9 @@
 			isa = PBXSourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				5273AF68291C074900BB5201 /* linphone-sdk-dummy.m in Sources */,
 				52F5D74828EC4260003719E8 /* CansConnect.swift in Sources */,
 				52BD5BFC2918E0890055F632 /* LinphoneWrapper.swift in Sources */,
-				522AC0A32919688D009FDF12 /* linphone-sdk-dummy.m in Sources */,
 				2B4C0B2F28DC6B1600F35838 /* canscloud_ios_framework.docc in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;

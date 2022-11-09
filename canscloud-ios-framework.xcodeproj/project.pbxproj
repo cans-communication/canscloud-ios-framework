@@ -524,7 +524,7 @@
 		2B4C0B2C28DC6B1600F35838 /* canscloud-ios-framework */ = {
 			isa = PBXGroup;
 			children = (
-				522AC0482919688D009FDF12 /* Target Support Files */,
+				522AC0482919688D009FDF12 /* TargetSupportFiles */,
 				52BD5AA22918E0870055F632 /* linphone-sdk */,
 				52F5D74728EC4260003719E8 /* CansConnect.swift */,
 				2B4C0B2D28DC6B1600F35838 /* canscloud_ios_framework.h */,
@@ -541,13 +541,13 @@
 			path = "canscloud-ios-frameworkTests";
 			sourceTree = "<group>";
 		};
-		522AC0482919688D009FDF12 /* Target Support Files */ = {
+		522AC0482919688D009FDF12 /* TargetSupportFiles */ = {
 			isa = PBXGroup;
 			children = (
 				522AC0732919688D009FDF12 /* linphone-sdk */,
 			);
-			name = "Target Support Files";
-			path = "../../../../Lab/Linphone/linphone-iphone/Pods/Target Support Files";
+			name = TargetSupportFiles;
+			path = "../../../../Lab/Linphone/linphone-iphone/Pods/TargetSupportFiles";
 			sourceTree = "<group>";
 		};
 		522AC0732919688D009FDF12 /* linphone-sdk */ = {

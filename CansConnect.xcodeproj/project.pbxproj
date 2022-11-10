@@ -7,10 +7,9 @@
 	objects = {
 
 /* Begin PBXBuildFile section */
-		2B4C0B2F28DC6B1600F35838 /* canscloud_ios_framework.docc in Sources */ = {isa = PBXBuildFile; fileRef = 2B4C0B2E28DC6B1600F35838 /* canscloud_ios_framework.docc */; };
-		2B4C0B3528DC6B1700F35838 /* canscloud_ios_framework.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 2B4C0B2A28DC6B1600F35838 /* canscloud_ios_framework.framework */; };
-		2B4C0B3A28DC6B1700F35838 /* canscloud_ios_frameworkTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 2B4C0B3928DC6B1700F35838 /* canscloud_ios_frameworkTests.swift */; };
-		2B4C0B3B28DC6B1700F35838 /* canscloud_ios_framework.h in Headers */ = {isa = PBXBuildFile; fileRef = 2B4C0B2D28DC6B1600F35838 /* canscloud_ios_framework.h */; settings = {ATTRIBUTES = (Public, ); }; };
+		2B4C0B2F28DC6B1600F35838 /* CansConnect.docc in Sources */ = {isa = PBXBuildFile; fileRef = 2B4C0B2E28DC6B1600F35838 /* CansConnect.docc */; };
+		2B4C0B3528DC6B1700F35838 /* CansConnect.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 2B4C0B2A28DC6B1600F35838 /* CansConnect.framework */; };
+		2B4C0B3B28DC6B1700F35838 /* CansConnect.h in Headers */ = {isa = PBXBuildFile; fileRef = 2B4C0B2D28DC6B1600F35838 /* CansConnect.h */; settings = {ATTRIBUTES = (Public, ); }; };
 		5273AF64291C074900BB5201 /* linphone-sdk-Info.plist in Resources */ = {isa = PBXBuildFile; fileRef = 5273AF5D291C074900BB5201 /* linphone-sdk-Info.plist */; };
 		5273AF65291C074900BB5201 /* linphone-sdk.release.xcconfig in Resources */ = {isa = PBXBuildFile; fileRef = 5273AF5E291C074900BB5201 /* linphone-sdk.release.xcconfig */; };
 		5273AF66291C074900BB5201 /* linphone-sdk.debug.xcconfig in Resources */ = {isa = PBXBuildFile; fileRef = 5273AF5F291C074900BB5201 /* linphone-sdk.debug.xcconfig */; };
@@ -24,8 +23,8 @@
 		52BD59372918DB5D0055F632 /* Main.storyboard in Resources */ = {isa = PBXBuildFile; fileRef = 52BD59352918DB5D0055F632 /* Main.storyboard */; };
 		52BD59392918DB5E0055F632 /* Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = 52BD59382918DB5E0055F632 /* Assets.xcassets */; };
 		52BD593C2918DB5F0055F632 /* LaunchScreen.storyboard in Resources */ = {isa = PBXBuildFile; fileRef = 52BD593A2918DB5E0055F632 /* LaunchScreen.storyboard */; };
-		52BD59422918DBD20055F632 /* canscloud_ios_framework.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 2B4C0B2A28DC6B1600F35838 /* canscloud_ios_framework.framework */; };
-		52BD59432918DBD20055F632 /* canscloud_ios_framework.framework in Embed Frameworks */ = {isa = PBXBuildFile; fileRef = 2B4C0B2A28DC6B1600F35838 /* canscloud_ios_framework.framework */; settings = {ATTRIBUTES = (CodeSignOnCopy, RemoveHeadersOnCopy, ); }; };
+		52BD59422918DBD20055F632 /* CansConnect.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 2B4C0B2A28DC6B1600F35838 /* CansConnect.framework */; };
+		52BD59432918DBD20055F632 /* CansConnect.framework in Embed Frameworks */ = {isa = PBXBuildFile; fileRef = 2B4C0B2A28DC6B1600F35838 /* CansConnect.framework */; settings = {ATTRIBUTES = (CodeSignOnCopy, RemoveHeadersOnCopy, ); }; };
 		52BD5B592918E0880055F632 /* deploy.sh in Resources */ = {isa = PBXBuildFile; fileRef = 52BD5AA52918E0870055F632 /* deploy.sh */; };
 		52BD5B5A2918E0880055F632 /* nowebcamVGA.jpg in Resources */ = {isa = PBXBuildFile; fileRef = 52BD5AA92918E0870055F632 /* nowebcamVGA.jpg */; };
 		52BD5B5B2918E0880055F632 /* nowebcamCIF.jpg in Resources */ = {isa = PBXBuildFile; fileRef = 52BD5AAA2918E0870055F632 /* nowebcamCIF.jpg */; };
@@ -233,7 +232,7 @@
 			dstPath = "";
 			dstSubfolderSpec = 10;
 			files = (
-				52BD59432918DBD20055F632 /* canscloud_ios_framework.framework in Embed Frameworks */,
+				52BD59432918DBD20055F632 /* CansConnect.framework in Embed Frameworks */,
 			);
 			name = "Embed Frameworks";
 			runOnlyForDeploymentPostprocessing = 0;
@@ -269,11 +268,10 @@
 /* End PBXCopyFilesBuildPhase section */
 
 /* Begin PBXFileReference section */
-		2B4C0B2A28DC6B1600F35838 /* canscloud_ios_framework.framework */ = {isa = PBXFileReference; explicitFileType = wrapper.framework; includeInIndex = 0; path = canscloud_ios_framework.framework; sourceTree = BUILT_PRODUCTS_DIR; };
-		2B4C0B2D28DC6B1600F35838 /* canscloud_ios_framework.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = canscloud_ios_framework.h; sourceTree = "<group>"; };
-		2B4C0B2E28DC6B1600F35838 /* canscloud_ios_framework.docc */ = {isa = PBXFileReference; lastKnownFileType = folder.documentationcatalog; path = canscloud_ios_framework.docc; sourceTree = "<group>"; };
-		2B4C0B3428DC6B1700F35838 /* canscloud-ios-frameworkTests.xctest */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; includeInIndex = 0; path = "canscloud-ios-frameworkTests.xctest"; sourceTree = BUILT_PRODUCTS_DIR; };
-		2B4C0B3928DC6B1700F35838 /* canscloud_ios_frameworkTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = canscloud_ios_frameworkTests.swift; sourceTree = "<group>"; };
+		2B4C0B2A28DC6B1600F35838 /* CansConnect.framework */ = {isa = PBXFileReference; explicitFileType = wrapper.framework; includeInIndex = 0; path = CansConnect.framework; sourceTree = BUILT_PRODUCTS_DIR; };
+		2B4C0B2D28DC6B1600F35838 /* CansConnect.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = CansConnect.h; sourceTree = "<group>"; };
+		2B4C0B2E28DC6B1600F35838 /* CansConnect.docc */ = {isa = PBXFileReference; lastKnownFileType = folder.documentationcatalog; path = CansConnect.docc; sourceTree = "<group>"; };
+		2B4C0B3428DC6B1700F35838 /* CansConnectTests.xctest */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; includeInIndex = 0; path = CansConnectTests.xctest; sourceTree = BUILT_PRODUCTS_DIR; };
 		5273AF5D291C074900BB5201 /* linphone-sdk-Info.plist */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text.plist.xml; path = "linphone-sdk-Info.plist"; sourceTree = "<group>"; };
 		5273AF5E291C074900BB5201 /* linphone-sdk.release.xcconfig */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text.xcconfig; path = "linphone-sdk.release.xcconfig"; sourceTree = "<group>"; };
 		5273AF5F291C074900BB5201 /* linphone-sdk.debug.xcconfig */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text.xcconfig; path = "linphone-sdk.debug.xcconfig"; sourceTree = "<group>"; };
@@ -485,7 +483,7 @@
 			isa = PBXFrameworksBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
-				2B4C0B3528DC6B1700F35838 /* canscloud_ios_framework.framework in Frameworks */,
+				2B4C0B3528DC6B1700F35838 /* CansConnect.framework in Frameworks */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -493,7 +491,7 @@
 			isa = PBXFrameworksBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
-				52BD59422918DBD20055F632 /* canscloud_ios_framework.framework in Frameworks */,
+				52BD59422918DBD20055F632 /* CansConnect.framework in Frameworks */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -503,8 +501,7 @@
 		2B4C0B2028DC6B1600F35838 = {
 			isa = PBXGroup;
 			children = (
-				2B4C0B2C28DC6B1600F35838 /* canscloud-ios-framework */,
-				2B4C0B3828DC6B1700F35838 /* canscloud-ios-frameworkTests */,
+				2B4C0B2C28DC6B1600F35838 /* CansConnect */,
 				52BD592E2918DB5D0055F632 /* DemoApp */,
 				2B4C0B2B28DC6B1600F35838 /* Products */,
 				52BD59412918DBD20055F632 /* Frameworks */,
@@ -514,32 +511,24 @@
 		2B4C0B2B28DC6B1600F35838 /* Products */ = {
 			isa = PBXGroup;
 			children = (
-				2B4C0B2A28DC6B1600F35838 /* canscloud_ios_framework.framework */,
-				2B4C0B3428DC6B1700F35838 /* canscloud-ios-frameworkTests.xctest */,
+				2B4C0B2A28DC6B1600F35838 /* CansConnect.framework */,
+				2B4C0B3428DC6B1700F35838 /* CansConnectTests.xctest */,
 				52BD592D2918DB5D0055F632 /* DemoApp.app */,
 			);
 			name = Products;
 			sourceTree = "<group>";
 		};
-		2B4C0B2C28DC6B1600F35838 /* canscloud-ios-framework */ = {
+		2B4C0B2C28DC6B1600F35838 /* CansConnect */ = {
 			isa = PBXGroup;
 			children = (
 				5273AF5B291C074900BB5201 /* TargetSupportFiles */,
 				52BD5AA22918E0870055F632 /* linphone-sdk */,
 				52F5D74728EC4260003719E8 /* CansConnect.swift */,
 				52B2B255291CC3D30053E772 /* CoreManager.swift */,
-				2B4C0B2D28DC6B1600F35838 /* canscloud_ios_framework.h */,
-				2B4C0B2E28DC6B1600F35838 /* canscloud_ios_framework.docc */,
+				2B4C0B2D28DC6B1600F35838 /* CansConnect.h */,
+				2B4C0B2E28DC6B1600F35838 /* CansConnect.docc */,
 			);
-			path = "canscloud-ios-framework";
-			sourceTree = "<group>";
-		};
-		2B4C0B3828DC6B1700F35838 /* canscloud-ios-frameworkTests */ = {
-			isa = PBXGroup;
-			children = (
-				2B4C0B3928DC6B1700F35838 /* canscloud_ios_frameworkTests.swift */,
-			);
-			path = "canscloud-ios-frameworkTests";
+			path = CansConnect;
 			sourceTree = "<group>";
 		};
 		5273AF5B291C074900BB5201 /* TargetSupportFiles */ = {
@@ -907,16 +896,16 @@
 			files = (
 				5273AF67291C074900BB5201 /* linphone-sdk-umbrella.h in Headers */,
 				5273AF69291C074900BB5201 /* linphone-sdk-prefix.pch in Headers */,
-				2B4C0B3B28DC6B1700F35838 /* canscloud_ios_framework.h in Headers */,
+				2B4C0B3B28DC6B1700F35838 /* CansConnect.h in Headers */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
 /* End PBXHeadersBuildPhase section */
 
 /* Begin PBXNativeTarget section */
-		2B4C0B2928DC6B1600F35838 /* canscloud-ios-framework */ = {
+		2B4C0B2928DC6B1600F35838 /* CansConnect */ = {
 			isa = PBXNativeTarget;
-			buildConfigurationList = 2B4C0B3E28DC6B1700F35838 /* Build configuration list for PBXNativeTarget "canscloud-ios-framework" */;
+			buildConfigurationList = 2B4C0B3E28DC6B1700F35838 /* Build configuration list for PBXNativeTarget "CansConnect" */;
 			buildPhases = (
 				2B4C0B2528DC6B1600F35838 /* Headers */,
 				2B4C0B2628DC6B1600F35838 /* Sources */,
@@ -928,14 +917,14 @@
 			);
 			dependencies = (
 			);
-			name = "canscloud-ios-framework";
+			name = CansConnect;
 			productName = "canscloud-ios-framework";
-			productReference = 2B4C0B2A28DC6B1600F35838 /* canscloud_ios_framework.framework */;
+			productReference = 2B4C0B2A28DC6B1600F35838 /* CansConnect.framework */;
 			productType = "com.apple.product-type.framework";
 		};
-		2B4C0B3328DC6B1700F35838 /* canscloud-ios-frameworkTests */ = {
+		2B4C0B3328DC6B1700F35838 /* CansConnectTests */ = {
 			isa = PBXNativeTarget;
-			buildConfigurationList = 2B4C0B4128DC6B1700F35838 /* Build configuration list for PBXNativeTarget "canscloud-ios-frameworkTests" */;
+			buildConfigurationList = 2B4C0B4128DC6B1700F35838 /* Build configuration list for PBXNativeTarget "CansConnectTests" */;
 			buildPhases = (
 				6AE2E9172BB4986D63ACF8FB /* [CP] Check Pods Manifest.lock */,
 				2B4C0B3028DC6B1700F35838 /* Sources */,
@@ -947,9 +936,9 @@
 			dependencies = (
 				2B4C0B3728DC6B1700F35838 /* PBXTargetDependency */,
 			);
-			name = "canscloud-ios-frameworkTests";
+			name = CansConnectTests;
 			productName = "canscloud-ios-frameworkTests";
-			productReference = 2B4C0B3428DC6B1700F35838 /* canscloud-ios-frameworkTests.xctest */;
+			productReference = 2B4C0B3428DC6B1700F35838 /* CansConnectTests.xctest */;
 			productType = "com.apple.product-type.bundle.unit-test";
 		};
 		52BD592C2918DB5D0055F632 /* DemoApp */ = {
@@ -992,7 +981,7 @@
 					};
 				};
 			};
-			buildConfigurationList = 2B4C0B2428DC6B1600F35838 /* Build configuration list for PBXProject "canscloud-ios-framework" */;
+			buildConfigurationList = 2B4C0B2428DC6B1600F35838 /* Build configuration list for PBXProject "CansConnect" */;
 			compatibilityVersion = "Xcode 13.0";
 			developmentRegion = en;
 			hasScannedForEncodings = 0;
@@ -1005,8 +994,8 @@
 			projectDirPath = "";
 			projectRoot = "";
 			targets = (
-				2B4C0B2928DC6B1600F35838 /* canscloud-ios-framework */,
-				2B4C0B3328DC6B1700F35838 /* canscloud-ios-frameworkTests */,
+				2B4C0B2928DC6B1600F35838 /* CansConnect */,
+				2B4C0B3328DC6B1700F35838 /* CansConnectTests */,
 				52BD592C2918DB5D0055F632 /* DemoApp */,
 			);
 		};
@@ -1218,7 +1207,7 @@
 				5273AF68291C074900BB5201 /* linphone-sdk-dummy.m in Sources */,
 				52F5D74828EC4260003719E8 /* CansConnect.swift in Sources */,
 				52BD5BFC2918E0890055F632 /* LinphoneWrapper.swift in Sources */,
-				2B4C0B2F28DC6B1600F35838 /* canscloud_ios_framework.docc in Sources */,
+				2B4C0B2F28DC6B1600F35838 /* CansConnect.docc in Sources */,
 				52B2B256291CC3D30053E772 /* CoreManager.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
@@ -1227,7 +1216,6 @@
 			isa = PBXSourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
-				2B4C0B3A28DC6B1700F35838 /* canscloud_ios_frameworkTests.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -1246,12 +1234,12 @@
 /* Begin PBXTargetDependency section */
 		2B4C0B3728DC6B1700F35838 /* PBXTargetDependency */ = {
 			isa = PBXTargetDependency;
-			target = 2B4C0B2928DC6B1600F35838 /* canscloud-ios-framework */;
+			target = 2B4C0B2928DC6B1600F35838 /* CansConnect */;
 			targetProxy = 2B4C0B3628DC6B1700F35838 /* PBXContainerItemProxy */;
 		};
 		52BD59452918DBD20055F632 /* PBXTargetDependency */ = {
 			isa = PBXTargetDependency;
-			target = 2B4C0B2928DC6B1600F35838 /* canscloud-ios-framework */;
+			target = 2B4C0B2928DC6B1600F35838 /* CansConnect */;
 			targetProxy = 52BD59442918DBD20055F632 /* PBXContainerItemProxy */;
 		};
 /* End PBXTargetDependency section */
@@ -1411,7 +1399,7 @@
 				"EXCLUDED_ARCHS[sdk=iphonesimulator*]" = arm64;
 				FRAMEWORK_SEARCH_PATHS = (
 					"$(inherited)",
-					"$(PROJECT_DIR)/canscloud-ios-framework/linphone-sdk/apple-darwin/Frameworks",
+					"$(PROJECT_DIR)/CansConnect/linphone-sdk/apple-darwin/Frameworks",
 				);
 				GENERATE_INFOPLIST_FILE = YES;
 				INFOPLIST_KEY_NSHumanReadableCopyright = "";
@@ -1450,7 +1438,7 @@
 				"EXCLUDED_ARCHS[sdk=iphonesimulator*]" = arm64;
 				FRAMEWORK_SEARCH_PATHS = (
 					"$(inherited)",
-					"$(PROJECT_DIR)/canscloud-ios-framework/linphone-sdk/apple-darwin/Frameworks",
+					"$(PROJECT_DIR)/CansConnect/linphone-sdk/apple-darwin/Frameworks",
 				);
 				GENERATE_INFOPLIST_FILE = YES;
 				INFOPLIST_KEY_NSHumanReadableCopyright = "";
@@ -1579,7 +1567,7 @@
 /* End XCBuildConfiguration section */
 
 /* Begin XCConfigurationList section */
-		2B4C0B2428DC6B1600F35838 /* Build configuration list for PBXProject "canscloud-ios-framework" */ = {
+		2B4C0B2428DC6B1600F35838 /* Build configuration list for PBXProject "CansConnect" */ = {
 			isa = XCConfigurationList;
 			buildConfigurations = (
 				2B4C0B3C28DC6B1700F35838 /* Debug */,
@@ -1588,7 +1576,7 @@
 			defaultConfigurationIsVisible = 0;
 			defaultConfigurationName = Release;
 		};
-		2B4C0B3E28DC6B1700F35838 /* Build configuration list for PBXNativeTarget "canscloud-ios-framework" */ = {
+		2B4C0B3E28DC6B1700F35838 /* Build configuration list for PBXNativeTarget "CansConnect" */ = {
 			isa = XCConfigurationList;
 			buildConfigurations = (
 				2B4C0B3F28DC6B1700F35838 /* Debug */,
@@ -1597,7 +1585,7 @@
 			defaultConfigurationIsVisible = 0;
 			defaultConfigurationName = Release;
 		};
-		2B4C0B4128DC6B1700F35838 /* Build configuration list for PBXNativeTarget "canscloud-ios-frameworkTests" */ = {
+		2B4C0B4128DC6B1700F35838 /* Build configuration list for PBXNativeTarget "CansConnectTests" */ = {
 			isa = XCConfigurationList;
 			buildConfigurations = (
 				2B4C0B4228DC6B1700F35838 /* Debug */,

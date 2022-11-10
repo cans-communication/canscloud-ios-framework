@@ -6,7 +6,7 @@
 //
 
 import UIKit
-import canscloud_ios_framework
+import CansConnect
 
 class ViewController: UIViewController {
 

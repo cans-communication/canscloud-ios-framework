@@ -15,9 +15,9 @@
             <BuildableReference
                BuildableIdentifier = "primary"
                BlueprintIdentifier = "2B4C0B2928DC6B1600F35838"
-               BuildableName = "canscloud_ios_framework.framework"
-               BlueprintName = "canscloud-ios-framework"
-               ReferencedContainer = "container:canscloud-ios-framework.xcodeproj">
+               BuildableName = "CansConnect.framework"
+               BlueprintName = "CansConnect"
+               ReferencedContainer = "container:CansConnect.xcodeproj">
             </BuildableReference>
          </BuildActionEntry>
       </BuildActionEntries>
@@ -33,9 +33,9 @@
             <BuildableReference
                BuildableIdentifier = "primary"
                BlueprintIdentifier = "2B4C0B3328DC6B1700F35838"
-               BuildableName = "canscloud-ios-frameworkTests.xctest"
-               BlueprintName = "canscloud-ios-frameworkTests"
-               ReferencedContainer = "container:canscloud-ios-framework.xcodeproj">
+               BuildableName = "CansConnectTests.xctest"
+               BlueprintName = "CansConnectTests"
+               ReferencedContainer = "container:CansConnect.xcodeproj">
             </BuildableReference>
          </TestableReference>
       </Testables>
@@ -61,9 +61,9 @@
          <BuildableReference
             BuildableIdentifier = "primary"
             BlueprintIdentifier = "2B4C0B2928DC6B1600F35838"
-            BuildableName = "canscloud_ios_framework.framework"
-            BlueprintName = "canscloud-ios-framework"
-            ReferencedContainer = "container:canscloud-ios-framework.xcodeproj">
+            BuildableName = "CansConnect.framework"
+            BlueprintName = "CansConnect"
+            ReferencedContainer = "container:CansConnect.xcodeproj">
          </BuildableReference>
       </MacroExpansion>
    </ProfileAction>

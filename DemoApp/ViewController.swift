@@ -6,14 +6,16 @@
 //
 
 import UIKit
+import canscloud_ios_framework
 
 class ViewController: UIViewController {
 
     override func viewDidLoad() {
         super.viewDidLoad()
         // Do any additional setup after loading the view.
+        
+        print("callsNb: \(CoreManager.instance().callsNb)")
     }
 
 
 }
-

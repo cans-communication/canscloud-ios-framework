@@ -17,6 +17,7 @@
 		5273AF67291C074900BB5201 /* linphone-sdk-umbrella.h in Headers */ = {isa = PBXBuildFile; fileRef = 5273AF60291C074900BB5201 /* linphone-sdk-umbrella.h */; };
 		5273AF68291C074900BB5201 /* linphone-sdk-dummy.m in Sources */ = {isa = PBXBuildFile; fileRef = 5273AF62291C074900BB5201 /* linphone-sdk-dummy.m */; };
 		5273AF69291C074900BB5201 /* linphone-sdk-prefix.pch in Headers */ = {isa = PBXBuildFile; fileRef = 5273AF63291C074900BB5201 /* linphone-sdk-prefix.pch */; };
+		52B2B256291CC3D30053E772 /* CoreManager.swift in Sources */ = {isa = PBXBuildFile; fileRef = 52B2B255291CC3D30053E772 /* CoreManager.swift */; };
 		52BD59302918DB5D0055F632 /* AppDelegate.swift in Sources */ = {isa = PBXBuildFile; fileRef = 52BD592F2918DB5D0055F632 /* AppDelegate.swift */; };
 		52BD59322918DB5D0055F632 /* SceneDelegate.swift in Sources */ = {isa = PBXBuildFile; fileRef = 52BD59312918DB5D0055F632 /* SceneDelegate.swift */; };
 		52BD59342918DB5D0055F632 /* ViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = 52BD59332918DB5D0055F632 /* ViewController.swift */; };
@@ -280,6 +281,7 @@
 		5273AF61291C074900BB5201 /* linphone-sdk.modulemap */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = "sourcecode.module-map"; path = "linphone-sdk.modulemap"; sourceTree = "<group>"; };
 		5273AF62291C074900BB5201 /* linphone-sdk-dummy.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = "linphone-sdk-dummy.m"; sourceTree = "<group>"; };
 		5273AF63291C074900BB5201 /* linphone-sdk-prefix.pch */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = "linphone-sdk-prefix.pch"; sourceTree = "<group>"; };
+		52B2B255291CC3D30053E772 /* CoreManager.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = CoreManager.swift; sourceTree = "<group>"; };
 		52BD592D2918DB5D0055F632 /* DemoApp.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = DemoApp.app; sourceTree = BUILT_PRODUCTS_DIR; };
 		52BD592F2918DB5D0055F632 /* AppDelegate.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AppDelegate.swift; sourceTree = "<group>"; };
 		52BD59312918DB5D0055F632 /* SceneDelegate.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SceneDelegate.swift; sourceTree = "<group>"; };
@@ -525,6 +527,7 @@
 				5273AF5B291C074900BB5201 /* TargetSupportFiles */,
 				52BD5AA22918E0870055F632 /* linphone-sdk */,
 				52F5D74728EC4260003719E8 /* CansConnect.swift */,
+				52B2B255291CC3D30053E772 /* CoreManager.swift */,
 				2B4C0B2D28DC6B1600F35838 /* canscloud_ios_framework.h */,
 				2B4C0B2E28DC6B1600F35838 /* canscloud_ios_framework.docc */,
 			);
@@ -1216,6 +1219,7 @@
 				52F5D74828EC4260003719E8 /* CansConnect.swift in Sources */,
 				52BD5BFC2918E0890055F632 /* LinphoneWrapper.swift in Sources */,
 				2B4C0B2F28DC6B1600F35838 /* canscloud_ios_framework.docc in Sources */,
+				52B2B256291CC3D30053E772 /* CoreManager.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};

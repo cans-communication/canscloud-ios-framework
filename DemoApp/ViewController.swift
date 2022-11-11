@@ -14,7 +14,8 @@ class ViewController: UIViewController {
         super.viewDidLoad()
         // Do any additional setup after loading the view.
         
-        print("callsNb: \(CoreManager.instance().callsNb)")
+        let cansConnect = CansConnect()
+        cansConnect.register()
     }
 
 

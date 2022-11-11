@@ -93,5 +93,42 @@ public class CansConnect: NSObject, URLSessionDelegate {
             completionHandler(.performDefaultHandling, nil)
         }
     }
+    
+    
+    
+    public func register() {
+        let filename = "linphonerc-factory"
+        guard
+            let path = Bundle.main.path(forResource: filename.fileName(), ofType: filename.fileExtension())
+        else { return }
+        do {
+            let factoryConfigFilename = try String(contentsOfFile: path, encoding: String.Encoding.utf8)
 
+            guard let config = Config.newForSharedCore(
+                appGroupId: "group.cc.cans.canscloud.msgNotification",
+                configFilename: "linphonerc",
+                factoryConfigFilename: factoryConfigFilename
+            ) else { return }
+
+//            let _ = try Factory.Instance.createSharedCoreWithConfig(
+//                config: config,
+//                systemContext: nil,
+//                appGroupId: "group.cc.cans.canscloud.msgNotification",
+//                mainCore: true
+//            )
+        } catch {
+            print(error)
+        }
+    }
+
+}
+
+extension String {
+    func fileName() -> String {
+        return URL(fileURLWithPath: self).deletingPathExtension().lastPathComponent
+    }
+
+    func fileExtension() -> String {
+        return URL(fileURLWithPath: self).pathExtension
+    }
 }

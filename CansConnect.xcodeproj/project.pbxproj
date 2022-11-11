@@ -16,7 +16,20 @@
 		5273AF67291C074900BB5201 /* linphone-sdk-umbrella.h in Headers */ = {isa = PBXBuildFile; fileRef = 5273AF60291C074900BB5201 /* linphone-sdk-umbrella.h */; };
 		5273AF68291C074900BB5201 /* linphone-sdk-dummy.m in Sources */ = {isa = PBXBuildFile; fileRef = 5273AF62291C074900BB5201 /* linphone-sdk-dummy.m */; };
 		5273AF69291C074900BB5201 /* linphone-sdk-prefix.pch in Headers */ = {isa = PBXBuildFile; fileRef = 5273AF63291C074900BB5201 /* linphone-sdk-prefix.pch */; };
+		5298516E291CFF72007A9E3C /* OpenApp.json in Resources */ = {isa = PBXBuildFile; fileRef = 5298516D291CFF72007A9E3C /* OpenApp.json */; };
+		52985170291D03BE007A9E3C /* linphonerc-factory in Resources */ = {isa = PBXBuildFile; fileRef = 52B2B4D5291CE3A30053E772 /* linphonerc-factory */; };
+		52985178291DE455007A9E3C /* NotificationService.swift in Sources */ = {isa = PBXBuildFile; fileRef = 52985177291DE455007A9E3C /* NotificationService.swift */; };
+		5298517C291DE455007A9E3C /* msgNotificationService.appex in Embed Foundation Extensions */ = {isa = PBXBuildFile; fileRef = 52985175291DE455007A9E3C /* msgNotificationService.appex */; settings = {ATTRIBUTES = (RemoveHeadersOnCopy, ); }; };
+		52985188291DE4CF007A9E3C /* NotificationService.swift in Sources */ = {isa = PBXBuildFile; fileRef = 52985187291DE4CF007A9E3C /* NotificationService.swift */; };
+		5298518C291DE4CF007A9E3C /* msgNotificationContent.appex in Embed Foundation Extensions */ = {isa = PBXBuildFile; fileRef = 52985185291DE4CF007A9E3C /* msgNotificationContent.appex */; settings = {ATTRIBUTES = (RemoveHeadersOnCopy, ); }; };
 		52B2B256291CC3D30053E772 /* CoreManager.swift in Sources */ = {isa = PBXBuildFile; fileRef = 52B2B255291CC3D30053E772 /* CoreManager.swift */; };
+		52B2B4EA291CE3A50053E772 /* assistant_linphone_create.rc in Resources */ = {isa = PBXBuildFile; fileRef = 52B2B25F291CE39F0053E772 /* assistant_linphone_create.rc */; };
+		52B2B74B291CE3A60053E772 /* linphonerc~ipad in Resources */ = {isa = PBXBuildFile; fileRef = 52B2B4C4291CE3A30053E772 /* linphonerc~ipad */; };
+		52B2B74C291CE3A60053E772 /* assistant_linphone_existing.rc in Resources */ = {isa = PBXBuildFile; fileRef = 52B2B4C7291CE3A30053E772 /* assistant_linphone_existing.rc */; };
+		52B2B74D291CE3A60053E772 /* assistant_external_sip.rc in Resources */ = {isa = PBXBuildFile; fileRef = 52B2B4C8291CE3A30053E772 /* assistant_external_sip.rc */; };
+		52B2B755291CE3A60053E772 /* linphonerc-factory in Resources */ = {isa = PBXBuildFile; fileRef = 52B2B4D5291CE3A30053E772 /* linphonerc-factory */; };
+		52B2B757291CE3A60053E772 /* linphonerc in Resources */ = {isa = PBXBuildFile; fileRef = 52B2B4D8291CE3A30053E772 /* linphonerc */; };
+		52B2B758291CE3A60053E772 /* assistant_remote.rc in Resources */ = {isa = PBXBuildFile; fileRef = 52B2B4DC291CE3A30053E772 /* assistant_remote.rc */; };
 		52BD59302918DB5D0055F632 /* AppDelegate.swift in Sources */ = {isa = PBXBuildFile; fileRef = 52BD592F2918DB5D0055F632 /* AppDelegate.swift */; };
 		52BD59322918DB5D0055F632 /* SceneDelegate.swift in Sources */ = {isa = PBXBuildFile; fileRef = 52BD59312918DB5D0055F632 /* SceneDelegate.swift */; };
 		52BD59342918DB5D0055F632 /* ViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = 52BD59332918DB5D0055F632 /* ViewController.swift */; };
@@ -216,6 +229,20 @@
 			remoteGlobalIDString = 2B4C0B2928DC6B1600F35838;
 			remoteInfo = "canscloud-ios-framework";
 		};
+		5298517A291DE455007A9E3C /* PBXContainerItemProxy */ = {
+			isa = PBXContainerItemProxy;
+			containerPortal = 2B4C0B2128DC6B1600F35838 /* Project object */;
+			proxyType = 1;
+			remoteGlobalIDString = 52985174291DE455007A9E3C;
+			remoteInfo = msgNotificationService;
+		};
+		5298518A291DE4CF007A9E3C /* PBXContainerItemProxy */ = {
+			isa = PBXContainerItemProxy;
+			containerPortal = 2B4C0B2128DC6B1600F35838 /* Project object */;
+			proxyType = 1;
+			remoteGlobalIDString = 52985184291DE4CF007A9E3C;
+			remoteInfo = msgNotificationContent;
+		};
 		52BD59442918DBD20055F632 /* PBXContainerItemProxy */ = {
 			isa = PBXContainerItemProxy;
 			containerPortal = 2B4C0B2128DC6B1600F35838 /* Project object */;
@@ -226,6 +253,18 @@
 /* End PBXContainerItemProxy section */
 
 /* Begin PBXCopyFilesBuildPhase section */
+		52985180291DE455007A9E3C /* Embed Foundation Extensions */ = {
+			isa = PBXCopyFilesBuildPhase;
+			buildActionMask = 2147483647;
+			dstPath = "";
+			dstSubfolderSpec = 13;
+			files = (
+				5298517C291DE455007A9E3C /* msgNotificationService.appex in Embed Foundation Extensions */,
+				5298518C291DE4CF007A9E3C /* msgNotificationContent.appex in Embed Foundation Extensions */,
+			);
+			name = "Embed Foundation Extensions";
+			runOnlyForDeploymentPostprocessing = 0;
+		};
 		52BD59462918DBD20055F632 /* Embed Frameworks */ = {
 			isa = PBXCopyFilesBuildPhase;
 			buildActionMask = 2147483647;
@@ -279,7 +318,21 @@
 		5273AF61291C074900BB5201 /* linphone-sdk.modulemap */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = "sourcecode.module-map"; path = "linphone-sdk.modulemap"; sourceTree = "<group>"; };
 		5273AF62291C074900BB5201 /* linphone-sdk-dummy.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = "linphone-sdk-dummy.m"; sourceTree = "<group>"; };
 		5273AF63291C074900BB5201 /* linphone-sdk-prefix.pch */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = "linphone-sdk-prefix.pch"; sourceTree = "<group>"; };
+		5298516D291CFF72007A9E3C /* OpenApp.json */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text.json; path = OpenApp.json; sourceTree = "<group>"; };
+		52985175291DE455007A9E3C /* msgNotificationService.appex */ = {isa = PBXFileReference; explicitFileType = "wrapper.app-extension"; includeInIndex = 0; path = msgNotificationService.appex; sourceTree = BUILT_PRODUCTS_DIR; };
+		52985177291DE455007A9E3C /* NotificationService.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = NotificationService.swift; sourceTree = "<group>"; };
+		52985179291DE455007A9E3C /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = Info.plist; sourceTree = "<group>"; };
+		52985185291DE4CF007A9E3C /* msgNotificationContent.appex */ = {isa = PBXFileReference; explicitFileType = "wrapper.app-extension"; includeInIndex = 0; path = msgNotificationContent.appex; sourceTree = BUILT_PRODUCTS_DIR; };
+		52985187291DE4CF007A9E3C /* NotificationService.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = NotificationService.swift; sourceTree = "<group>"; };
+		52985189291DE4CF007A9E3C /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = Info.plist; sourceTree = "<group>"; };
 		52B2B255291CC3D30053E772 /* CoreManager.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = CoreManager.swift; sourceTree = "<group>"; };
+		52B2B25F291CE39F0053E772 /* assistant_linphone_create.rc */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text.xml; path = assistant_linphone_create.rc; sourceTree = "<group>"; };
+		52B2B4C4291CE3A30053E772 /* linphonerc~ipad */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text; path = "linphonerc~ipad"; sourceTree = "<group>"; };
+		52B2B4C7291CE3A30053E772 /* assistant_linphone_existing.rc */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text.xml; path = assistant_linphone_existing.rc; sourceTree = "<group>"; };
+		52B2B4C8291CE3A30053E772 /* assistant_external_sip.rc */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text.xml; path = assistant_external_sip.rc; sourceTree = "<group>"; };
+		52B2B4D5291CE3A30053E772 /* linphonerc-factory */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text; path = "linphonerc-factory"; sourceTree = "<group>"; };
+		52B2B4D8291CE3A30053E772 /* linphonerc */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text; path = linphonerc; sourceTree = "<group>"; };
+		52B2B4DC291CE3A30053E772 /* assistant_remote.rc */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text.xml; path = assistant_remote.rc; sourceTree = "<group>"; };
 		52BD592D2918DB5D0055F632 /* DemoApp.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = DemoApp.app; sourceTree = BUILT_PRODUCTS_DIR; };
 		52BD592F2918DB5D0055F632 /* AppDelegate.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AppDelegate.swift; sourceTree = "<group>"; };
 		52BD59312918DB5D0055F632 /* SceneDelegate.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SceneDelegate.swift; sourceTree = "<group>"; };
@@ -487,6 +540,20 @@
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
+		52985172291DE455007A9E3C /* Frameworks */ = {
+			isa = PBXFrameworksBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+		52985182291DE4CF007A9E3C /* Frameworks */ = {
+			isa = PBXFrameworksBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
 		52BD592A2918DB5D0055F632 /* Frameworks */ = {
 			isa = PBXFrameworksBuildPhase;
 			buildActionMask = 2147483647;
@@ -503,6 +570,8 @@
 			children = (
 				2B4C0B2C28DC6B1600F35838 /* CansConnect */,
 				52BD592E2918DB5D0055F632 /* DemoApp */,
+				52985176291DE455007A9E3C /* msgNotificationService */,
+				52985186291DE4CF007A9E3C /* msgNotificationContent */,
 				2B4C0B2B28DC6B1600F35838 /* Products */,
 				52BD59412918DBD20055F632 /* Frameworks */,
 			);
@@ -514,6 +583,8 @@
 				2B4C0B2A28DC6B1600F35838 /* CansConnect.framework */,
 				2B4C0B3428DC6B1700F35838 /* CansConnectTests.xctest */,
 				52BD592D2918DB5D0055F632 /* DemoApp.app */,
+				52985175291DE455007A9E3C /* msgNotificationService.appex */,
+				52985185291DE4CF007A9E3C /* msgNotificationContent.appex */,
 			);
 			name = Products;
 			sourceTree = "<group>";
@@ -521,6 +592,7 @@
 		2B4C0B2C28DC6B1600F35838 /* CansConnect */ = {
 			isa = PBXGroup;
 			children = (
+				52B2B257291CE39F0053E772 /* Resources */,
 				5273AF5B291C074900BB5201 /* TargetSupportFiles */,
 				52BD5AA22918E0870055F632 /* linphone-sdk */,
 				52F5D74728EC4260003719E8 /* CansConnect.swift */,
@@ -551,6 +623,39 @@
 				5273AF63291C074900BB5201 /* linphone-sdk-prefix.pch */,
 			);
 			path = "linphone-sdk";
+			sourceTree = "<group>";
+		};
+		52985176291DE455007A9E3C /* msgNotificationService */ = {
+			isa = PBXGroup;
+			children = (
+				52985177291DE455007A9E3C /* NotificationService.swift */,
+				52985179291DE455007A9E3C /* Info.plist */,
+			);
+			path = msgNotificationService;
+			sourceTree = "<group>";
+		};
+		52985186291DE4CF007A9E3C /* msgNotificationContent */ = {
+			isa = PBXGroup;
+			children = (
+				52985187291DE4CF007A9E3C /* NotificationService.swift */,
+				52985189291DE4CF007A9E3C /* Info.plist */,
+			);
+			path = msgNotificationContent;
+			sourceTree = "<group>";
+		};
+		52B2B257291CE39F0053E772 /* Resources */ = {
+			isa = PBXGroup;
+			children = (
+				5298516D291CFF72007A9E3C /* OpenApp.json */,
+				52B2B25F291CE39F0053E772 /* assistant_linphone_create.rc */,
+				52B2B4C4291CE3A30053E772 /* linphonerc~ipad */,
+				52B2B4C7291CE3A30053E772 /* assistant_linphone_existing.rc */,
+				52B2B4C8291CE3A30053E772 /* assistant_external_sip.rc */,
+				52B2B4D5291CE3A30053E772 /* linphonerc-factory */,
+				52B2B4D8291CE3A30053E772 /* linphonerc */,
+				52B2B4DC291CE3A30053E772 /* assistant_remote.rc */,
+			);
+			path = Resources;
 			sourceTree = "<group>";
 		};
 		52BD592E2918DB5D0055F632 /* DemoApp */ = {
@@ -941,6 +1046,40 @@
 			productReference = 2B4C0B3428DC6B1700F35838 /* CansConnectTests.xctest */;
 			productType = "com.apple.product-type.bundle.unit-test";
 		};
+		52985174291DE455007A9E3C /* msgNotificationService */ = {
+			isa = PBXNativeTarget;
+			buildConfigurationList = 5298517D291DE455007A9E3C /* Build configuration list for PBXNativeTarget "msgNotificationService" */;
+			buildPhases = (
+				52985171291DE455007A9E3C /* Sources */,
+				52985172291DE455007A9E3C /* Frameworks */,
+				52985173291DE455007A9E3C /* Resources */,
+			);
+			buildRules = (
+			);
+			dependencies = (
+			);
+			name = msgNotificationService;
+			productName = msgNotificationService;
+			productReference = 52985175291DE455007A9E3C /* msgNotificationService.appex */;
+			productType = "com.apple.product-type.app-extension";
+		};
+		52985184291DE4CF007A9E3C /* msgNotificationContent */ = {
+			isa = PBXNativeTarget;
+			buildConfigurationList = 5298518D291DE4CF007A9E3C /* Build configuration list for PBXNativeTarget "msgNotificationContent" */;
+			buildPhases = (
+				52985181291DE4CF007A9E3C /* Sources */,
+				52985182291DE4CF007A9E3C /* Frameworks */,
+				52985183291DE4CF007A9E3C /* Resources */,
+			);
+			buildRules = (
+			);
+			dependencies = (
+			);
+			name = msgNotificationContent;
+			productName = msgNotificationContent;
+			productReference = 52985185291DE4CF007A9E3C /* msgNotificationContent.appex */;
+			productType = "com.apple.product-type.app-extension";
+		};
 		52BD592C2918DB5D0055F632 /* DemoApp */ = {
 			isa = PBXNativeTarget;
 			buildConfigurationList = 52BD593E2918DB5F0055F632 /* Build configuration list for PBXNativeTarget "DemoApp" */;
@@ -949,11 +1088,14 @@
 				52BD592A2918DB5D0055F632 /* Frameworks */,
 				52BD592B2918DB5D0055F632 /* Resources */,
 				52BD59462918DBD20055F632 /* Embed Frameworks */,
+				52985180291DE455007A9E3C /* Embed Foundation Extensions */,
 			);
 			buildRules = (
 			);
 			dependencies = (
 				52BD59452918DBD20055F632 /* PBXTargetDependency */,
+				5298517B291DE455007A9E3C /* PBXTargetDependency */,
+				5298518B291DE4CF007A9E3C /* PBXTargetDependency */,
 			);
 			name = DemoApp;
 			productName = DemoApp;
@@ -976,6 +1118,12 @@
 					2B4C0B3328DC6B1700F35838 = {
 						CreatedOnToolsVersion = 13.4.1;
 					};
+					52985174291DE455007A9E3C = {
+						CreatedOnToolsVersion = 14.1;
+					};
+					52985184291DE4CF007A9E3C = {
+						CreatedOnToolsVersion = 14.1;
+					};
 					52BD592C2918DB5D0055F632 = {
 						CreatedOnToolsVersion = 14.1;
 					};
@@ -988,6 +1136,25 @@
 			knownRegions = (
 				en,
 				Base,
+				de,
+				ar,
+				ja,
+				uk,
+				zh_CN,
+				es,
+				pt_BR,
+				it,
+				sv,
+				cs,
+				hu,
+				ka,
+				tr,
+				pl,
+				zh_TW,
+				ru,
+				fr,
+				nl,
+				es_AR,
 			);
 			mainGroup = 2B4C0B2028DC6B1600F35838;
 			productRefGroup = 2B4C0B2B28DC6B1600F35838 /* Products */;
@@ -997,6 +1164,8 @@
 				2B4C0B2928DC6B1600F35838 /* CansConnect */,
 				2B4C0B3328DC6B1700F35838 /* CansConnectTests */,
 				52BD592C2918DB5D0055F632 /* DemoApp */,
+				52985174291DE455007A9E3C /* msgNotificationService */,
+				52985184291DE4CF007A9E3C /* msgNotificationContent */,
 			);
 		};
 /* End PBXProject section */
@@ -1031,6 +1200,7 @@
 				52BD5B752918E0880055F632 /* user1_key.pem in Resources */,
 				52BD5B992918E0880055F632 /* empty_rc in Resources */,
 				52BD5B832918E0880055F632 /* ringback.wav in Resources */,
+				52B2B74D291CE3A60053E772 /* assistant_external_sip.rc in Resources */,
 				52BD5BC62918E0880055F632 /* invalid_friends_rc in Resources */,
 				52BD5B592918E0880055F632 /* deploy.sh in Resources */,
 				52BD5BC12918E0880055F632 /* marie_zrtp_b256_rc in Resources */,
@@ -1041,6 +1211,7 @@
 				52BD5BA42918E0880055F632 /* stun_rc in Resources */,
 				52BD5BB02918E0880055F632 /* marie_remote_https_rc in Resources */,
 				52BD5B872918E0880055F632 /* messages.db in Resources */,
+				52B2B4EA291CE3A50053E772 /* assistant_linphone_create.rc in Resources */,
 				52BD5B8B2918E0880055F632 /* call_with_transfer_incoming_ringing_call.xml in Resources */,
 				52BD5B852918E0880055F632 /* sintel_trailer_pcmu_h264.mkv in Resources */,
 				52BD5B982918E0880055F632 /* claire_sips_rc in Resources */,
@@ -1073,6 +1244,7 @@
 				52BD5BDB2918E0880055F632 /* marie_nat64_rc in Resources */,
 				52BD5BD12918E0880055F632 /* marie_transient_remote_rc in Resources */,
 				52BD5BB12918E0880055F632 /* groupchat_lime_x3dh_rc in Resources */,
+				52B2B74B291CE3A60053E772 /* linphonerc~ipad in Resources */,
 				52BD5B7F2918E0880055F632 /* sintel_trailer_opus_h264.mkv in Resources */,
 				52BD5BD32918E0880055F632 /* marie_bodyless_rc in Resources */,
 				52BD5BC32918E0880055F632 /* pauline_tls_client_rc in Resources */,
@@ -1118,9 +1290,11 @@
 				52BD5B922918E0880055F632 /* marie_os_defined_rtp_ports_rc in Resources */,
 				52BD5B612918E0880055F632 /* vcards.vcf in Resources */,
 				52BD5BCC2918E0880055F632 /* remote_zero_length_params_rc in Resources */,
+				52B2B74C291CE3A60053E772 /* assistant_linphone_existing.rc in Resources */,
 				52BD5BB72918E0880055F632 /* pauline_external_rc in Resources */,
 				52BD5BCB2918E0880055F632 /* marie_remote_invalid_rc in Resources */,
 				52BD5BAE2918E0880055F632 /* pauline_os_defined_rtp_ports_rc in Resources */,
+				52B2B755291CE3A60053E772 /* linphonerc-factory in Resources */,
 				52BD5B712918E0880055F632 /* key3.pem in Resources */,
 				52BD5BDF2918E0880055F632 /* pauline_h264_rc in Resources */,
 				52BD5B732918E0880055F632 /* cert.pem in Resources */,
@@ -1133,6 +1307,7 @@
 				52BD5B7C2918E0880055F632 /* vrroom.wav in Resources */,
 				52BD5BE32918E0880055F632 /* marie_v4proxy_rc in Resources */,
 				52BD5BB92918E0880055F632 /* marie_early_rc in Resources */,
+				52B2B758291CE3A60053E772 /* assistant_remote.rc in Resources */,
 				52BD5BE62918E0880055F632 /* marie_zrtp_ecdh255_rc in Resources */,
 				52BD5B8D2918E0880055F632 /* call_with_multiple_audio_mline_in_sdp.xml in Resources */,
 				52BD5B7E2918E0880055F632 /* hello8000.wav in Resources */,
@@ -1141,8 +1316,10 @@
 				52BD5B882918E0880055F632 /* linphone.db in Resources */,
 				52BD5BCA2918E0880055F632 /* pauline_zrtp_ecdh255_rc in Resources */,
 				52BD5B722918E0880055F632 /* key2.pem in Resources */,
+				5298516E291CFF72007A9E3C /* OpenApp.json in Resources */,
 				52BD5BAC2918E0880055F632 /* marie_rtp_port_range_rc in Resources */,
 				5273AF64291C074900BB5201 /* linphone-sdk-Info.plist in Resources */,
+				52B2B757291CE3A60053E772 /* linphonerc in Resources */,
 				52BD5B962918E0880055F632 /* michelle_rc in Resources */,
 				52BD5B742918E0880055F632 /* user2_CN_cert.pem in Resources */,
 				52BD5B8A2918E0880055F632 /* chatrooms.db in Resources */,
@@ -1162,10 +1339,25 @@
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
+		52985173291DE455007A9E3C /* Resources */ = {
+			isa = PBXResourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+		52985183291DE4CF007A9E3C /* Resources */ = {
+			isa = PBXResourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
 		52BD592B2918DB5D0055F632 /* Resources */ = {
 			isa = PBXResourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				52985170291D03BE007A9E3C /* linphonerc-factory in Resources */,
 				52BD593C2918DB5F0055F632 /* LaunchScreen.storyboard in Resources */,
 				52BD59392918DB5E0055F632 /* Assets.xcassets in Resources */,
 				52BD59372918DB5D0055F632 /* Main.storyboard in Resources */,
@@ -1219,6 +1411,22 @@
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
+		52985171291DE455007A9E3C /* Sources */ = {
+			isa = PBXSourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				52985178291DE455007A9E3C /* NotificationService.swift in Sources */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+		52985181291DE4CF007A9E3C /* Sources */ = {
+			isa = PBXSourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				52985188291DE4CF007A9E3C /* NotificationService.swift in Sources */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
 		52BD59292918DB5D0055F632 /* Sources */ = {
 			isa = PBXSourcesBuildPhase;
 			buildActionMask = 2147483647;
@@ -1236,6 +1444,16 @@
 			isa = PBXTargetDependency;
 			target = 2B4C0B2928DC6B1600F35838 /* CansConnect */;
 			targetProxy = 2B4C0B3628DC6B1700F35838 /* PBXContainerItemProxy */;
+		};
+		5298517B291DE455007A9E3C /* PBXTargetDependency */ = {
+			isa = PBXTargetDependency;
+			target = 52985174291DE455007A9E3C /* msgNotificationService */;
+			targetProxy = 5298517A291DE455007A9E3C /* PBXContainerItemProxy */;
+		};
+		5298518B291DE4CF007A9E3C /* PBXTargetDependency */ = {
+			isa = PBXTargetDependency;
+			target = 52985184291DE4CF007A9E3C /* msgNotificationContent */;
+			targetProxy = 5298518A291DE4CF007A9E3C /* PBXContainerItemProxy */;
 		};
 		52BD59452918DBD20055F632 /* PBXTargetDependency */ = {
 			isa = PBXTargetDependency;
@@ -1496,12 +1714,138 @@
 			};
 			name = Release;
 		};
+		5298517E291DE455007A9E3C /* Debug */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				CLANG_CXX_LANGUAGE_STANDARD = "gnu++20";
+				"CODE_SIGN_IDENTITY[sdk=iphoneos*]" = "iPhone Developer";
+				CODE_SIGN_STYLE = Manual;
+				CURRENT_PROJECT_VERSION = 1;
+				DEVELOPMENT_TEAM = "";
+				"DEVELOPMENT_TEAM[sdk=iphoneos*]" = N27H9XFR3R;
+				GENERATE_INFOPLIST_FILE = YES;
+				INFOPLIST_FILE = msgNotificationService/Info.plist;
+				INFOPLIST_KEY_CFBundleDisplayName = msgNotificationService;
+				INFOPLIST_KEY_NSHumanReadableCopyright = "";
+				IPHONEOS_DEPLOYMENT_TARGET = 16.1;
+				LD_RUNPATH_SEARCH_PATHS = (
+					"$(inherited)",
+					"@executable_path/Frameworks",
+					"@executable_path/../../Frameworks",
+				);
+				MARKETING_VERSION = 1.0;
+				PRODUCT_BUNDLE_IDENTIFIER = cc.cans.canscloud.msgNotificationService;
+				PRODUCT_NAME = "$(TARGET_NAME)";
+				PROVISIONING_PROFILE_SPECIFIER = "";
+				"PROVISIONING_PROFILE_SPECIFIER[sdk=iphoneos*]" = "CANS Cloud msgNotificationService Development";
+				SKIP_INSTALL = YES;
+				SWIFT_EMIT_LOC_STRINGS = YES;
+				SWIFT_VERSION = 5.0;
+				TARGETED_DEVICE_FAMILY = "1,2";
+			};
+			name = Debug;
+		};
+		5298517F291DE455007A9E3C /* Release */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				CLANG_CXX_LANGUAGE_STANDARD = "gnu++20";
+				"CODE_SIGN_IDENTITY[sdk=iphoneos*]" = "iPhone Developer";
+				CODE_SIGN_STYLE = Manual;
+				CURRENT_PROJECT_VERSION = 1;
+				DEVELOPMENT_TEAM = "";
+				"DEVELOPMENT_TEAM[sdk=iphoneos*]" = N27H9XFR3R;
+				GENERATE_INFOPLIST_FILE = YES;
+				INFOPLIST_FILE = msgNotificationService/Info.plist;
+				INFOPLIST_KEY_CFBundleDisplayName = msgNotificationService;
+				INFOPLIST_KEY_NSHumanReadableCopyright = "";
+				IPHONEOS_DEPLOYMENT_TARGET = 16.1;
+				LD_RUNPATH_SEARCH_PATHS = (
+					"$(inherited)",
+					"@executable_path/Frameworks",
+					"@executable_path/../../Frameworks",
+				);
+				MARKETING_VERSION = 1.0;
+				PRODUCT_BUNDLE_IDENTIFIER = cc.cans.canscloud.msgNotificationService;
+				PRODUCT_NAME = "$(TARGET_NAME)";
+				PROVISIONING_PROFILE_SPECIFIER = "";
+				"PROVISIONING_PROFILE_SPECIFIER[sdk=iphoneos*]" = "CANS Cloud msgNotificationService Development";
+				SKIP_INSTALL = YES;
+				SWIFT_EMIT_LOC_STRINGS = YES;
+				SWIFT_VERSION = 5.0;
+				TARGETED_DEVICE_FAMILY = "1,2";
+			};
+			name = Release;
+		};
+		5298518E291DE4CF007A9E3C /* Debug */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				CLANG_CXX_LANGUAGE_STANDARD = "gnu++20";
+				"CODE_SIGN_IDENTITY[sdk=iphoneos*]" = "iPhone Developer";
+				CODE_SIGN_STYLE = Manual;
+				CURRENT_PROJECT_VERSION = 1;
+				DEVELOPMENT_TEAM = "";
+				"DEVELOPMENT_TEAM[sdk=iphoneos*]" = N27H9XFR3R;
+				GENERATE_INFOPLIST_FILE = YES;
+				INFOPLIST_FILE = msgNotificationContent/Info.plist;
+				INFOPLIST_KEY_CFBundleDisplayName = msgNotificationContent;
+				INFOPLIST_KEY_NSHumanReadableCopyright = "";
+				IPHONEOS_DEPLOYMENT_TARGET = 16.1;
+				LD_RUNPATH_SEARCH_PATHS = (
+					"$(inherited)",
+					"@executable_path/Frameworks",
+					"@executable_path/../../Frameworks",
+				);
+				MARKETING_VERSION = 1.0;
+				PRODUCT_BUNDLE_IDENTIFIER = cc.cans.canscloud.msgNotificationContent;
+				PRODUCT_NAME = "$(TARGET_NAME)";
+				PROVISIONING_PROFILE_SPECIFIER = "";
+				"PROVISIONING_PROFILE_SPECIFIER[sdk=iphoneos*]" = "CANS Cloud msgNotificationContent Development";
+				SKIP_INSTALL = YES;
+				SWIFT_EMIT_LOC_STRINGS = YES;
+				SWIFT_VERSION = 5.0;
+				TARGETED_DEVICE_FAMILY = "1,2";
+			};
+			name = Debug;
+		};
+		5298518F291DE4CF007A9E3C /* Release */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				CLANG_CXX_LANGUAGE_STANDARD = "gnu++20";
+				"CODE_SIGN_IDENTITY[sdk=iphoneos*]" = "iPhone Developer";
+				CODE_SIGN_STYLE = Manual;
+				CURRENT_PROJECT_VERSION = 1;
+				DEVELOPMENT_TEAM = "";
+				"DEVELOPMENT_TEAM[sdk=iphoneos*]" = N27H9XFR3R;
+				GENERATE_INFOPLIST_FILE = YES;
+				INFOPLIST_FILE = msgNotificationContent/Info.plist;
+				INFOPLIST_KEY_CFBundleDisplayName = msgNotificationContent;
+				INFOPLIST_KEY_NSHumanReadableCopyright = "";
+				IPHONEOS_DEPLOYMENT_TARGET = 16.1;
+				LD_RUNPATH_SEARCH_PATHS = (
+					"$(inherited)",
+					"@executable_path/Frameworks",
+					"@executable_path/../../Frameworks",
+				);
+				MARKETING_VERSION = 1.0;
+				PRODUCT_BUNDLE_IDENTIFIER = cc.cans.canscloud.msgNotificationContent;
+				PRODUCT_NAME = "$(TARGET_NAME)";
+				PROVISIONING_PROFILE_SPECIFIER = "";
+				"PROVISIONING_PROFILE_SPECIFIER[sdk=iphoneos*]" = "CANS Cloud msgNotificationContent Development";
+				SKIP_INSTALL = YES;
+				SWIFT_EMIT_LOC_STRINGS = YES;
+				SWIFT_VERSION = 5.0;
+				TARGETED_DEVICE_FAMILY = "1,2";
+			};
+			name = Release;
+		};
 		52BD593F2918DB5F0055F632 /* Debug */ = {
 			isa = XCBuildConfiguration;
 			buildSettings = {
+				ALWAYS_EMBED_SWIFT_STANDARD_LIBRARIES = YES;
 				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
 				ASSETCATALOG_COMPILER_GLOBAL_ACCENT_COLOR_NAME = AccentColor;
 				CLANG_CXX_LANGUAGE_STANDARD = "gnu++20";
+				CODE_SIGN_ENTITLEMENTS = "";
 				"CODE_SIGN_IDENTITY[sdk=iphoneos*]" = "iPhone Developer";
 				CODE_SIGN_STYLE = Manual;
 				CURRENT_PROJECT_VERSION = 1;
@@ -1520,10 +1864,10 @@
 					"@executable_path/Frameworks",
 				);
 				MARKETING_VERSION = 1.0;
-				PRODUCT_BUNDLE_IDENTIFIER = cc.cans.demoapp;
+				PRODUCT_BUNDLE_IDENTIFIER = cc.cans.canscloud;
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				PROVISIONING_PROFILE_SPECIFIER = "";
-				"PROVISIONING_PROFILE_SPECIFIER[sdk=iphoneos*]" = "Demo App Development";
+				"PROVISIONING_PROFILE_SPECIFIER[sdk=iphoneos*]" = "CANS Cloud Development";
 				SWIFT_EMIT_LOC_STRINGS = YES;
 				SWIFT_VERSION = 5.0;
 				TARGETED_DEVICE_FAMILY = "1,2";
@@ -1533,9 +1877,11 @@
 		52BD59402918DB5F0055F632 /* Release */ = {
 			isa = XCBuildConfiguration;
 			buildSettings = {
+				ALWAYS_EMBED_SWIFT_STANDARD_LIBRARIES = YES;
 				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
 				ASSETCATALOG_COMPILER_GLOBAL_ACCENT_COLOR_NAME = AccentColor;
 				CLANG_CXX_LANGUAGE_STANDARD = "gnu++20";
+				CODE_SIGN_ENTITLEMENTS = "";
 				"CODE_SIGN_IDENTITY[sdk=iphoneos*]" = "iPhone Developer";
 				CODE_SIGN_STYLE = Manual;
 				CURRENT_PROJECT_VERSION = 1;
@@ -1554,10 +1900,10 @@
 					"@executable_path/Frameworks",
 				);
 				MARKETING_VERSION = 1.0;
-				PRODUCT_BUNDLE_IDENTIFIER = cc.cans.demoapp;
+				PRODUCT_BUNDLE_IDENTIFIER = cc.cans.canscloud;
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				PROVISIONING_PROFILE_SPECIFIER = "";
-				"PROVISIONING_PROFILE_SPECIFIER[sdk=iphoneos*]" = "Demo App Development";
+				"PROVISIONING_PROFILE_SPECIFIER[sdk=iphoneos*]" = "CANS Cloud Development";
 				SWIFT_EMIT_LOC_STRINGS = YES;
 				SWIFT_VERSION = 5.0;
 				TARGETED_DEVICE_FAMILY = "1,2";
@@ -1590,6 +1936,24 @@
 			buildConfigurations = (
 				2B4C0B4228DC6B1700F35838 /* Debug */,
 				2B4C0B4328DC6B1700F35838 /* Release */,
+			);
+			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Release;
+		};
+		5298517D291DE455007A9E3C /* Build configuration list for PBXNativeTarget "msgNotificationService" */ = {
+			isa = XCConfigurationList;
+			buildConfigurations = (
+				5298517E291DE455007A9E3C /* Debug */,
+				5298517F291DE455007A9E3C /* Release */,
+			);
+			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Release;
+		};
+		5298518D291DE4CF007A9E3C /* Build configuration list for PBXNativeTarget "msgNotificationContent" */ = {
+			isa = XCConfigurationList;
+			buildConfigurations = (
+				5298518E291DE4CF007A9E3C /* Debug */,
+				5298518F291DE4CF007A9E3C /* Release */,
 			);
 			defaultConfigurationIsVisible = 0;
 			defaultConfigurationName = Release;

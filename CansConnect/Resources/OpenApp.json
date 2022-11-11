@@ -1,0 +1,11 @@
+{
+  "code": 200,
+  "success": true,
+  "message": "Success",
+  "data": {
+    "version": "1.0.1",
+    "status_update": "noupdate",
+    "title_message": "Update Version",
+    "body_message": "Update Phone Book"
+  }
+}

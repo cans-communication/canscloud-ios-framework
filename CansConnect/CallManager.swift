@@ -113,11 +113,11 @@ import AVFoundation
 	}
 
 	@objc static func callKitEnabled() -> Bool {
-		#if !targetEnvironment(simulator)
-		if ConfigManager.instance().lpConfigBoolForKey(key: "use_callkit", section: "app") {
-			return true
-		}
-		#endif
+//		#if !targetEnvironment(simulator)
+//		if ConfigManager.instance().lpConfigBoolForKey(key: "use_callkit", section: "app") {
+//			return true
+//		}
+//		#endif
 		return false
 	}
 

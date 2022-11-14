@@ -15,7 +15,8 @@ class ViewController: UIViewController {
         // Do any additional setup after loading the view.
         
         let cansConnect = CansConnect()
-        cansConnect.register()
+//        cansConnect.registerWithSwift()
+        cansConnect.registerWithObjC()
     }
 
 

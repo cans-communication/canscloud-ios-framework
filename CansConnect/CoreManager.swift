@@ -20,7 +20,7 @@
 import Foundation
 //import linphonesw
 
-@objc public class CoreManager: NSObject {
+@objc class CoreManager: NSObject {
 	static var theCoreManager: CoreManager?
 	var lc: Core?
 	private var mIterateTimer: Timer?

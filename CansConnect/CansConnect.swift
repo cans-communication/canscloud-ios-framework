@@ -96,7 +96,7 @@ public class CansConnect: NSObject, URLSessionDelegate {
     
     
     
-    public func register() {
+    public func registerWithSwift() {
         let filename = "linphonerc-factory"
         guard
             let path = Bundle.main.path(forResource: filename.fileName(), ofType: filename.fileExtension())
@@ -110,15 +110,23 @@ public class CansConnect: NSObject, URLSessionDelegate {
                 factoryConfigFilename: factoryConfigFilename
             ) else { return }
 
-//            let _ = try Factory.Instance.createSharedCoreWithConfig(
-//                config: config,
-//                systemContext: nil,
-//                appGroupId: "group.cc.cans.canscloud.msgNotification",
-//                mainCore: true
-//            )
+            let _ = try Factory.Instance.createSharedCoreWithConfig(
+                config: config,
+                systemContext: nil,
+                appGroupId: "group.cc.cans.canscloud.msgNotification",
+                mainCore: true
+            )
         } catch {
             print(error)
         }
+    }
+    
+    public func registerWithObjC() {
+        
+    }
+    
+    @objc public func startCall(addr: OpaquePointer?, isSas: Bool) {
+        CallManager.instance().startCall(addr: addr, isSas: isSas)
     }
 
 }

@@ -10,6 +10,11 @@
 		2B4C0B2F28DC6B1600F35838 /* CansConnect.docc in Sources */ = {isa = PBXBuildFile; fileRef = 2B4C0B2E28DC6B1600F35838 /* CansConnect.docc */; };
 		2B4C0B3528DC6B1700F35838 /* CansConnect.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 2B4C0B2A28DC6B1600F35838 /* CansConnect.framework */; };
 		2B4C0B3B28DC6B1700F35838 /* CansConnect.h in Headers */ = {isa = PBXBuildFile; fileRef = 2B4C0B2D28DC6B1600F35838 /* CansConnect.h */; settings = {ATTRIBUTES = (Public, ); }; };
+		525D5E272921068A0072429F /* LinphoneManager.h in Headers */ = {isa = PBXBuildFile; fileRef = 525D5E252921068A0072429F /* LinphoneManager.h */; };
+		525D5E282921068A0072429F /* LinphoneManager.m in Sources */ = {isa = PBXBuildFile; fileRef = 525D5E262921068A0072429F /* LinphoneManager.m */; };
+		525D5E3029220A510072429F /* CallManager.swift in Sources */ = {isa = PBXBuildFile; fileRef = 525D5E2F29220A510072429F /* CallManager.swift */; };
+		525D5E3229220AD60072429F /* ProviderDelegate.swift in Sources */ = {isa = PBXBuildFile; fileRef = 525D5E3129220AD50072429F /* ProviderDelegate.swift */; };
+		525D5E3429220BFB0072429F /* AppManager.swift in Sources */ = {isa = PBXBuildFile; fileRef = 525D5E3329220BFB0072429F /* AppManager.swift */; };
 		5273AF64291C074900BB5201 /* linphone-sdk-Info.plist in Resources */ = {isa = PBXBuildFile; fileRef = 5273AF5D291C074900BB5201 /* linphone-sdk-Info.plist */; };
 		5273AF65291C074900BB5201 /* linphone-sdk.release.xcconfig in Resources */ = {isa = PBXBuildFile; fileRef = 5273AF5E291C074900BB5201 /* linphone-sdk.release.xcconfig */; };
 		5273AF66291C074900BB5201 /* linphone-sdk.debug.xcconfig in Resources */ = {isa = PBXBuildFile; fileRef = 5273AF5F291C074900BB5201 /* linphone-sdk.debug.xcconfig */; };
@@ -311,6 +316,13 @@
 		2B4C0B2D28DC6B1600F35838 /* CansConnect.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = CansConnect.h; sourceTree = "<group>"; };
 		2B4C0B2E28DC6B1600F35838 /* CansConnect.docc */ = {isa = PBXFileReference; lastKnownFileType = folder.documentationcatalog; path = CansConnect.docc; sourceTree = "<group>"; };
 		2B4C0B3428DC6B1700F35838 /* CansConnectTests.xctest */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; includeInIndex = 0; path = CansConnectTests.xctest; sourceTree = BUILT_PRODUCTS_DIR; };
+		5254DCAC291FC49100993979 /* msgNotificationService.entitlements */ = {isa = PBXFileReference; lastKnownFileType = text.plist.entitlements; path = msgNotificationService.entitlements; sourceTree = "<group>"; };
+		5254DCAD291FC4AA00993979 /* msgNotificationContent.entitlements */ = {isa = PBXFileReference; lastKnownFileType = text.plist.entitlements; path = msgNotificationContent.entitlements; sourceTree = "<group>"; };
+		525D5E252921068A0072429F /* LinphoneManager.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = LinphoneManager.h; sourceTree = "<group>"; };
+		525D5E262921068A0072429F /* LinphoneManager.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = LinphoneManager.m; sourceTree = "<group>"; };
+		525D5E2F29220A510072429F /* CallManager.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = CallManager.swift; sourceTree = "<group>"; };
+		525D5E3129220AD50072429F /* ProviderDelegate.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = ProviderDelegate.swift; sourceTree = "<group>"; };
+		525D5E3329220BFB0072429F /* AppManager.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = AppManager.swift; sourceTree = "<group>"; };
 		5273AF5D291C074900BB5201 /* linphone-sdk-Info.plist */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text.plist.xml; path = "linphone-sdk-Info.plist"; sourceTree = "<group>"; };
 		5273AF5E291C074900BB5201 /* linphone-sdk.release.xcconfig */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text.xcconfig; path = "linphone-sdk.release.xcconfig"; sourceTree = "<group>"; };
 		5273AF5F291C074900BB5201 /* linphone-sdk.debug.xcconfig */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text.xcconfig; path = "linphone-sdk.debug.xcconfig"; sourceTree = "<group>"; };
@@ -325,6 +337,7 @@
 		52985185291DE4CF007A9E3C /* msgNotificationContent.appex */ = {isa = PBXFileReference; explicitFileType = "wrapper.app-extension"; includeInIndex = 0; path = msgNotificationContent.appex; sourceTree = BUILT_PRODUCTS_DIR; };
 		52985187291DE4CF007A9E3C /* NotificationService.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = NotificationService.swift; sourceTree = "<group>"; };
 		52985189291DE4CF007A9E3C /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = Info.plist; sourceTree = "<group>"; };
+		52985191291DEBE7007A9E3C /* DemoApp.entitlements */ = {isa = PBXFileReference; lastKnownFileType = text.plist.entitlements; path = DemoApp.entitlements; sourceTree = "<group>"; };
 		52B2B255291CC3D30053E772 /* CoreManager.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = CoreManager.swift; sourceTree = "<group>"; };
 		52B2B25F291CE39F0053E772 /* assistant_linphone_create.rc */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text.xml; path = assistant_linphone_create.rc; sourceTree = "<group>"; };
 		52B2B4C4291CE3A30053E772 /* linphonerc~ipad */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text; path = "linphonerc~ipad"; sourceTree = "<group>"; };
@@ -592,15 +605,36 @@
 		2B4C0B2C28DC6B1600F35838 /* CansConnect */ = {
 			isa = PBXGroup;
 			children = (
+				525D5E2E2921EE870072429F /* ObjC */,
 				52B2B257291CE39F0053E772 /* Resources */,
 				5273AF5B291C074900BB5201 /* TargetSupportFiles */,
 				52BD5AA22918E0870055F632 /* linphone-sdk */,
 				52F5D74728EC4260003719E8 /* CansConnect.swift */,
 				52B2B255291CC3D30053E772 /* CoreManager.swift */,
+				525D5E2F29220A510072429F /* CallManager.swift */,
+				525D5E3129220AD50072429F /* ProviderDelegate.swift */,
+				525D5E3329220BFB0072429F /* AppManager.swift */,
 				2B4C0B2D28DC6B1600F35838 /* CansConnect.h */,
 				2B4C0B2E28DC6B1600F35838 /* CansConnect.docc */,
 			);
 			path = CansConnect;
+			sourceTree = "<group>";
+		};
+		525D5E202920F4870072429F /* LinphoneManager */ = {
+			isa = PBXGroup;
+			children = (
+				525D5E252921068A0072429F /* LinphoneManager.h */,
+				525D5E262921068A0072429F /* LinphoneManager.m */,
+			);
+			path = LinphoneManager;
+			sourceTree = "<group>";
+		};
+		525D5E2E2921EE870072429F /* ObjC */ = {
+			isa = PBXGroup;
+			children = (
+				525D5E202920F4870072429F /* LinphoneManager */,
+			);
+			path = ObjC;
 			sourceTree = "<group>";
 		};
 		5273AF5B291C074900BB5201 /* TargetSupportFiles */ = {
@@ -628,6 +662,7 @@
 		52985176291DE455007A9E3C /* msgNotificationService */ = {
 			isa = PBXGroup;
 			children = (
+				5254DCAC291FC49100993979 /* msgNotificationService.entitlements */,
 				52985177291DE455007A9E3C /* NotificationService.swift */,
 				52985179291DE455007A9E3C /* Info.plist */,
 			);
@@ -637,6 +672,7 @@
 		52985186291DE4CF007A9E3C /* msgNotificationContent */ = {
 			isa = PBXGroup;
 			children = (
+				5254DCAD291FC4AA00993979 /* msgNotificationContent.entitlements */,
 				52985187291DE4CF007A9E3C /* NotificationService.swift */,
 				52985189291DE4CF007A9E3C /* Info.plist */,
 			);
@@ -661,6 +697,7 @@
 		52BD592E2918DB5D0055F632 /* DemoApp */ = {
 			isa = PBXGroup;
 			children = (
+				52985191291DEBE7007A9E3C /* DemoApp.entitlements */,
 				52BD592F2918DB5D0055F632 /* AppDelegate.swift */,
 				52BD59312918DB5D0055F632 /* SceneDelegate.swift */,
 				52BD59332918DB5D0055F632 /* ViewController.swift */,
@@ -1002,6 +1039,7 @@
 				5273AF67291C074900BB5201 /* linphone-sdk-umbrella.h in Headers */,
 				5273AF69291C074900BB5201 /* linphone-sdk-prefix.pch in Headers */,
 				2B4C0B3B28DC6B1700F35838 /* CansConnect.h in Headers */,
+				525D5E272921068A0072429F /* LinphoneManager.h in Headers */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -1396,11 +1434,15 @@
 			isa = PBXSourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				525D5E282921068A0072429F /* LinphoneManager.m in Sources */,
 				5273AF68291C074900BB5201 /* linphone-sdk-dummy.m in Sources */,
 				52F5D74828EC4260003719E8 /* CansConnect.swift in Sources */,
+				525D5E3029220A510072429F /* CallManager.swift in Sources */,
 				52BD5BFC2918E0890055F632 /* LinphoneWrapper.swift in Sources */,
 				2B4C0B2F28DC6B1600F35838 /* CansConnect.docc in Sources */,
+				525D5E3429220BFB0072429F /* AppManager.swift in Sources */,
 				52B2B256291CC3D30053E772 /* CoreManager.swift in Sources */,
+				525D5E3229220AD60072429F /* ProviderDelegate.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -1718,6 +1760,7 @@
 			isa = XCBuildConfiguration;
 			buildSettings = {
 				CLANG_CXX_LANGUAGE_STANDARD = "gnu++20";
+				CODE_SIGN_ENTITLEMENTS = msgNotificationService/msgNotificationService.entitlements;
 				"CODE_SIGN_IDENTITY[sdk=iphoneos*]" = "iPhone Developer";
 				CODE_SIGN_STYLE = Manual;
 				CURRENT_PROJECT_VERSION = 1;
@@ -1749,6 +1792,7 @@
 			isa = XCBuildConfiguration;
 			buildSettings = {
 				CLANG_CXX_LANGUAGE_STANDARD = "gnu++20";
+				CODE_SIGN_ENTITLEMENTS = msgNotificationService/msgNotificationService.entitlements;
 				"CODE_SIGN_IDENTITY[sdk=iphoneos*]" = "iPhone Developer";
 				CODE_SIGN_STYLE = Manual;
 				CURRENT_PROJECT_VERSION = 1;
@@ -1780,6 +1824,7 @@
 			isa = XCBuildConfiguration;
 			buildSettings = {
 				CLANG_CXX_LANGUAGE_STANDARD = "gnu++20";
+				CODE_SIGN_ENTITLEMENTS = msgNotificationContent/msgNotificationContent.entitlements;
 				"CODE_SIGN_IDENTITY[sdk=iphoneos*]" = "iPhone Developer";
 				CODE_SIGN_STYLE = Manual;
 				CURRENT_PROJECT_VERSION = 1;
@@ -1811,6 +1856,7 @@
 			isa = XCBuildConfiguration;
 			buildSettings = {
 				CLANG_CXX_LANGUAGE_STANDARD = "gnu++20";
+				CODE_SIGN_ENTITLEMENTS = msgNotificationContent/msgNotificationContent.entitlements;
 				"CODE_SIGN_IDENTITY[sdk=iphoneos*]" = "iPhone Developer";
 				CODE_SIGN_STYLE = Manual;
 				CURRENT_PROJECT_VERSION = 1;
@@ -1845,7 +1891,7 @@
 				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
 				ASSETCATALOG_COMPILER_GLOBAL_ACCENT_COLOR_NAME = AccentColor;
 				CLANG_CXX_LANGUAGE_STANDARD = "gnu++20";
-				CODE_SIGN_ENTITLEMENTS = "";
+				CODE_SIGN_ENTITLEMENTS = DemoApp/DemoApp.entitlements;
 				"CODE_SIGN_IDENTITY[sdk=iphoneos*]" = "iPhone Developer";
 				CODE_SIGN_STYLE = Manual;
 				CURRENT_PROJECT_VERSION = 1;
@@ -1881,7 +1927,7 @@
 				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
 				ASSETCATALOG_COMPILER_GLOBAL_ACCENT_COLOR_NAME = AccentColor;
 				CLANG_CXX_LANGUAGE_STANDARD = "gnu++20";
-				CODE_SIGN_ENTITLEMENTS = "";
+				CODE_SIGN_ENTITLEMENTS = DemoApp/DemoApp.entitlements;
 				"CODE_SIGN_IDENTITY[sdk=iphoneos*]" = "iPhone Developer";
 				CODE_SIGN_STYLE = Manual;
 				CURRENT_PROJECT_VERSION = 1;

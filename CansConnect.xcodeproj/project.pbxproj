@@ -27,7 +27,6 @@
 		5298517C291DE455007A9E3C /* msgNotificationService.appex in Embed Foundation Extensions */ = {isa = PBXBuildFile; fileRef = 52985175291DE455007A9E3C /* msgNotificationService.appex */; settings = {ATTRIBUTES = (RemoveHeadersOnCopy, ); }; };
 		52985188291DE4CF007A9E3C /* NotificationService.swift in Sources */ = {isa = PBXBuildFile; fileRef = 52985187291DE4CF007A9E3C /* NotificationService.swift */; };
 		5298518C291DE4CF007A9E3C /* msgNotificationContent.appex in Embed Foundation Extensions */ = {isa = PBXBuildFile; fileRef = 52985185291DE4CF007A9E3C /* msgNotificationContent.appex */; settings = {ATTRIBUTES = (RemoveHeadersOnCopy, ); }; };
-		52B2B256291CC3D30053E772 /* CoreManager.swift in Sources */ = {isa = PBXBuildFile; fileRef = 52B2B255291CC3D30053E772 /* CoreManager.swift */; };
 		52B2B4EA291CE3A50053E772 /* assistant_linphone_create.rc in Resources */ = {isa = PBXBuildFile; fileRef = 52B2B25F291CE39F0053E772 /* assistant_linphone_create.rc */; };
 		52B2B74B291CE3A60053E772 /* linphonerc~ipad in Resources */ = {isa = PBXBuildFile; fileRef = 52B2B4C4291CE3A30053E772 /* linphonerc~ipad */; };
 		52B2B74C291CE3A60053E772 /* assistant_linphone_existing.rc in Resources */ = {isa = PBXBuildFile; fileRef = 52B2B4C7291CE3A30053E772 /* assistant_linphone_existing.rc */; };
@@ -338,7 +337,6 @@
 		52985187291DE4CF007A9E3C /* NotificationService.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = NotificationService.swift; sourceTree = "<group>"; };
 		52985189291DE4CF007A9E3C /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = Info.plist; sourceTree = "<group>"; };
 		52985191291DEBE7007A9E3C /* DemoApp.entitlements */ = {isa = PBXFileReference; lastKnownFileType = text.plist.entitlements; path = DemoApp.entitlements; sourceTree = "<group>"; };
-		52B2B255291CC3D30053E772 /* CoreManager.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = CoreManager.swift; sourceTree = "<group>"; };
 		52B2B25F291CE39F0053E772 /* assistant_linphone_create.rc */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text.xml; path = assistant_linphone_create.rc; sourceTree = "<group>"; };
 		52B2B4C4291CE3A30053E772 /* linphonerc~ipad */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text; path = "linphonerc~ipad"; sourceTree = "<group>"; };
 		52B2B4C7291CE3A30053E772 /* assistant_linphone_existing.rc */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text.xml; path = assistant_linphone_existing.rc; sourceTree = "<group>"; };
@@ -610,7 +608,6 @@
 				5273AF5B291C074900BB5201 /* TargetSupportFiles */,
 				52BD5AA22918E0870055F632 /* linphone-sdk */,
 				52F5D74728EC4260003719E8 /* CansConnect.swift */,
-				52B2B255291CC3D30053E772 /* CoreManager.swift */,
 				525D5E2F29220A510072429F /* CallManager.swift */,
 				525D5E3129220AD50072429F /* ProviderDelegate.swift */,
 				525D5E3329220BFB0072429F /* AppManager.swift */,
@@ -1441,7 +1438,6 @@
 				52BD5BFC2918E0890055F632 /* LinphoneWrapper.swift in Sources */,
 				2B4C0B2F28DC6B1600F35838 /* CansConnect.docc in Sources */,
 				525D5E3429220BFB0072429F /* AppManager.swift in Sources */,
-				52B2B256291CC3D30053E772 /* CoreManager.swift in Sources */,
 				525D5E3229220AD60072429F /* ProviderDelegate.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;

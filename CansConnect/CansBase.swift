@@ -132,6 +132,10 @@ import Foundation
     @objc public func setCore(core: OpaquePointer) {
         CallManager.instance().setCore(core: core)
     }
+    
+    @objc public func terminateCall(call: OpaquePointer?) {
+        CallManager.instance().terminateCall(call: call)
+    }
 
 }
 

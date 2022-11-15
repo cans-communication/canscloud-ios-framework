@@ -14,9 +14,8 @@ class ViewController: UIViewController {
         super.viewDidLoad()
         // Do any additional setup after loading the view.
         
-        let cansConnect = CansConnect()
-//        cansConnect.registerWithSwift()
-        cansConnect.registerWithObjC()
+        let cansBase = CansBase()
+        cansBase.registerWithObjC()
     }
 
 

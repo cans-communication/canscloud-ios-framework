@@ -7,7 +7,7 @@
 
 import Foundation
 
-public class CansConnect: NSObject, URLSessionDelegate {
+@objc public class CansBase: NSObject, URLSessionDelegate {
     
     public override init() {
         
@@ -127,6 +127,10 @@ public class CansConnect: NSObject, URLSessionDelegate {
     
     @objc public func startCall(addr: OpaquePointer?, isSas: Bool) {
         CallManager.instance().startCall(addr: addr, isSas: isSas)
+    }
+    
+    @objc public func setCore(core: OpaquePointer) {
+        CallManager.instance().setCore(core: core)
     }
 
 }

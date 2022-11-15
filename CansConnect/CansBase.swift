@@ -136,6 +136,10 @@ import Foundation
     @objc public func terminateCall(call: OpaquePointer?) {
         CallManager.instance().terminateCall(call: call)
     }
+    
+    @objc public func acceptCall(call: OpaquePointer?, hasVideo:Bool) {
+        CallManager.instance().acceptCall(call: call, hasVideo: hasVideo)
+    }
 
 }
 

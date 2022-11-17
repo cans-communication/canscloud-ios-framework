@@ -11,8 +11,6 @@
 #include "linphone/linphonecore.h"
 
 
-
-
 @interface LinphoneManager ()
     
 @end
@@ -23,32 +21,217 @@
     LinphoneFactory *factory = linphone_factory_get();
     LinphoneCoreCbs *cbs = linphone_factory_create_core_cbs(factory);
     linphone_core_cbs_set_registration_state_changed(cbs,linphone_iphone_registration_state);
-//    linphone_core_cbs_set_notify_presence_received_for_uri_or_tel(cbs, linphone_iphone_notify_presence_received_for_uri_or_tel);
-//    linphone_core_cbs_set_authentication_requested(cbs, linphone_iphone_popup_password_request);
-//    linphone_core_cbs_set_message_received(cbs, linphone_iphone_message_received);
-//    linphone_core_cbs_set_transfer_state_changed(cbs, linphone_iphone_transfer_state_changed);
-//    linphone_core_cbs_set_is_composing_received(cbs, linphone_iphone_is_composing_received);
-//    linphone_core_cbs_set_configuring_status(cbs, linphone_iphone_configuring_status_changed);
-//    linphone_core_cbs_set_global_state_changed(cbs, linphone_iphone_global_state_changed);
-//    linphone_core_cbs_set_notify_received(cbs, linphone_iphone_notify_received);
-//    linphone_core_cbs_set_call_encryption_changed(cbs, linphone_iphone_call_encryption_changed);
-//    linphone_core_cbs_set_chat_room_state_changed(cbs, linphone_iphone_chatroom_state_changed);
-//    linphone_core_cbs_set_version_update_check_result_received(cbs, linphone_iphone_version_update_check_result_received);
-//    linphone_core_cbs_set_qrcode_found(cbs, linphone_iphone_qr_code_found);
-//    linphone_core_cbs_set_call_log_updated(cbs, linphone_iphone_call_log_updated);
-//    linphone_core_cbs_set_call_id_updated(cbs, linphone_iphone_call_id_updated);
-//    linphone_core_cbs_set_user_data(cbs, (__bridge void *)(self));
+    linphone_core_cbs_set_notify_presence_received_for_uri_or_tel(cbs, linphone_iphone_notify_presence_received_for_uri_or_tel);
+    linphone_core_cbs_set_authentication_requested(cbs, linphone_iphone_popup_password_request);
+    linphone_core_cbs_set_transfer_state_changed(cbs, linphone_iphone_transfer_state_changed);
+    linphone_core_cbs_set_is_composing_received(cbs, linphone_iphone_is_composing_received);
+    linphone_core_cbs_set_configuring_status(cbs, linphone_iphone_configuring_status_changed);
+    linphone_core_cbs_set_global_state_changed(cbs, linphone_iphone_global_state_changed);
+    linphone_core_cbs_set_notify_received(cbs, linphone_iphone_notify_received);
+    linphone_core_cbs_set_call_encryption_changed(cbs, linphone_iphone_call_encryption_changed);
+    linphone_core_cbs_set_version_update_check_result_received(cbs, linphone_iphone_version_update_check_result_received);
+    linphone_core_cbs_set_call_log_updated(cbs, linphone_iphone_call_log_updated);
+    linphone_core_cbs_set_call_id_updated(cbs, linphone_iphone_call_id_updated);
+    linphone_core_cbs_set_user_data(cbs, (__bridge void *)(self));
 }
+
+// MARK: - Transfert State Functions
+
+static void linphone_iphone_transfer_state_changed(LinphoneCore *lc, LinphoneCall *call, LinphoneCallState state) {
+    
+}
+
+// MARK: - Text Received Functions
+
+static void linphone_iphone_call_id_updated(LinphoneCore *lc, const char *previous_call_id, const char *current_call_id) {
+//    [CallManager.instance updateCallIdWithPrevious:[NSString stringWithUTF8String:previous_call_id] current:[NSString stringWithUTF8String:current_call_id]];
+}
+
+static void linphone_iphone_call_log_updated(LinphoneCore *lc, LinphoneCallLog *newcl) {
+    if (linphone_call_log_get_status(newcl) == LinphoneCallEarlyAborted) {
+        const char *cid = linphone_call_log_get_call_id(newcl);
+        if (cid) {
+//            [CallManager.instance markCallAsDeclinedWithCallId:[NSString stringWithUTF8String:cid]];
+        }
+    }
+}
+
+void linphone_iphone_version_update_check_result_received (LinphoneCore *lc, LinphoneVersionUpdateCheckResult result, const char *version, const char *url) {
+    if (result == LinphoneVersionUpdateCheckUpToDate || result == LinphoneVersionUpdateCheckError) {
+        return;
+    }
+//    NSString *title = NSLocalizedString(@"Outdated Version", nil);
+//    NSString *body = NSLocalizedString(@"A new version of your app is available, use the button below to download it.", nil);
+//
+//    UIAlertController *versVerifView = [UIAlertController alertControllerWithTitle:title
+//                        message:body
+//                        preferredStyle:UIAlertControllerStyleAlert];
+//
+//    NSString *ObjCurl = [NSString stringWithUTF8String:url];
+//    UIAlertAction* defaultAction = [UIAlertAction actionWithTitle:NSLocalizedString(@"Download", nil)
+//                    style:UIAlertActionStyleDefault
+//                    handler:^(UIAlertAction * action) {
+//            [[UIApplication sharedApplication] openURL:[NSURL URLWithString:ObjCurl]];
+//        }];
+//
+//    [versVerifView addAction:defaultAction];
+//    [PhoneMainView.instance presentViewController:versVerifView animated:YES completion:nil];
+}
+
+static void linphone_iphone_call_encryption_changed(LinphoneCore *lc, LinphoneCall *call, bool_t on,
+                            const char *authentication_token) {
+    [(__bridge LinphoneManager *)linphone_core_cbs_get_user_data(linphone_core_get_current_callbacks(lc)) onCallEncryptionChanged:lc call:call on:on token:authentication_token];
+}
+
+- (void)onCallEncryptionChanged:(LinphoneCore *)lc
+call:(LinphoneCall *)call
+on:(BOOL)on
+token:(const char *)authentication_token {
+    // Post event
+    NSMutableDictionary *dict = [NSMutableDictionary dictionary];
+    [dict setObject:[NSValue valueWithPointer:call] forKey:@"call"];
+    [dict setObject:[NSNumber numberWithBool:on] forKey:@"on"];
+    if (authentication_token) {
+        [dict setObject:[NSString stringWithUTF8String:authentication_token] forKey:@"token"];
+    }
+    [NSNotificationCenter.defaultCenter postNotificationName:kLinphoneCallEncryptionChanged object:self userInfo:dict];
+}
+
+static void linphone_iphone_notify_presence_received_for_uri_or_tel(LinphoneCore *lc, LinphoneFriend *lf,
+                                    const char *uri_or_tel,
+                                    const LinphonePresenceModel *presence_model) {
+    [(__bridge LinphoneManager *)linphone_core_cbs_get_user_data(linphone_core_get_current_callbacks(lc)) onNotifyPresenceReceivedForUriOrTel:lc friend:lf uri:uri_or_tel presenceModel:presence_model];
+}
+
+- (void)onNotifyPresenceReceivedForUriOrTel:(LinphoneCore *)lc friend:(LinphoneFriend *)lf uri:(const char *)uri presenceModel:(const LinphonePresenceModel *)model {
+    // Post event
+    NSMutableDictionary *dict = [NSMutableDictionary dictionary];
+    [dict setObject:[NSValue valueWithPointer:lf] forKey:@"friend"];
+    [dict setObject:[NSValue valueWithPointer:uri] forKey:@"uri"];
+    [dict setObject:[NSValue valueWithPointer:model] forKey:@"presence_model"];
+    [NSNotificationCenter.defaultCenter postNotificationName:kLinphoneNotifyPresenceReceivedForUriOrTel
+     object:self
+     userInfo:dict];
+}
+
+- (void)onNotifyReceived:(LinphoneCore *)lc event:(LinphoneEvent *)lev notifyEvent:(const char *)notified_event content:(const LinphoneContent *)body {
+    // Post event
+    NSMutableDictionary *dict = [NSMutableDictionary dictionary];
+    [dict setObject:[NSValue valueWithPointer:lev] forKey:@"event"];
+    [dict setObject:[NSString stringWithUTF8String:notified_event] forKey:@"notified_event"];
+    if (body != NULL) {
+        [dict setObject:[NSValue valueWithPointer:body] forKey:@"content"];
+    }
+    [NSNotificationCenter.defaultCenter postNotificationName:kLinphoneNotifyReceived object:self userInfo:dict];
+}
+
+static void linphone_iphone_notify_received(LinphoneCore *lc, LinphoneEvent *lev, const char *notified_event,
+                        const LinphoneContent *body) {
+    [(__bridge LinphoneManager *)linphone_core_cbs_get_user_data(linphone_core_get_current_callbacks(lc)) onNotifyReceived:lc event:lev notifyEvent:notified_event content:body];
+}
+
+
+// MARK: - Auth info Function
+
+static void linphone_iphone_popup_password_request(LinphoneCore *lc, LinphoneAuthInfo *auth_info, LinphoneAuthMethod method) {
+    // let the wizard handle its own errors
+//    if ([PhoneMainView.instance currentView] != AssistantView.compositeViewDescription) {
+//        const char * realmC = linphone_auth_info_get_realm(auth_info);
+//        const char * usernameC = linphone_auth_info_get_username(auth_info) ? : "";
+//        const char * domainC = linphone_auth_info_get_domain(auth_info) ? : "";
+//        static UIAlertController *alertView = nil;
+//
+//        // InstantMessageDeliveryNotifications from previous accounts can trigger some pop-up spam asking for indentification
+//        // Try to filter the popup password request to avoid displaying those that do not matter and can be handled through a simple warning
+//        const MSList *configList = linphone_core_get_proxy_config_list(LC);
+//        bool foundMatchingConfig = false;
+//        while (configList && !foundMatchingConfig) {
+//            const char * configUsername = linphone_proxy_config_get_identity(configList->data);
+//            const char * configDomain = linphone_proxy_config_get_domain(configList->data);
+//            foundMatchingConfig = (strcmp(configUsername, usernameC) == 0) && (strcmp(configDomain, domainC) == 0);
+//            configList = configList->next;
+//        }
+//        if (!foundMatchingConfig) {
+//            LOGW(@"Received an authentication request from %s@%s, but ignored it did not match any current user", usernameC, domainC);
+//            return;
+//        }
+//
+//        // avoid having multiple popups
+//        [PhoneMainView.instance dismissViewControllerAnimated:YES completion:nil];
+//
+//        // dont pop up if we are in background, in any case we will refresh registers when entering
+//        // the application again
+//        if ([[UIApplication sharedApplication] applicationState] != UIApplicationStateActive) {
+//            return;
+//        }
+//
+//        NSString *realm = [NSString stringWithUTF8String:realmC?:domainC];
+//        NSString *username = [NSString stringWithUTF8String:usernameC];
+//        NSString *domain = [NSString stringWithUTF8String:domainC];
+//        alertView = [UIAlertController alertControllerWithTitle:NSLocalizedString(@"Authentification needed", nil)
+//                 message:[NSString stringWithFormat:NSLocalizedString(@"Connection failed because authentication is "
+//                                          @"missing or invalid for %@@%@.\nYou can "
+//                                          @"provide password again, or check your "
+//                                          @"account configuration in the settings.", nil), username, realm]
+//                 preferredStyle:UIAlertControllerStyleAlert];
+//
+//        UIAlertAction* defaultAction = [UIAlertAction actionWithTitle:NSLocalizedString(@"Cancel", nil)
+//                        style:UIAlertActionStyleDefault
+//                        handler:^(UIAlertAction * action) {}];
+//
+//        [alertView addTextFieldWithConfigurationHandler:^(UITextField *textField) {
+//                textField.placeholder = NSLocalizedString(@"Password", nil);
+//                textField.clearButtonMode = UITextFieldViewModeWhileEditing;
+//                textField.borderStyle = UITextBorderStyleRoundedRect;
+//                textField.secureTextEntry = YES;
+//            }];
+//
+//        UIAlertAction* continueAction = [UIAlertAction actionWithTitle:NSLocalizedString(@"Confirm password", nil)
+//                         style:UIAlertActionStyleDefault
+//                         handler:^(UIAlertAction * action) {
+//                NSString *password = alertView.textFields[0].text;
+//                LinphoneAuthInfo *info =
+//                linphone_auth_info_new(username.UTF8String, NULL, password.UTF8String, NULL,
+//                               realm.UTF8String, domain.UTF8String);
+//                linphone_core_add_auth_info(LC, info);
+//                [CoreManager.instance refreshRegisters];
+//            }];
+//
+//        UIAlertAction* settingsAction = [UIAlertAction actionWithTitle:NSLocalizedString(@"Go to settings", nil)
+//                         style:UIAlertActionStyleDefault
+//                         handler:^(UIAlertAction * action) {
+//                [PhoneMainView.instance changeCurrentView:SettingsView.compositeViewDescription];
+//            }];
+//
+//        [alertView addAction:defaultAction];
+//        [alertView addAction:continueAction];
+//        [alertView addAction:settingsAction];
+//        [PhoneMainView.instance presentViewController:alertView animated:YES completion:nil];
+//    }
+}
+
+// MARK: - Message composition start
+
+- (void)onMessageComposeReceived:(LinphoneCore *)core forRoom:(LinphoneChatRoom *)room {
+    [NSNotificationCenter.defaultCenter postNotificationName:kLinphoneTextComposeEvent
+     object:self
+     userInfo:@{
+            @"room" : [NSValue valueWithPointer:room]
+                }];
+}
+
+static void linphone_iphone_is_composing_received(LinphoneCore *lc, LinphoneChatRoom *room) {
+    [(__bridge LinphoneManager *)linphone_core_cbs_get_user_data(linphone_core_get_current_callbacks(lc)) onMessageComposeReceived:lc forRoom:room];
+}
+
+// MARK: - Registration State Functions
 
 static void linphone_iphone_registration_state(LinphoneCore *lc, LinphoneProxyConfig *cfg,
                            LinphoneRegistrationState state, const char *message) {
     [(__bridge LinphoneManager *)linphone_core_cbs_get_user_data(linphone_core_get_current_callbacks(lc)) onRegister:lc cfg:cfg state:state message:message];
 }
 
-- (void)onRegister:(LinphoneCore *)lc
-cfg:(LinphoneProxyConfig *)cfg
-state:(LinphoneRegistrationState)state
-message:(const char *)cmessage {
+- (void)onRegister:(LinphoneCore *)lc cfg:(LinphoneProxyConfig *)cfg state:(LinphoneRegistrationState)state message:(const char *)cmessage {
 //    LOGI(@"New registration state: %s (message: %s)", linphone_registration_state_to_string(state), cmessage);
 
     LinphoneReason reason = linphone_proxy_config_get_error(cfg);
@@ -115,5 +298,49 @@ message:(const char *)cmessage {
     [NSNotificationCenter.defaultCenter postNotificationName:kLinphoneRegistrationUpdate object:self userInfo:dict];
 }
 
+// MARK: - Configuring status changed
+
+static void linphone_iphone_configuring_status_changed(LinphoneCore *lc, LinphoneConfiguringState status,
+                               const char *message) {
+    [(__bridge LinphoneManager *)linphone_core_cbs_get_user_data(linphone_core_get_current_callbacks(lc)) onConfiguringStatusChanged:status withMessage:message];
+}
+
+- (void)onConfiguringStatusChanged:(LinphoneConfiguringState)status withMessage:(const char *)message {
+//    LOGI(@"onConfiguringStatusChanged: %s %@", linphone_configuring_state_to_string(status),
+//         message ? [NSString stringWithFormat:@"(message: %s)", message] : @"");
+    NSDictionary *dict = [NSDictionary
+                  dictionaryWithObjectsAndKeys:[NSNumber numberWithInt:status], @"state",
+                  [NSString stringWithUTF8String:message ? message : ""], @"message", nil];
+
+    // dispatch the notification asynchronously
+    dispatch_async(dispatch_get_main_queue(), ^(void) {
+            [NSNotificationCenter.defaultCenter postNotificationName:kLinphoneConfiguringStateUpdate
+             object:self
+             userInfo:dict];
+        });
+}
+
+// MARK: - Global state change
+
+static void linphone_iphone_global_state_changed(LinphoneCore *lc, LinphoneGlobalState gstate, const char *message) {
+    [(__bridge LinphoneManager *)linphone_core_cbs_get_user_data(linphone_core_get_current_callbacks(lc)) onGlobalStateChanged:gstate withMessage:message];
+}
+
+- (void)onGlobalStateChanged:(LinphoneGlobalState)state withMessage:(const char *)message {
+//    LOGI(@"onGlobalStateChanged: %d (message: %s)", state, message);
+
+    NSDictionary *dict = [NSDictionary
+                  dictionaryWithObjectsAndKeys:[NSNumber numberWithInt:state], @"state",
+                  [NSString stringWithUTF8String:message ? message : ""], @"message", nil];
+
+//    if (theLinphoneCore && linphone_core_get_global_state(theLinphoneCore) == LinphoneGlobalOff) {
+//        [CoreManager.instance stopIterateTimer];
+//    }
+//    // dispatch the notification asynchronously
+//    dispatch_async(dispatch_get_main_queue(), ^(void) {
+//        if (theLinphoneCore && linphone_core_get_global_state(theLinphoneCore) != LinphoneGlobalOff)
+//            [NSNotificationCenter.defaultCenter postNotificationName:kLinphoneGlobalStateUpdate object:self userInfo:dict];
+//    });
+}
 
 @end

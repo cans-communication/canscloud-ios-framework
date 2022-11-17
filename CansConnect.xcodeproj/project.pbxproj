@@ -10,6 +10,7 @@
 		2B4C0B2F28DC6B1600F35838 /* CansConnect.docc in Sources */ = {isa = PBXBuildFile; fileRef = 2B4C0B2E28DC6B1600F35838 /* CansConnect.docc */; };
 		2B4C0B3528DC6B1700F35838 /* CansConnect.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 2B4C0B2A28DC6B1600F35838 /* CansConnect.framework */; };
 		2B4C0B3B28DC6B1700F35838 /* CansConnect.h in Headers */ = {isa = PBXBuildFile; fileRef = 2B4C0B2D28DC6B1600F35838 /* CansConnect.h */; settings = {ATTRIBUTES = (Public, ); }; };
+		520BA3E92924E1DD00E8421D /* CansConnect-Bridging-Header.h in Headers */ = {isa = PBXBuildFile; fileRef = 520BA3E82924E1DD00E8421D /* CansConnect-Bridging-Header.h */; };
 		525D5E272921068A0072429F /* LinphoneManager.h in Headers */ = {isa = PBXBuildFile; fileRef = 525D5E252921068A0072429F /* LinphoneManager.h */; };
 		525D5E282921068A0072429F /* LinphoneManager.m in Sources */ = {isa = PBXBuildFile; fileRef = 525D5E262921068A0072429F /* LinphoneManager.m */; };
 		525D5E3029220A510072429F /* CallManager.swift in Sources */ = {isa = PBXBuildFile; fileRef = 525D5E2F29220A510072429F /* CallManager.swift */; };
@@ -315,6 +316,7 @@
 		2B4C0B2D28DC6B1600F35838 /* CansConnect.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = CansConnect.h; sourceTree = "<group>"; };
 		2B4C0B2E28DC6B1600F35838 /* CansConnect.docc */ = {isa = PBXFileReference; lastKnownFileType = folder.documentationcatalog; path = CansConnect.docc; sourceTree = "<group>"; };
 		2B4C0B3428DC6B1700F35838 /* CansConnectTests.xctest */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; includeInIndex = 0; path = CansConnectTests.xctest; sourceTree = BUILT_PRODUCTS_DIR; };
+		520BA3E82924E1DD00E8421D /* CansConnect-Bridging-Header.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = "CansConnect-Bridging-Header.h"; sourceTree = "<group>"; };
 		5254DCAC291FC49100993979 /* msgNotificationService.entitlements */ = {isa = PBXFileReference; lastKnownFileType = text.plist.entitlements; path = msgNotificationService.entitlements; sourceTree = "<group>"; };
 		5254DCAD291FC4AA00993979 /* msgNotificationContent.entitlements */ = {isa = PBXFileReference; lastKnownFileType = text.plist.entitlements; path = msgNotificationContent.entitlements; sourceTree = "<group>"; };
 		525D5E252921068A0072429F /* LinphoneManager.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = LinphoneManager.h; sourceTree = "<group>"; };
@@ -613,6 +615,7 @@
 				525D5E3329220BFB0072429F /* AppManager.swift */,
 				2B4C0B2D28DC6B1600F35838 /* CansConnect.h */,
 				2B4C0B2E28DC6B1600F35838 /* CansConnect.docc */,
+				520BA3E82924E1DD00E8421D /* CansConnect-Bridging-Header.h */,
 			);
 			path = CansConnect;
 			sourceTree = "<group>";
@@ -1036,6 +1039,7 @@
 				5273AF67291C074900BB5201 /* linphone-sdk-umbrella.h in Headers */,
 				5273AF69291C074900BB5201 /* linphone-sdk-prefix.pch in Headers */,
 				2B4C0B3B28DC6B1700F35838 /* CansConnect.h in Headers */,
+				520BA3E92924E1DD00E8421D /* CansConnect-Bridging-Header.h in Headers */,
 				525D5E272921068A0072429F /* LinphoneManager.h in Headers */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
@@ -1674,6 +1678,7 @@
 				SUPPORTS_MACCATALYST = NO;
 				SUPPORTS_MAC_DESIGNED_FOR_IPHONE_IPAD = NO;
 				SWIFT_EMIT_LOC_STRINGS = YES;
+				SWIFT_OBJC_BRIDGING_HEADER = "CansConnect/CansConnect-Bridging-Header.h";
 				SWIFT_VERSION = 5.0;
 				TARGETED_DEVICE_FAMILY = 1;
 			};
@@ -1713,6 +1718,7 @@
 				SUPPORTS_MACCATALYST = NO;
 				SUPPORTS_MAC_DESIGNED_FOR_IPHONE_IPAD = NO;
 				SWIFT_EMIT_LOC_STRINGS = YES;
+				SWIFT_OBJC_BRIDGING_HEADER = "CansConnect/CansConnect-Bridging-Header.h";
 				SWIFT_VERSION = 5.0;
 				TARGETED_DEVICE_FAMILY = 1;
 			};

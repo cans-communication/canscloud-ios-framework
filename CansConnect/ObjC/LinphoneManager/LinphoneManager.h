@@ -7,11 +7,33 @@
 
 #import <Foundation/Foundation.h>
 
+NSString *const kLinphoneCoreUpdate = @"LinphoneCoreUpdate";
+NSString *const kLinphoneDisplayStatusUpdate = @"LinphoneDisplayStatusUpdate";
+NSString *const kLinphoneMessageReceived = @"LinphoneMessageReceived";
+NSString *const kLinphoneTextComposeEvent = @"LinphoneTextComposeStarted";
+NSString *const kLinphoneCallUpdate = @"LinphoneCallUpdate";
 NSString *const kLinphoneRegistrationUpdate = @"LinphoneRegistrationUpdate";
+NSString *const kLinphoneAddressBookUpdate = @"LinphoneAddressBookUpdate";
+NSString *const kLinphoneMainViewChange = @"LinphoneMainViewChange";
+NSString *const kLinphoneLogsUpdate = @"LinphoneLogsUpdate";
+NSString *const kLinphoneSettingsUpdate = @"LinphoneSettingsUpdate";
+NSString *const kLinphoneBluetoothAvailabilityUpdate = @"LinphoneBluetoothAvailabilityUpdate";
+NSString *const kLinphoneConfiguringStateUpdate = @"LinphoneConfiguringStateUpdate";
+NSString *const kLinphoneGlobalStateUpdate = @"LinphoneGlobalStateUpdate";
+NSString *const kLinphoneNotifyReceived = @"LinphoneNotifyReceived";
+NSString *const kLinphoneNotifyPresenceReceivedForUriOrTel = @"LinphoneNotifyPresenceReceivedForUriOrTel";
+NSString *const kLinphoneCallEncryptionChanged = @"LinphoneCallEncryptionChanged";
+NSString *const kLinphoneFileTransferSendUpdate = @"LinphoneFileTransferSendUpdate";
+NSString *const kLinphoneFileTransferRecvUpdate = @"LinphoneFileTransferRecvUpdate";
+NSString *const kLinphoneQRCodeFound = @"LinphoneQRCodeFound";
+NSString *const kLinphoneChatCreateViewChange = @"LinphoneChatCreateViewChange";
+NSString *const kLinphoneMsgNotificationAppGroupId = @"group.cc.cans.canscloud.msgNotification";
 
 @interface LinphoneManager : NSObject {
     
 }
+
+- (void)createLinphoneCore;
 
 @end
 

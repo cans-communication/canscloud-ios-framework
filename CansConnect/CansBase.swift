@@ -125,12 +125,12 @@ import Foundation
         
     }
     
-    @objc public func startCall(addr: OpaquePointer?, isSas: Bool) {
-        CallManager.instance().startCall(addr: addr, isSas: isSas)
-    }
-    
     @objc public func setCore(core: OpaquePointer) {
         CallManager.instance().setCore(core: core)
+    }
+    
+    @objc public func startCall(addr: OpaquePointer?, isSas: Bool) {
+        CallManager.instance().startCall(addr: addr, isSas: isSas)
     }
     
     @objc public func terminateCall(call: OpaquePointer?) {
@@ -139,6 +139,11 @@ import Foundation
     
     @objc public func acceptCall(call: OpaquePointer?, hasVideo:Bool) {
         CallManager.instance().acceptCall(call: call, hasVideo: hasVideo)
+    }
+
+    @objc public func configure() {
+        let linphoneManager = LinphoneManager()
+        linphoneManager.createLinphoneCore()
     }
 
 }

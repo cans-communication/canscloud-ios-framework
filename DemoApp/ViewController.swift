@@ -15,7 +15,7 @@ class ViewController: UIViewController {
         // Do any additional setup after loading the view.
         
         let cansBase = CansBase()
-        cansBase.registerWithObjC()
+        cansBase.configure()
     }
 
 

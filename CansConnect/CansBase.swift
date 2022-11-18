@@ -94,9 +94,29 @@ import Foundation
         }
     }
     
+    @objc public func setCore(core: OpaquePointer) {
+        CallManager.instance().setCore(core: core)
+        CoreManager.instance().setCore(core: core)
+    }
     
+    @objc public func startCall(addr: OpaquePointer?, isSas: Bool) {
+        CallManager.instance().startCall(addr: addr, isSas: isSas)
+    }
     
-    public func registerWithSwift() {
+    @objc public func terminateCall(call: OpaquePointer?) {
+        CallManager.instance().terminateCall(call: call)
+    }
+    
+    @objc public func acceptCall(call: OpaquePointer?, hasVideo:Bool) {
+        CallManager.instance().acceptCall(call: call, hasVideo: hasVideo)
+    }
+
+    @objc public func configure() {
+        let linphoneManager = LinphoneManager()
+        linphoneManager.createLinphoneCore()
+    }
+    
+    public func configureSwift() {
         let filename = "linphonerc-factory"
         guard
             let path = Bundle.main.path(forResource: filename.fileName(), ofType: filename.fileExtension())
@@ -121,29 +141,13 @@ import Foundation
         }
     }
     
-    public func registerWithObjC() {
+    public func register() {
+        let accountParams = CoreManager.instance().createAccountParams()
+        print(accountParams)
         
-    }
-    
-    @objc public func setCore(core: OpaquePointer) {
-        CallManager.instance().setCore(core: core)
-    }
-    
-    @objc public func startCall(addr: OpaquePointer?, isSas: Bool) {
-        CallManager.instance().startCall(addr: addr, isSas: isSas)
-    }
-    
-    @objc public func terminateCall(call: OpaquePointer?) {
-        CallManager.instance().terminateCall(call: call)
-    }
-    
-    @objc public func acceptCall(call: OpaquePointer?, hasVideo:Bool) {
-        CallManager.instance().acceptCall(call: call, hasVideo: hasVideo)
-    }
-
-    @objc public func configure() {
-        let linphoneManager = LinphoneManager()
-        linphoneManager.createLinphoneCore()
+//        if let accountParams = CoreManager.instance().createAccountParams() {
+//            CoreManager.instance().createAccount(params: accountParams)
+//        }
     }
 
 }

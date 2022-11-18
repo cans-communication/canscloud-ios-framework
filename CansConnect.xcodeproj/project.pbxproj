@@ -11,6 +11,7 @@
 		2B4C0B3528DC6B1700F35838 /* CansConnect.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 2B4C0B2A28DC6B1600F35838 /* CansConnect.framework */; };
 		2B4C0B3B28DC6B1700F35838 /* CansConnect.h in Headers */ = {isa = PBXBuildFile; fileRef = 2B4C0B2D28DC6B1600F35838 /* CansConnect.h */; settings = {ATTRIBUTES = (Public, ); }; };
 		520BA3E92924E1DD00E8421D /* CansConnect-Bridging-Header.h in Headers */ = {isa = PBXBuildFile; fileRef = 520BA3E82924E1DD00E8421D /* CansConnect-Bridging-Header.h */; };
+		5255AAFC292621400070B454 /* CoreManager.swift in Sources */ = {isa = PBXBuildFile; fileRef = 5255AAFB292621400070B454 /* CoreManager.swift */; };
 		525D5E272921068A0072429F /* LinphoneManager.h in Headers */ = {isa = PBXBuildFile; fileRef = 525D5E252921068A0072429F /* LinphoneManager.h */; };
 		525D5E282921068A0072429F /* LinphoneManager.m in Sources */ = {isa = PBXBuildFile; fileRef = 525D5E262921068A0072429F /* LinphoneManager.m */; };
 		525D5E3029220A510072429F /* CallManager.swift in Sources */ = {isa = PBXBuildFile; fileRef = 525D5E2F29220A510072429F /* CallManager.swift */; };
@@ -319,6 +320,7 @@
 		520BA3E82924E1DD00E8421D /* CansConnect-Bridging-Header.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = "CansConnect-Bridging-Header.h"; sourceTree = "<group>"; };
 		5254DCAC291FC49100993979 /* msgNotificationService.entitlements */ = {isa = PBXFileReference; lastKnownFileType = text.plist.entitlements; path = msgNotificationService.entitlements; sourceTree = "<group>"; };
 		5254DCAD291FC4AA00993979 /* msgNotificationContent.entitlements */ = {isa = PBXFileReference; lastKnownFileType = text.plist.entitlements; path = msgNotificationContent.entitlements; sourceTree = "<group>"; };
+		5255AAFB292621400070B454 /* CoreManager.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = CoreManager.swift; sourceTree = "<group>"; };
 		525D5E252921068A0072429F /* LinphoneManager.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = LinphoneManager.h; sourceTree = "<group>"; };
 		525D5E262921068A0072429F /* LinphoneManager.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = LinphoneManager.m; sourceTree = "<group>"; };
 		525D5E2F29220A510072429F /* CallManager.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = CallManager.swift; sourceTree = "<group>"; };
@@ -611,6 +613,7 @@
 				52BD5AA22918E0870055F632 /* linphone-sdk */,
 				52F5D74728EC4260003719E8 /* CansBase.swift */,
 				525D5E2F29220A510072429F /* CallManager.swift */,
+				5255AAFB292621400070B454 /* CoreManager.swift */,
 				525D5E3129220AD50072429F /* ProviderDelegate.swift */,
 				525D5E3329220BFB0072429F /* AppManager.swift */,
 				2B4C0B2D28DC6B1600F35838 /* CansConnect.h */,
@@ -1441,6 +1444,7 @@
 				525D5E3029220A510072429F /* CallManager.swift in Sources */,
 				52BD5BFC2918E0890055F632 /* LinphoneWrapper.swift in Sources */,
 				2B4C0B2F28DC6B1600F35838 /* CansConnect.docc in Sources */,
+				5255AAFC292621400070B454 /* CoreManager.swift in Sources */,
 				525D5E3429220BFB0072429F /* AppManager.swift in Sources */,
 				525D5E3229220AD60072429F /* ProviderDelegate.swift in Sources */,
 			);
@@ -1647,6 +1651,7 @@
 		2B4C0B3F28DC6B1700F35838 /* Debug */ = {
 			isa = XCBuildConfiguration;
 			buildSettings = {
+				ALWAYS_EMBED_SWIFT_STANDARD_LIBRARIES = NO;
 				BUILD_LIBRARY_FOR_DISTRIBUTION = YES;
 				CODE_SIGN_STYLE = Automatic;
 				CURRENT_PROJECT_VERSION = 3;
@@ -1678,7 +1683,7 @@
 				SUPPORTS_MACCATALYST = NO;
 				SUPPORTS_MAC_DESIGNED_FOR_IPHONE_IPAD = NO;
 				SWIFT_EMIT_LOC_STRINGS = YES;
-				SWIFT_OBJC_BRIDGING_HEADER = "CansConnect/CansConnect-Bridging-Header.h";
+				SWIFT_OBJC_BRIDGING_HEADER = "$(SRCROOT)/CansConnect/CansConnect-Bridging-Header.h";
 				SWIFT_VERSION = 5.0;
 				TARGETED_DEVICE_FAMILY = 1;
 			};
@@ -1687,6 +1692,7 @@
 		2B4C0B4028DC6B1700F35838 /* Release */ = {
 			isa = XCBuildConfiguration;
 			buildSettings = {
+				ALWAYS_EMBED_SWIFT_STANDARD_LIBRARIES = NO;
 				BUILD_LIBRARY_FOR_DISTRIBUTION = YES;
 				CODE_SIGN_STYLE = Automatic;
 				CURRENT_PROJECT_VERSION = 3;
@@ -1718,7 +1724,7 @@
 				SUPPORTS_MACCATALYST = NO;
 				SUPPORTS_MAC_DESIGNED_FOR_IPHONE_IPAD = NO;
 				SWIFT_EMIT_LOC_STRINGS = YES;
-				SWIFT_OBJC_BRIDGING_HEADER = "CansConnect/CansConnect-Bridging-Header.h";
+				SWIFT_OBJC_BRIDGING_HEADER = "$(SRCROOT)/CansConnect/CansConnect-Bridging-Header.h";
 				SWIFT_VERSION = 5.0;
 				TARGETED_DEVICE_FAMILY = 1;
 			};

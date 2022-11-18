@@ -674,5 +674,15 @@ import AVFoundation
         }
         return false
     }
+    
+//    public func setUsername(newValue: String) throws
+    
+    func setUsername(newValue: String) {
+        do {
+            let _ = try lc?.primaryContactParsed?.setUsername(newValue: newValue)
+        } catch {
+            print(error)
+        }
+    }
 
 }

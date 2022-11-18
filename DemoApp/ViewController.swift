@@ -16,6 +16,7 @@ class ViewController: UIViewController {
         
         let cansBase = CansBase()
         cansBase.configure()
+        cansBase.register()
     }
 
 

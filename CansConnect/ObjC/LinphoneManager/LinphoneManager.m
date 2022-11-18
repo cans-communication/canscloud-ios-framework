@@ -7,9 +7,6 @@
 
 #import "LinphoneManager.h"
 
-#include "linphone/factory.h"
-#include "linphone/linphonecore.h"
-
 
 @interface LinphoneManager ()
     
@@ -18,6 +15,8 @@
 @implementation LinphoneManager
 
 - (void)createLinphoneCore {
+    [self overrideDefaultSettings];
+    
     LinphoneFactory *factory = linphone_factory_get();
     LinphoneCoreCbs *cbs = linphone_factory_create_core_cbs(factory);
     linphone_core_cbs_set_registration_state_changed(cbs,linphone_iphone_registration_state);
@@ -33,7 +32,31 @@
     linphone_core_cbs_set_call_log_updated(cbs, linphone_iphone_call_log_updated);
     linphone_core_cbs_set_call_id_updated(cbs, linphone_iphone_call_id_updated);
     linphone_core_cbs_set_user_data(cbs, (__bridge void *)(self));
+    
+    theLinphoneCore = linphone_factory_create_shared_core_with_config(factory, _configDb, NULL, [kLinphoneMsgNotificationAppGroupId UTF8String], true);
+    linphone_core_add_callbacks(theLinphoneCore, cbs);
+    
+//    [CallManager]
 }
+
+- (void)overrideDefaultSettings {
+    NSString *factory = [LinphoneManager bundleFile:@"linphonerc-factory"];
+    
+    _configDb = linphone_config_new_for_shared_core(kLinphoneMsgNotificationAppGroupId.UTF8String, @"linphonerc".UTF8String, factory.UTF8String);
+    linphone_config_clean_entry(_configDb, "misc", "max_calls");
+}
+
+// MARK: - Linphone Core Functions
+
++ (LinphoneCore *)getLc {
+    if (theLinphoneCore == nil) {
+        @throw([NSException exceptionWithName:@"LinphoneCoreException"
+            reason:@"Linphone core not initialized yet"
+            userInfo:nil]);
+    }
+    return theLinphoneCore;
+}
+
 
 // MARK: - Transfert State Functions
 
@@ -341,6 +364,12 @@ static void linphone_iphone_global_state_changed(LinphoneCore *lc, LinphoneGloba
 //        if (theLinphoneCore && linphone_core_get_global_state(theLinphoneCore) != LinphoneGlobalOff)
 //            [NSNotificationCenter.defaultCenter postNotificationName:kLinphoneGlobalStateUpdate object:self userInfo:dict];
 //    });
+}
+
+// MARK: - Misc Functions
+
++ (NSString *)bundleFile:(NSString *)file {
+    return [[NSBundle mainBundle] pathForResource:[file stringByDeletingPathExtension] ofType:[file pathExtension]];
 }
 
 @end

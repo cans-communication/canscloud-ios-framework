@@ -7,14 +7,11 @@
 
 #import <Foundation/Foundation.h>
 
-//#import "CansConnect-Swift.h"
-
 #include "linphone/factory.h"
 #include "linphone/linphonecore.h"
 
-
-
 #define LC ([LinphoneManager getLc])
+
 
 static LinphoneCore *theLinphoneCore = nil;
 

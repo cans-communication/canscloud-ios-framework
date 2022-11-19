@@ -94,11 +94,6 @@ import Foundation
         }
     }
     
-    @objc public func setCore(core: OpaquePointer) {
-        CallManager.instance().setCore(core: core)
-        CoreManager.instance().setCore(core: core)
-    }
-    
     @objc public func startCall(addr: OpaquePointer?, isSas: Bool) {
         CallManager.instance().startCall(addr: addr, isSas: isSas)
     }
@@ -109,11 +104,6 @@ import Foundation
     
     @objc public func acceptCall(call: OpaquePointer?, hasVideo:Bool) {
         CallManager.instance().acceptCall(call: call, hasVideo: hasVideo)
-    }
-
-    @objc public func configure() {
-        let linphoneManager = LinphoneManager()
-        linphoneManager.createLinphoneCore()
     }
     
     public func configureSwift() {
@@ -141,13 +131,35 @@ import Foundation
         }
     }
     
-    public func register() {
-        let accountParams = CoreManager.instance().createAccountParams()
-        print(accountParams)
+    @objc public func setCore(core: OpaquePointer) {
+        CallManager.instance().setCore(core: core)
+        CoreManager.instance().setCore(core: core)
+    }
+    
+    @objc public func configure() {
+//        let linphoneManager = LinphoneManager()
+//        linphoneManager.createLinphoneCore()
+//        setCore(core: LinphoneManager.getLc())
+    }
+    
+    public func registerWithSwift() {
+        if let accountParams = CoreManager.instance().createAccountParams() {
+            do {
+                try accountParams.identityAddress?.setUsername(newValue: "50101")
+                if let account = CoreManager.instance().createAccount(params: accountParams) {
+                    print( CoreManager.instance().username )
+                    if CoreManager.instance().addAccount(account: account) {
+                        CoreManager.instance().defaultAccount = account
+                    }
+                }
+            } catch {
+                print(error)
+            }
+        }
+    }
+    
+    public func registerWithObjC() {
         
-//        if let accountParams = CoreManager.instance().createAccountParams() {
-//            CoreManager.instance().createAccount(params: accountParams)
-//        }
     }
 
 }

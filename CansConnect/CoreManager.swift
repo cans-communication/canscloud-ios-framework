@@ -211,4 +211,14 @@ import Foundation
         }
     }
     
+    func addAccount(account: Account) -> Bool {
+        do {
+            try lc?.addAccount(account: account)
+            return true
+        } catch {
+            print(error)
+            return false
+        }
+    }
+    
 }

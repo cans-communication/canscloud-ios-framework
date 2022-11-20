@@ -14,6 +14,50 @@
 
 @implementation LinphoneManager
 
+- (void)registerSip {
+    NSString *domain = @"test.cans.cc:8444";
+    NSString *username = @"50101";
+    NSString *pwd = @"p50101CANS";
+
+    LinphoneAccountParams *accountParams =  linphone_core_create_account_params(LC);
+    LinphoneAddress *addr = linphone_address_new(NULL);
+    LinphoneAddress *tmpAddr = linphone_address_new([NSString stringWithFormat:@"sip:%@",domain].UTF8String);
+    if (tmpAddr == nil) {
+        return;
+    }
+
+    linphone_address_set_username(addr, username.UTF8String);
+    linphone_address_set_port(addr, linphone_address_get_port(tmpAddr));
+    linphone_address_set_domain(addr, linphone_address_get_domain(tmpAddr));
+    linphone_account_params_set_identity_address(accountParams, addr);
+
+    // set transport
+    linphone_account_params_set_routes_addresses(accountParams, NULL);
+    linphone_account_params_set_server_addr(accountParams, [NSString stringWithFormat:@"%s;transport=tcp", domain.UTF8String].UTF8String);
+
+    linphone_account_params_set_publish_enabled(accountParams, FALSE);
+    linphone_account_params_set_register_enabled(accountParams, TRUE);
+
+    LinphoneAuthInfo *info = linphone_auth_info_new(linphone_address_get_username(addr), // username
+                                                    NULL,                                // user id
+                                                    pwd.UTF8String,                        // passwd
+                                                    NULL,                                // ha1
+                                                    linphone_address_get_domain(addr),   // realm - assumed to be domain
+                                                    linphone_address_get_domain(addr)    // domain
+                                                    );
+    linphone_core_add_auth_info(LC, info);
+    linphone_address_unref(addr);
+    linphone_address_unref(tmpAddr);
+
+    LinphoneAccount *account = linphone_core_create_account(LC, accountParams);
+    linphone_account_params_unref(accountParams);
+    if (account) {
+        if (linphone_core_add_account(LC, account) != -1) {
+            linphone_core_set_default_account(LC, account);
+        }
+    }
+}
+
 - (void)createLinphoneCore {
     [self overrideDefaultSettings];
     

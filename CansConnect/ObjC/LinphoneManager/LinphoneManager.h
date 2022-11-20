@@ -47,6 +47,7 @@ NSString *const kLinphoneMsgNotificationAppGroupId = @"group.cc.cans.canscloud.m
 
 + (LinphoneCore*) getLc;
 - (void)createLinphoneCore;
+- (void)registerSip;
 
 
 @end

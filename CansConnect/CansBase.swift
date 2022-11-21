@@ -143,23 +143,7 @@ import Foundation
         setCore(core: LinphoneManager.getLc())
     }
     
-    public func registerWithSwift() {
-        if let accountParams = CoreManager.instance().createAccountParams() {
-            do {
-                try accountParams.identityAddress?.setUsername(newValue: "50101")
-                if let account = CoreManager.instance().createAccount(params: accountParams) {
-                    print( CoreManager.instance().username )
-                    if CoreManager.instance().addAccount(account: account) {
-                        CoreManager.instance().defaultAccount = account
-                    }
-                }
-            } catch {
-                print(error)
-            }
-        }
-    }
-    
-    public func registerWithObjC() {
+    @objc public func registerWithObjC() {
         linphoneManager.registerSip()
     }
 

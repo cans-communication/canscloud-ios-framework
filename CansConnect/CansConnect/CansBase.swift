@@ -97,15 +97,15 @@ import Foundation
     }
     
     @objc public func startCall(addr: OpaquePointer?, isSas: Bool) {
-//        CallManager.instance().startCall(addr: addr, isSas: isSas)
+        CallManager.instance().startCall(addr: addr, isSas: isSas)
     }
     
     @objc public func terminateCall(call: OpaquePointer?) {
-//        CallManager.instance().terminateCall(call: call)
+        CallManager.instance().terminateCall(call: call)
     }
     
     @objc public func acceptCall(call: OpaquePointer?, hasVideo:Bool) {
-//        CallManager.instance().acceptCall(call: call, hasVideo: hasVideo)
+        CallManager.instance().acceptCall(call: call, hasVideo: hasVideo)
     }
     
     public func configureSwift() {
@@ -134,8 +134,8 @@ import Foundation
     }
     
     @objc public func setCore(core: OpaquePointer) {
-//        CallManager.instance().setCore(core: core)
-//        CoreManager.instance().setCore(core: core)
+        CallManager.instance().setCore(core: core)
+        CoreManager.instance().setCore(core: core)
     }
     
     @objc public func configure() {

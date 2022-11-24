@@ -188,6 +188,7 @@
 		52919114292E879800D87DF9 /* msx264.framework in Embed Frameworks */ = {isa = PBXBuildFile; fileRef = 52919047292E86CD00D87DF9 /* msx264.framework */; settings = {ATTRIBUTES = (CodeSignOnCopy, RemoveHeadersOnCopy, ); }; };
 		52919115292E879B00D87DF9 /* ortp.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 52919041292E86CD00D87DF9 /* ortp.framework */; };
 		52919116292E879C00D87DF9 /* ortp.framework in Embed Frameworks */ = {isa = PBXBuildFile; fileRef = 52919041292E86CD00D87DF9 /* ortp.framework */; settings = {ATTRIBUTES = (CodeSignOnCopy, RemoveHeadersOnCopy, ); }; };
+		5291911E292F513F00D87DF9 /* CansBase.swift in Sources */ = {isa = PBXBuildFile; fileRef = 5291911D292F513F00D87DF9 /* CansBase.swift */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXCopyFilesBuildPhase section */
@@ -386,6 +387,7 @@
 		52919049292E86CD00D87DF9 /* linphone.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; path = linphone.framework; sourceTree = "<group>"; };
 		5291904C292E86CD00D87DF9 /* LinphoneWrapper.cs */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text; path = LinphoneWrapper.cs; sourceTree = "<group>"; };
 		5291904E292E86CD00D87DF9 /* LinphoneWrapper.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = LinphoneWrapper.swift; sourceTree = "<group>"; };
+		5291911D292F513F00D87DF9 /* CansBase.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = CansBase.swift; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -436,6 +438,7 @@
 		52670835292C79CD002CDDAE /* CansConnect */ = {
 			isa = PBXGroup;
 			children = (
+				5291911D292F513F00D87DF9 /* CansBase.swift */,
 				52918F98292E86CD00D87DF9 /* linphone-sdk */,
 				52670836292C79CD002CDDAE /* CansConnect.h */,
 				52670837292C79CD002CDDAE /* CansConnect.docc */,
@@ -969,6 +972,7 @@
 			isa = PBXSourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				5291911E292F513F00D87DF9 /* CansBase.swift in Sources */,
 				529190F2292E86D100D87DF9 /* LinphoneWrapper.swift in Sources */,
 				52670838292C79CD002CDDAE /* CansConnect.docc in Sources */,
 			);

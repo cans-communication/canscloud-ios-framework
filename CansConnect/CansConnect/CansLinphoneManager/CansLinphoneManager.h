@@ -1,5 +1,5 @@
 //
-//  LinphoneManager.h
+//  CansLinphoneManager.h
 //  CansConnect
 //
 //  Created by Siraphop Chaisirikul on 13/11/2565 BE.
@@ -10,7 +10,7 @@
 #include "linphone/factory.h"
 #include "linphone/linphonecore.h"
 
-#define LC ([LinphoneManager getLc])
+#define LC ([CansLinphoneManager getLc])
 
 
 static LinphoneCore *theLinphoneCore = nil;
@@ -37,7 +37,7 @@ NSString *const kLinphoneQRCodeFound = @"LinphoneQRCodeFound";
 NSString *const kLinphoneChatCreateViewChange = @"LinphoneChatCreateViewChange";
 NSString *const kLinphoneMsgNotificationAppGroupId = @"group.cc.cans.canscloud.msgNotification";
 
-@interface LinphoneManager : NSObject {
+@interface CansLinphoneManager : NSObject {
     
 }
 

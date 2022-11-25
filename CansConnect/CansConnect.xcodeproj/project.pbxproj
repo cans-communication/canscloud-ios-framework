@@ -189,8 +189,8 @@
 		52919115292E879B00D87DF9 /* ortp.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 52919041292E86CD00D87DF9 /* ortp.framework */; };
 		52919116292E879C00D87DF9 /* ortp.framework in Embed Frameworks */ = {isa = PBXBuildFile; fileRef = 52919041292E86CD00D87DF9 /* ortp.framework */; settings = {ATTRIBUTES = (CodeSignOnCopy, RemoveHeadersOnCopy, ); }; };
 		5291911E292F513F00D87DF9 /* CansBase.swift in Sources */ = {isa = PBXBuildFile; fileRef = 5291911D292F513F00D87DF9 /* CansBase.swift */; };
-		52919131292F5B1300D87DF9 /* LinphoneManager.m in Sources */ = {isa = PBXBuildFile; fileRef = 5291912B292F5B1300D87DF9 /* LinphoneManager.m */; };
-		52919132292F5B1300D87DF9 /* LinphoneManager.h in Headers */ = {isa = PBXBuildFile; fileRef = 5291912C292F5B1300D87DF9 /* LinphoneManager.h */; };
+		52919131292F5B1300D87DF9 /* CansLinphoneManager.m in Sources */ = {isa = PBXBuildFile; fileRef = 5291912B292F5B1300D87DF9 /* CansLinphoneManager.m */; };
+		52919132292F5B1300D87DF9 /* CansLinphoneManager.h in Headers */ = {isa = PBXBuildFile; fileRef = 5291912C292F5B1300D87DF9 /* CansLinphoneManager.h */; };
 		52919133292F5B1300D87DF9 /* AppManager.swift in Sources */ = {isa = PBXBuildFile; fileRef = 5291912D292F5B1300D87DF9 /* AppManager.swift */; };
 		52919134292F5B1300D87DF9 /* ProviderDelegate.swift in Sources */ = {isa = PBXBuildFile; fileRef = 5291912E292F5B1300D87DF9 /* ProviderDelegate.swift */; };
 		52919135292F5B1300D87DF9 /* CallManager.swift in Sources */ = {isa = PBXBuildFile; fileRef = 5291912F292F5B1300D87DF9 /* CallManager.swift */; };
@@ -394,8 +394,8 @@
 		5291904C292E86CD00D87DF9 /* LinphoneWrapper.cs */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text; path = LinphoneWrapper.cs; sourceTree = "<group>"; };
 		5291904E292E86CD00D87DF9 /* LinphoneWrapper.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = LinphoneWrapper.swift; sourceTree = "<group>"; };
 		5291911D292F513F00D87DF9 /* CansBase.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = CansBase.swift; sourceTree = "<group>"; };
-		5291912B292F5B1300D87DF9 /* LinphoneManager.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = LinphoneManager.m; sourceTree = "<group>"; };
-		5291912C292F5B1300D87DF9 /* LinphoneManager.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = LinphoneManager.h; sourceTree = "<group>"; };
+		5291912B292F5B1300D87DF9 /* CansLinphoneManager.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = CansLinphoneManager.m; sourceTree = "<group>"; };
+		5291912C292F5B1300D87DF9 /* CansLinphoneManager.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = CansLinphoneManager.h; sourceTree = "<group>"; };
 		5291912D292F5B1300D87DF9 /* AppManager.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = AppManager.swift; sourceTree = "<group>"; };
 		5291912E292F5B1300D87DF9 /* ProviderDelegate.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = ProviderDelegate.swift; sourceTree = "<group>"; };
 		5291912F292F5B1300D87DF9 /* CallManager.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = CallManager.swift; sourceTree = "<group>"; };
@@ -453,7 +453,7 @@
 				5291912D292F5B1300D87DF9 /* AppManager.swift */,
 				5291912F292F5B1300D87DF9 /* CallManager.swift */,
 				52919130292F5B1300D87DF9 /* CoreManager.swift */,
-				5291912A292F5B1300D87DF9 /* LinphoneManager */,
+				5291912A292F5B1300D87DF9 /* CansLinphoneManager */,
 				5291912E292F5B1300D87DF9 /* ProviderDelegate.swift */,
 				5291911D292F513F00D87DF9 /* CansBase.swift */,
 				52918F98292E86CD00D87DF9 /* linphone-sdk */,
@@ -767,13 +767,13 @@
 			path = linphonesw;
 			sourceTree = "<group>";
 		};
-		5291912A292F5B1300D87DF9 /* LinphoneManager */ = {
+		5291912A292F5B1300D87DF9 /* CansLinphoneManager */ = {
 			isa = PBXGroup;
 			children = (
-				5291912B292F5B1300D87DF9 /* LinphoneManager.m */,
-				5291912C292F5B1300D87DF9 /* LinphoneManager.h */,
+				5291912C292F5B1300D87DF9 /* CansLinphoneManager.h */,
+				5291912B292F5B1300D87DF9 /* CansLinphoneManager.m */,
 			);
-			path = LinphoneManager;
+			path = CansLinphoneManager;
 			sourceTree = "<group>";
 		};
 /* End PBXGroup section */
@@ -784,7 +784,7 @@
 			buildActionMask = 2147483647;
 			files = (
 				52670839292C79CD002CDDAE /* CansConnect.h in Headers */,
-				52919132292F5B1300D87DF9 /* LinphoneManager.h in Headers */,
+				52919132292F5B1300D87DF9 /* CansLinphoneManager.h in Headers */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -1000,7 +1000,7 @@
 			buildActionMask = 2147483647;
 			files = (
 				52919136292F5B1300D87DF9 /* CoreManager.swift in Sources */,
-				52919131292F5B1300D87DF9 /* LinphoneManager.m in Sources */,
+				52919131292F5B1300D87DF9 /* CansLinphoneManager.m in Sources */,
 				52919133292F5B1300D87DF9 /* AppManager.swift in Sources */,
 				5291911E292F513F00D87DF9 /* CansBase.swift in Sources */,
 				52919135292F5B1300D87DF9 /* CallManager.swift in Sources */,

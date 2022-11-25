@@ -191,10 +191,10 @@
 		5291911E292F513F00D87DF9 /* CansBase.swift in Sources */ = {isa = PBXBuildFile; fileRef = 5291911D292F513F00D87DF9 /* CansBase.swift */; };
 		52919131292F5B1300D87DF9 /* CansLinphoneManager.m in Sources */ = {isa = PBXBuildFile; fileRef = 5291912B292F5B1300D87DF9 /* CansLinphoneManager.m */; };
 		52919132292F5B1300D87DF9 /* CansLinphoneManager.h in Headers */ = {isa = PBXBuildFile; fileRef = 5291912C292F5B1300D87DF9 /* CansLinphoneManager.h */; };
-		52919133292F5B1300D87DF9 /* AppManager.swift in Sources */ = {isa = PBXBuildFile; fileRef = 5291912D292F5B1300D87DF9 /* AppManager.swift */; };
-		52919134292F5B1300D87DF9 /* ProviderDelegate.swift in Sources */ = {isa = PBXBuildFile; fileRef = 5291912E292F5B1300D87DF9 /* ProviderDelegate.swift */; };
-		52919135292F5B1300D87DF9 /* CallManager.swift in Sources */ = {isa = PBXBuildFile; fileRef = 5291912F292F5B1300D87DF9 /* CallManager.swift */; };
-		52919136292F5B1300D87DF9 /* CoreManager.swift in Sources */ = {isa = PBXBuildFile; fileRef = 52919130292F5B1300D87DF9 /* CoreManager.swift */; };
+		52919133292F5B1300D87DF9 /* CansAppManager.swift in Sources */ = {isa = PBXBuildFile; fileRef = 5291912D292F5B1300D87DF9 /* CansAppManager.swift */; };
+		52919134292F5B1300D87DF9 /* CansProviderDelegate.swift in Sources */ = {isa = PBXBuildFile; fileRef = 5291912E292F5B1300D87DF9 /* CansProviderDelegate.swift */; };
+		52919135292F5B1300D87DF9 /* CansCallManager.swift in Sources */ = {isa = PBXBuildFile; fileRef = 5291912F292F5B1300D87DF9 /* CansCallManager.swift */; };
+		52919136292F5B1300D87DF9 /* CansCoreManager.swift in Sources */ = {isa = PBXBuildFile; fileRef = 52919130292F5B1300D87DF9 /* CansCoreManager.swift */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXCopyFilesBuildPhase section */
@@ -396,10 +396,10 @@
 		5291911D292F513F00D87DF9 /* CansBase.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = CansBase.swift; sourceTree = "<group>"; };
 		5291912B292F5B1300D87DF9 /* CansLinphoneManager.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = CansLinphoneManager.m; sourceTree = "<group>"; };
 		5291912C292F5B1300D87DF9 /* CansLinphoneManager.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = CansLinphoneManager.h; sourceTree = "<group>"; };
-		5291912D292F5B1300D87DF9 /* AppManager.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = AppManager.swift; sourceTree = "<group>"; };
-		5291912E292F5B1300D87DF9 /* ProviderDelegate.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = ProviderDelegate.swift; sourceTree = "<group>"; };
-		5291912F292F5B1300D87DF9 /* CallManager.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = CallManager.swift; sourceTree = "<group>"; };
-		52919130292F5B1300D87DF9 /* CoreManager.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = CoreManager.swift; sourceTree = "<group>"; };
+		5291912D292F5B1300D87DF9 /* CansAppManager.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = CansAppManager.swift; sourceTree = "<group>"; };
+		5291912E292F5B1300D87DF9 /* CansProviderDelegate.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = CansProviderDelegate.swift; sourceTree = "<group>"; };
+		5291912F292F5B1300D87DF9 /* CansCallManager.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = CansCallManager.swift; sourceTree = "<group>"; };
+		52919130292F5B1300D87DF9 /* CansCoreManager.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = CansCoreManager.swift; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -450,13 +450,13 @@
 		52670835292C79CD002CDDAE /* CansConnect */ = {
 			isa = PBXGroup;
 			children = (
-				5291912D292F5B1300D87DF9 /* AppManager.swift */,
-				5291912F292F5B1300D87DF9 /* CallManager.swift */,
-				52919130292F5B1300D87DF9 /* CoreManager.swift */,
-				5291912A292F5B1300D87DF9 /* CansLinphoneManager */,
-				5291912E292F5B1300D87DF9 /* ProviderDelegate.swift */,
-				5291911D292F513F00D87DF9 /* CansBase.swift */,
 				52918F98292E86CD00D87DF9 /* linphone-sdk */,
+				5291912D292F5B1300D87DF9 /* CansAppManager.swift */,
+				5291912F292F5B1300D87DF9 /* CansCallManager.swift */,
+				52919130292F5B1300D87DF9 /* CansCoreManager.swift */,
+				5291912A292F5B1300D87DF9 /* CansLinphoneManager */,
+				5291912E292F5B1300D87DF9 /* CansProviderDelegate.swift */,
+				5291911D292F513F00D87DF9 /* CansBase.swift */,
 				52670836292C79CD002CDDAE /* CansConnect.h */,
 				52670837292C79CD002CDDAE /* CansConnect.docc */,
 			);
@@ -999,12 +999,12 @@
 			isa = PBXSourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
-				52919136292F5B1300D87DF9 /* CoreManager.swift in Sources */,
+				52919136292F5B1300D87DF9 /* CansCoreManager.swift in Sources */,
 				52919131292F5B1300D87DF9 /* CansLinphoneManager.m in Sources */,
-				52919133292F5B1300D87DF9 /* AppManager.swift in Sources */,
+				52919133292F5B1300D87DF9 /* CansAppManager.swift in Sources */,
 				5291911E292F513F00D87DF9 /* CansBase.swift in Sources */,
-				52919135292F5B1300D87DF9 /* CallManager.swift in Sources */,
-				52919134292F5B1300D87DF9 /* ProviderDelegate.swift in Sources */,
+				52919135292F5B1300D87DF9 /* CansCallManager.swift in Sources */,
+				52919134292F5B1300D87DF9 /* CansProviderDelegate.swift in Sources */,
 				529190F2292E86D100D87DF9 /* LinphoneWrapper.swift in Sources */,
 				52670838292C79CD002CDDAE /* CansConnect.docc in Sources */,
 			);
@@ -1156,6 +1156,7 @@
 					"@loader_path/Frameworks",
 				);
 				MARKETING_VERSION = 1.0;
+				MODULEMAP_FILE = "";
 				PRODUCT_BUNDLE_IDENTIFIER = cc.cans.CansConnect;
 				PRODUCT_NAME = "$(TARGET_NAME:c99extidentifier)";
 				SKIP_INSTALL = YES;
@@ -1192,6 +1193,7 @@
 					"@loader_path/Frameworks",
 				);
 				MARKETING_VERSION = 1.0;
+				MODULEMAP_FILE = "";
 				PRODUCT_BUNDLE_IDENTIFIER = cc.cans.CansConnect;
 				PRODUCT_NAME = "$(TARGET_NAME:c99extidentifier)";
 				SKIP_INSTALL = YES;

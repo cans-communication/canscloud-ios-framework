@@ -20,16 +20,16 @@
 import Foundation
 //import linphonesw
 
-@objc class CoreManager: NSObject {
-	static var theCoreManager: CoreManager?
+@objc class CansCoreManager: NSObject {
+	static var theCansCoreManager: CansCoreManager?
 	var lc: Core?
 	private var mIterateTimer: Timer?
 
-	@objc static func instance() -> CoreManager {
-		if (theCoreManager == nil) {
-			theCoreManager = CoreManager()
+	@objc static func instance() -> CansCoreManager {
+		if (theCansCoreManager == nil) {
+			theCansCoreManager = CansCoreManager()
 		}
-		return theCoreManager!
+		return theCansCoreManager!
 	}
 
 	@objc func setCore(core: OpaquePointer) {

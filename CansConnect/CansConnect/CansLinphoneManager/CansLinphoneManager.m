@@ -109,14 +109,14 @@ static void linphone_iphone_transfer_state_changed(LinphoneCore *lc, LinphoneCal
 // MARK: - Text Received Functions
 
 static void linphone_iphone_call_id_updated(LinphoneCore *lc, const char *previous_call_id, const char *current_call_id) {
-//    [CallManager.instance updateCallIdWithPrevious:[NSString stringWithUTF8String:previous_call_id] current:[NSString stringWithUTF8String:current_call_id]];
+//    [CansCallManager.instance updateCallIdWithPrevious:[NSString stringWithUTF8String:previous_call_id] current:[NSString stringWithUTF8String:current_call_id]];
 }
 
 static void linphone_iphone_call_log_updated(LinphoneCore *lc, LinphoneCallLog *newcl) {
     if (linphone_call_log_get_status(newcl) == LinphoneCallEarlyAborted) {
         const char *cid = linphone_call_log_get_call_id(newcl);
         if (cid) {
-//            [CallManager.instance markCallAsDeclinedWithCallId:[NSString stringWithUTF8String:cid]];
+//            [CansCallManager.instance markCallAsDeclinedWithCallId:[NSString stringWithUTF8String:cid]];
         }
     }
 }
@@ -259,7 +259,7 @@ static void linphone_iphone_popup_password_request(LinphoneCore *lc, LinphoneAut
 //                linphone_auth_info_new(username.UTF8String, NULL, password.UTF8String, NULL,
 //                               realm.UTF8String, domain.UTF8String);
 //                linphone_core_add_auth_info(LC, info);
-//                [CoreManager.instance refreshRegisters];
+//                [CansCoreManager.instance refreshRegisters];
 //            }];
 //
 //        UIAlertAction* settingsAction = [UIAlertAction actionWithTitle:NSLocalizedString(@"Go to settings", nil)
@@ -399,7 +399,7 @@ static void linphone_iphone_global_state_changed(LinphoneCore *lc, LinphoneGloba
                   [NSString stringWithUTF8String:message ? message : ""], @"message", nil];
 
 //    if (theLinphoneCore && linphone_core_get_global_state(theLinphoneCore) == LinphoneGlobalOff) {
-//        [CoreManager.instance stopIterateTimer];
+//        [CansCoreManager.instance stopIterateTimer];
 //    }
 //    // dispatch the notification asynchronously
 //    dispatch_async(dispatch_get_main_queue(), ^(void) {

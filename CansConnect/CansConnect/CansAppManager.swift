@@ -20,7 +20,7 @@
 import Foundation
 import CoreTelephony
 
-enum NetworkType: Int {
+enum CansNetworkType: Int {
 	case network_none = 0
 	case network_2g = 1
 	case network_3g = 2
@@ -30,18 +30,18 @@ enum NetworkType: Int {
 }
 
 /*
-* AppManager is a class that includes some useful functions.
+* CansAppManager is a class that includes some useful functions.
 */
-@objc class AppManager: NSObject {
-	static func network() -> NetworkType {
+@objc class CansAppManager: NSObject {
+	static func network() -> CansNetworkType {
 		let info = CTTelephonyNetworkInfo()
 		let currentRadio = info.currentRadioAccessTechnology
 		if (currentRadio == CTRadioAccessTechnologyEdge) {
-			return NetworkType.network_2g
+			return CansNetworkType.network_2g
 		} else if (currentRadio == CTRadioAccessTechnologyLTE) {
-			return NetworkType.network_4g
+			return CansNetworkType.network_4g
 		}
-		return NetworkType.network_3g
+		return CansNetworkType.network_3g
 	}
 
 	@objc static func recordingFilePathFromCall(address: String) -> String {

@@ -7,6 +7,7 @@
 	objects = {
 
 /* Begin PBXBuildFile section */
+		526224FA293332B20090FF0F /* TestImport.swift in Sources */ = {isa = PBXBuildFile; fileRef = 526224F9293332B20090FF0F /* TestImport.swift */; };
 		52670894292CA6E3002CDDAE /* AppDelegate.m in Sources */ = {isa = PBXBuildFile; fileRef = 52670893292CA6E3002CDDAE /* AppDelegate.m */; };
 		52670897292CA6E3002CDDAE /* SceneDelegate.m in Sources */ = {isa = PBXBuildFile; fileRef = 52670896292CA6E3002CDDAE /* SceneDelegate.m */; };
 		5267089A292CA6E3002CDDAE /* ViewController.m in Sources */ = {isa = PBXBuildFile; fileRef = 52670899292CA6E3002CDDAE /* ViewController.m */; };
@@ -33,6 +34,8 @@
 /* End PBXCopyFilesBuildPhase section */
 
 /* Begin PBXFileReference section */
+		526224F8293332B10090FF0F /* DemoApp-Bridging-Header.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = "DemoApp-Bridging-Header.h"; sourceTree = "<group>"; };
+		526224F9293332B20090FF0F /* TestImport.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TestImport.swift; sourceTree = "<group>"; };
 		5267088F292CA6E3002CDDAE /* DemoApp.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = DemoApp.app; sourceTree = BUILT_PRODUCTS_DIR; };
 		52670892292CA6E3002CDDAE /* AppDelegate.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = AppDelegate.h; sourceTree = "<group>"; };
 		52670893292CA6E3002CDDAE /* AppDelegate.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = AppDelegate.m; sourceTree = "<group>"; };
@@ -91,6 +94,8 @@
 				526708A0292CA6E5002CDDAE /* LaunchScreen.storyboard */,
 				526708A3292CA6E5002CDDAE /* Info.plist */,
 				526708A4292CA6E5002CDDAE /* main.m */,
+				526224F9293332B20090FF0F /* TestImport.swift */,
+				526224F8293332B10090FF0F /* DemoApp-Bridging-Header.h */,
 			);
 			path = DemoApp;
 			sourceTree = "<group>";
@@ -135,6 +140,7 @@
 				TargetAttributes = {
 					5267088E292CA6E3002CDDAE = {
 						CreatedOnToolsVersion = 14.1;
+						LastSwiftMigration = 1410;
 					};
 				};
 			};
@@ -178,6 +184,7 @@
 				52670894292CA6E3002CDDAE /* AppDelegate.m in Sources */,
 				526708A5292CA6E5002CDDAE /* main.m in Sources */,
 				52670897292CA6E3002CDDAE /* SceneDelegate.m in Sources */,
+				526224FA293332B20090FF0F /* TestImport.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -318,6 +325,7 @@
 			buildSettings = {
 				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
 				ASSETCATALOG_COMPILER_GLOBAL_ACCENT_COLOR_NAME = AccentColor;
+				CLANG_ENABLE_MODULES = YES;
 				CODE_SIGN_STYLE = Automatic;
 				CURRENT_PROJECT_VERSION = 1;
 				DEVELOPMENT_TEAM = N27H9XFR3R;
@@ -336,6 +344,9 @@
 				PRODUCT_BUNDLE_IDENTIFIER = cc.cans.DemoApp;
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				SWIFT_EMIT_LOC_STRINGS = YES;
+				SWIFT_OBJC_BRIDGING_HEADER = "DemoApp/DemoApp-Bridging-Header.h";
+				SWIFT_OPTIMIZATION_LEVEL = "-Onone";
+				SWIFT_VERSION = 5.0;
 				TARGETED_DEVICE_FAMILY = "1,2";
 			};
 			name = Debug;
@@ -345,6 +356,7 @@
 			buildSettings = {
 				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
 				ASSETCATALOG_COMPILER_GLOBAL_ACCENT_COLOR_NAME = AccentColor;
+				CLANG_ENABLE_MODULES = YES;
 				CODE_SIGN_STYLE = Automatic;
 				CURRENT_PROJECT_VERSION = 1;
 				DEVELOPMENT_TEAM = N27H9XFR3R;
@@ -363,6 +375,8 @@
 				PRODUCT_BUNDLE_IDENTIFIER = cc.cans.DemoApp;
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				SWIFT_EMIT_LOC_STRINGS = YES;
+				SWIFT_OBJC_BRIDGING_HEADER = "DemoApp/DemoApp-Bridging-Header.h";
+				SWIFT_VERSION = 5.0;
 				TARGETED_DEVICE_FAMILY = "1,2";
 			};
 			name = Release;

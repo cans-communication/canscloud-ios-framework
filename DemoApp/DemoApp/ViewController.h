@@ -7,8 +7,16 @@
 
 #import <UIKit/UIKit.h>
 
-@interface ViewController : UIViewController
+//#include "CansConnect/linphone/linphonecore.h"
+//#include "linphone/linphonecore.h"
 
+#include "CansConnect/CansConnect.h"
+
+@interface ViewController : UIViewController {
+    
+}
+
+//+ (LinphoneCore*) getLc;
 
 @end
 

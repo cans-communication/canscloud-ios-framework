@@ -229,6 +229,7 @@
 /* End PBXCopyFilesBuildPhase section */
 
 /* Begin PBXFileReference section */
+		521F285E2934C3F6007FFCE7 /* CansConnect.modulemap */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = "sourcecode.module-map"; path = CansConnect.modulemap; sourceTree = "<group>"; };
 		52670833292C79CD002CDDAE /* CansConnect.framework */ = {isa = PBXFileReference; explicitFileType = wrapper.framework; includeInIndex = 0; path = CansConnect.framework; sourceTree = BUILT_PRODUCTS_DIR; };
 		52670836292C79CD002CDDAE /* CansConnect.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = CansConnect.h; sourceTree = "<group>"; };
 		52670837292C79CD002CDDAE /* CansConnect.docc */ = {isa = PBXFileReference; lastKnownFileType = folder.documentationcatalog; path = CansConnect.docc; sourceTree = "<group>"; };
@@ -458,6 +459,7 @@
 				5291912E292F5B1300D87DF9 /* CansProviderDelegate.swift */,
 				5291911D292F513F00D87DF9 /* CansBase.swift */,
 				52670836292C79CD002CDDAE /* CansConnect.h */,
+				521F285E2934C3F6007FFCE7 /* CansConnect.modulemap */,
 				52670837292C79CD002CDDAE /* CansConnect.docc */,
 			);
 			path = CansConnect;
@@ -1156,7 +1158,7 @@
 					"@loader_path/Frameworks",
 				);
 				MARKETING_VERSION = 1.0;
-				MODULEMAP_FILE = "";
+				MODULEMAP_FILE = $SRCROOT/CansConnect/CansConnect.modulemap;
 				PRODUCT_BUNDLE_IDENTIFIER = cc.cans.CansConnect;
 				PRODUCT_NAME = "$(TARGET_NAME:c99extidentifier)";
 				SKIP_INSTALL = YES;
@@ -1193,7 +1195,7 @@
 					"@loader_path/Frameworks",
 				);
 				MARKETING_VERSION = 1.0;
-				MODULEMAP_FILE = "";
+				MODULEMAP_FILE = $SRCROOT/CansConnect/CansConnect.modulemap;
 				PRODUCT_BUNDLE_IDENTIFIER = cc.cans.CansConnect;
 				PRODUCT_NAME = "$(TARGET_NAME:c99extidentifier)";
 				SKIP_INSTALL = YES;

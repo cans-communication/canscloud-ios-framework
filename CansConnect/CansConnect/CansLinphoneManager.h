@@ -7,13 +7,15 @@
 
 #import <Foundation/Foundation.h>
 
-#include "linphone/factory.h"
-#include "linphone/linphonecore.h"
+//#include "linphone/factory.h"
+//#include "linphone/linphonecore.h"
 
-#define LC ([CansLinphoneManager getLc])
+//#import "<linphone/linphonecore.h>"
+
+//#define LC ([CansLinphoneManager getLc])
 
 
-static LinphoneCore *theLinphoneCore = nil;
+//static LinphoneCore *theLinphoneCore = nil;
 
 NSString *const kLinphoneCoreUpdate = @"LinphoneCoreUpdate";
 NSString *const kLinphoneDisplayStatusUpdate = @"LinphoneDisplayStatusUpdate";
@@ -42,12 +44,11 @@ NSString *const kLinphoneMsgNotificationAppGroupId = @"group.cc.cans.canscloud.m
 }
 
 
-@property (readonly) LpConfig *configDb;
-
-
-+ (LinphoneCore*) getLc;
-- (void)createLinphoneCore;
-- (void)registerSip;
+//@property (readonly) LpConfig *configDb;
+//
+//+ (LinphoneCore*) getLc;
+//- (void)createLinphoneCore;
+//- (void)registerSip;
 
 
 @end

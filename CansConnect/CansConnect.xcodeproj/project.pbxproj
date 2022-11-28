@@ -190,7 +190,7 @@
 		52919116292E879C00D87DF9 /* ortp.framework in Embed Frameworks */ = {isa = PBXBuildFile; fileRef = 52919041292E86CD00D87DF9 /* ortp.framework */; settings = {ATTRIBUTES = (CodeSignOnCopy, RemoveHeadersOnCopy, ); }; };
 		5291911E292F513F00D87DF9 /* CansBase.swift in Sources */ = {isa = PBXBuildFile; fileRef = 5291911D292F513F00D87DF9 /* CansBase.swift */; };
 		52919131292F5B1300D87DF9 /* CansLinphoneManager.m in Sources */ = {isa = PBXBuildFile; fileRef = 5291912B292F5B1300D87DF9 /* CansLinphoneManager.m */; };
-		52919132292F5B1300D87DF9 /* CansLinphoneManager.h in Headers */ = {isa = PBXBuildFile; fileRef = 5291912C292F5B1300D87DF9 /* CansLinphoneManager.h */; };
+		52919132292F5B1300D87DF9 /* CansLinphoneManager.h in Headers */ = {isa = PBXBuildFile; fileRef = 5291912C292F5B1300D87DF9 /* CansLinphoneManager.h */; settings = {ATTRIBUTES = (Public, ); }; };
 		52919133292F5B1300D87DF9 /* CansAppManager.swift in Sources */ = {isa = PBXBuildFile; fileRef = 5291912D292F5B1300D87DF9 /* CansAppManager.swift */; };
 		52919134292F5B1300D87DF9 /* CansProviderDelegate.swift in Sources */ = {isa = PBXBuildFile; fileRef = 5291912E292F5B1300D87DF9 /* CansProviderDelegate.swift */; };
 		52919135292F5B1300D87DF9 /* CansCallManager.swift in Sources */ = {isa = PBXBuildFile; fileRef = 5291912F292F5B1300D87DF9 /* CansCallManager.swift */; };
@@ -451,11 +451,12 @@
 		52670835292C79CD002CDDAE /* CansConnect */ = {
 			isa = PBXGroup;
 			children = (
+				5291912C292F5B1300D87DF9 /* CansLinphoneManager.h */,
+				5291912B292F5B1300D87DF9 /* CansLinphoneManager.m */,
 				52918F98292E86CD00D87DF9 /* linphone-sdk */,
 				5291912D292F5B1300D87DF9 /* CansAppManager.swift */,
 				5291912F292F5B1300D87DF9 /* CansCallManager.swift */,
 				52919130292F5B1300D87DF9 /* CansCoreManager.swift */,
-				5291912A292F5B1300D87DF9 /* CansLinphoneManager */,
 				5291912E292F5B1300D87DF9 /* CansProviderDelegate.swift */,
 				5291911D292F513F00D87DF9 /* CansBase.swift */,
 				52670836292C79CD002CDDAE /* CansConnect.h */,
@@ -767,15 +768,6 @@
 				5291904E292E86CD00D87DF9 /* LinphoneWrapper.swift */,
 			);
 			path = linphonesw;
-			sourceTree = "<group>";
-		};
-		5291912A292F5B1300D87DF9 /* CansLinphoneManager */ = {
-			isa = PBXGroup;
-			children = (
-				5291912C292F5B1300D87DF9 /* CansLinphoneManager.h */,
-				5291912B292F5B1300D87DF9 /* CansLinphoneManager.m */,
-			);
-			path = CansLinphoneManager;
 			sourceTree = "<group>";
 		};
 /* End PBXGroup section */
@@ -1135,6 +1127,7 @@
 			isa = XCBuildConfiguration;
 			buildSettings = {
 				BUILD_LIBRARY_FOR_DISTRIBUTION = YES;
+				CLANG_ALLOW_NON_MODULAR_INCLUDES_IN_FRAMEWORK_MODULES = YES;
 				CODE_SIGN_STYLE = Automatic;
 				CURRENT_PROJECT_VERSION = 1;
 				DEFINES_MODULE = YES;
@@ -1172,6 +1165,7 @@
 			isa = XCBuildConfiguration;
 			buildSettings = {
 				BUILD_LIBRARY_FOR_DISTRIBUTION = YES;
+				CLANG_ALLOW_NON_MODULAR_INCLUDES_IN_FRAMEWORK_MODULES = YES;
 				CODE_SIGN_STYLE = Automatic;
 				CURRENT_PROJECT_VERSION = 1;
 				DEFINES_MODULE = YES;

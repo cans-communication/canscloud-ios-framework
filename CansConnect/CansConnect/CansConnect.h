@@ -29,5 +29,5 @@ FOUNDATION_EXPORT const unsigned char CansConnectVersionString[];
 
 #import <CansConnect/CansLinphoneManager.h>
 
-#import <linphonecore.h>
+//#import <swift-umbrella.h>
 

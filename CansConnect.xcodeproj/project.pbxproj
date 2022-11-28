@@ -11,6 +11,12 @@
 		2B4C0B3528DC6B1700F35838 /* CansConnect.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 2B4C0B2A28DC6B1600F35838 /* CansConnect.framework */; };
 		2B4C0B3B28DC6B1700F35838 /* CansConnect.h in Headers */ = {isa = PBXBuildFile; fileRef = 2B4C0B2D28DC6B1600F35838 /* CansConnect.h */; settings = {ATTRIBUTES = (Public, ); }; };
 		520BA3E92924E1DD00E8421D /* CansConnect-Bridging-Header.h in Headers */ = {isa = PBXBuildFile; fileRef = 520BA3E82924E1DD00E8421D /* CansConnect-Bridging-Header.h */; };
+		521F284D2934A895007FFCE7 /* Utils.swift in Sources */ = {isa = PBXBuildFile; fileRef = 521F284C2934A894007FFCE7 /* Utils.swift */; };
+		521F284E2934A89B007FFCE7 /* Utils.swift in Sources */ = {isa = PBXBuildFile; fileRef = 521F284C2934A894007FFCE7 /* Utils.swift */; };
+		521F284F2934A8DE007FFCE7 /* CansConnect.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 2B4C0B2A28DC6B1600F35838 /* CansConnect.framework */; };
+		521F28502934A8DE007FFCE7 /* CansConnect.framework in Embed Frameworks */ = {isa = PBXBuildFile; fileRef = 2B4C0B2A28DC6B1600F35838 /* CansConnect.framework */; settings = {ATTRIBUTES = (CodeSignOnCopy, RemoveHeadersOnCopy, ); }; };
+		521F28542934A8E4007FFCE7 /* CansConnect.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 2B4C0B2A28DC6B1600F35838 /* CansConnect.framework */; };
+		521F28552934A8E4007FFCE7 /* CansConnect.framework in Embed Frameworks */ = {isa = PBXBuildFile; fileRef = 2B4C0B2A28DC6B1600F35838 /* CansConnect.framework */; settings = {ATTRIBUTES = (CodeSignOnCopy, RemoveHeadersOnCopy, ); }; };
 		5255AAFC292621400070B454 /* CoreManager.swift in Sources */ = {isa = PBXBuildFile; fileRef = 5255AAFB292621400070B454 /* CoreManager.swift */; };
 		525D5E272921068A0072429F /* LinphoneManager.h in Headers */ = {isa = PBXBuildFile; fileRef = 525D5E252921068A0072429F /* LinphoneManager.h */; };
 		525D5E282921068A0072429F /* LinphoneManager.m in Sources */ = {isa = PBXBuildFile; fileRef = 525D5E262921068A0072429F /* LinphoneManager.m */; };
@@ -220,6 +226,20 @@
 			remoteGlobalIDString = 2B4C0B2928DC6B1600F35838;
 			remoteInfo = "canscloud-ios-framework";
 		};
+		521F28512934A8DE007FFCE7 /* PBXContainerItemProxy */ = {
+			isa = PBXContainerItemProxy;
+			containerPortal = 2B4C0B2128DC6B1600F35838 /* Project object */;
+			proxyType = 1;
+			remoteGlobalIDString = 2B4C0B2928DC6B1600F35838;
+			remoteInfo = CansConnect;
+		};
+		521F28562934A8E4007FFCE7 /* PBXContainerItemProxy */ = {
+			isa = PBXContainerItemProxy;
+			containerPortal = 2B4C0B2128DC6B1600F35838 /* Project object */;
+			proxyType = 1;
+			remoteGlobalIDString = 2B4C0B2928DC6B1600F35838;
+			remoteInfo = CansConnect;
+		};
 		5298517A291DE455007A9E3C /* PBXContainerItemProxy */ = {
 			isa = PBXContainerItemProxy;
 			containerPortal = 2B4C0B2128DC6B1600F35838 /* Project object */;
@@ -244,6 +264,28 @@
 /* End PBXContainerItemProxy section */
 
 /* Begin PBXCopyFilesBuildPhase section */
+		521F28532934A8DE007FFCE7 /* Embed Frameworks */ = {
+			isa = PBXCopyFilesBuildPhase;
+			buildActionMask = 2147483647;
+			dstPath = "";
+			dstSubfolderSpec = 10;
+			files = (
+				521F28502934A8DE007FFCE7 /* CansConnect.framework in Embed Frameworks */,
+			);
+			name = "Embed Frameworks";
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+		521F28582934A8E4007FFCE7 /* Embed Frameworks */ = {
+			isa = PBXCopyFilesBuildPhase;
+			buildActionMask = 2147483647;
+			dstPath = "";
+			dstSubfolderSpec = 10;
+			files = (
+				521F28552934A8E4007FFCE7 /* CansConnect.framework in Embed Frameworks */,
+			);
+			name = "Embed Frameworks";
+			runOnlyForDeploymentPostprocessing = 0;
+		};
 		52985180291DE455007A9E3C /* Embed Foundation Extensions */ = {
 			isa = PBXCopyFilesBuildPhase;
 			buildActionMask = 2147483647;
@@ -303,6 +345,7 @@
 		2B4C0B2E28DC6B1600F35838 /* CansConnect.docc */ = {isa = PBXFileReference; lastKnownFileType = folder.documentationcatalog; path = CansConnect.docc; sourceTree = "<group>"; };
 		2B4C0B3428DC6B1700F35838 /* CansConnectTests.xctest */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; includeInIndex = 0; path = CansConnectTests.xctest; sourceTree = BUILT_PRODUCTS_DIR; };
 		520BA3E82924E1DD00E8421D /* CansConnect-Bridging-Header.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = "CansConnect-Bridging-Header.h"; sourceTree = "<group>"; };
+		521F284C2934A894007FFCE7 /* Utils.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = Utils.swift; sourceTree = "<group>"; };
 		5254DCAC291FC49100993979 /* msgNotificationService.entitlements */ = {isa = PBXFileReference; lastKnownFileType = text.plist.entitlements; path = msgNotificationService.entitlements; sourceTree = "<group>"; };
 		5254DCAD291FC4AA00993979 /* msgNotificationContent.entitlements */ = {isa = PBXFileReference; lastKnownFileType = text.plist.entitlements; path = msgNotificationContent.entitlements; sourceTree = "<group>"; };
 		5255AAFB292621400070B454 /* CoreManager.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = CoreManager.swift; sourceTree = "<group>"; };
@@ -529,6 +572,7 @@
 			isa = PBXFrameworksBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				521F284F2934A8DE007FFCE7 /* CansConnect.framework in Frameworks */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -536,6 +580,7 @@
 			isa = PBXFrameworksBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				521F28542934A8E4007FFCE7 /* CansConnect.framework in Frameworks */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -612,6 +657,7 @@
 			isa = PBXGroup;
 			children = (
 				5254DCAC291FC49100993979 /* msgNotificationService.entitlements */,
+				521F284C2934A894007FFCE7 /* Utils.swift */,
 				52985177291DE455007A9E3C /* NotificationService.swift */,
 				52985179291DE455007A9E3C /* Info.plist */,
 			);
@@ -1024,10 +1070,12 @@
 				52985171291DE455007A9E3C /* Sources */,
 				52985172291DE455007A9E3C /* Frameworks */,
 				52985173291DE455007A9E3C /* Resources */,
+				521F28532934A8DE007FFCE7 /* Embed Frameworks */,
 			);
 			buildRules = (
 			);
 			dependencies = (
+				521F28522934A8DE007FFCE7 /* PBXTargetDependency */,
 			);
 			name = msgNotificationService;
 			productName = msgNotificationService;
@@ -1041,10 +1089,12 @@
 				52985181291DE4CF007A9E3C /* Sources */,
 				52985182291DE4CF007A9E3C /* Frameworks */,
 				52985183291DE4CF007A9E3C /* Resources */,
+				521F28582934A8E4007FFCE7 /* Embed Frameworks */,
 			);
 			buildRules = (
 			);
 			dependencies = (
+				521F28572934A8E4007FFCE7 /* PBXTargetDependency */,
 			);
 			name = msgNotificationContent;
 			productName = msgNotificationContent;
@@ -1378,6 +1428,7 @@
 			buildActionMask = 2147483647;
 			files = (
 				52985178291DE455007A9E3C /* NotificationService.swift in Sources */,
+				521F284D2934A895007FFCE7 /* Utils.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -1386,6 +1437,7 @@
 			buildActionMask = 2147483647;
 			files = (
 				52985188291DE4CF007A9E3C /* NotificationService.swift in Sources */,
+				521F284E2934A89B007FFCE7 /* Utils.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -1406,6 +1458,16 @@
 			isa = PBXTargetDependency;
 			target = 2B4C0B2928DC6B1600F35838 /* CansConnect */;
 			targetProxy = 2B4C0B3628DC6B1700F35838 /* PBXContainerItemProxy */;
+		};
+		521F28522934A8DE007FFCE7 /* PBXTargetDependency */ = {
+			isa = PBXTargetDependency;
+			target = 2B4C0B2928DC6B1600F35838 /* CansConnect */;
+			targetProxy = 521F28512934A8DE007FFCE7 /* PBXContainerItemProxy */;
+		};
+		521F28572934A8E4007FFCE7 /* PBXTargetDependency */ = {
+			isa = PBXTargetDependency;
+			target = 2B4C0B2928DC6B1600F35838 /* CansConnect */;
+			targetProxy = 521F28562934A8E4007FFCE7 /* PBXContainerItemProxy */;
 		};
 		5298517B291DE455007A9E3C /* PBXTargetDependency */ = {
 			isa = PBXTargetDependency;

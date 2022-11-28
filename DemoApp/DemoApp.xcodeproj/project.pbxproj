@@ -17,6 +17,8 @@
 		5262253C29333E5B0090FF0F /* msgNotificationService.appex in Embed Foundation Extensions */ = {isa = PBXBuildFile; fileRef = 5262253529333E5B0090FF0F /* msgNotificationService.appex */; settings = {ATTRIBUTES = (RemoveHeadersOnCopy, ); }; };
 		5262254129333F840090FF0F /* Utils.swift in Sources */ = {isa = PBXBuildFile; fileRef = 5262254029333F840090FF0F /* Utils.swift */; };
 		5262254229333F840090FF0F /* Utils.swift in Sources */ = {isa = PBXBuildFile; fileRef = 5262254029333F840090FF0F /* Utils.swift */; };
+		5262254E29347BD00090FF0F /* CansConnect.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 526708AC292CA722002CDDAE /* CansConnect.framework */; };
+		5262254F29347BD00090FF0F /* CansConnect.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 526708AC292CA722002CDDAE /* CansConnect.framework */; };
 		52670894292CA6E3002CDDAE /* AppDelegate.m in Sources */ = {isa = PBXBuildFile; fileRef = 52670893292CA6E3002CDDAE /* AppDelegate.m */; };
 		52670897292CA6E3002CDDAE /* SceneDelegate.m in Sources */ = {isa = PBXBuildFile; fileRef = 52670896292CA6E3002CDDAE /* SceneDelegate.m */; };
 		5267089A292CA6E3002CDDAE /* ViewController.m in Sources */ = {isa = PBXBuildFile; fileRef = 52670899292CA6E3002CDDAE /* ViewController.m */; };
@@ -106,6 +108,7 @@
 			files = (
 				5262252329333E1C0090FF0F /* UserNotificationsUI.framework in Frameworks */,
 				5262252129333E1C0090FF0F /* UserNotifications.framework in Frameworks */,
+				5262254E29347BD00090FF0F /* CansConnect.framework in Frameworks */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -113,6 +116,7 @@
 			isa = PBXFrameworksBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				5262254F29347BD00090FF0F /* CansConnect.framework in Frameworks */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};

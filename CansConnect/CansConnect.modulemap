@@ -1,0 +1,8 @@
+framework module CansConnect {
+  umbrella header "CansConnect.h"
+  
+  header "LinphoneManager.h"
+  
+  export *
+  module * { export * }
+}

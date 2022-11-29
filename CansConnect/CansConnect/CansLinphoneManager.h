@@ -10,9 +10,12 @@
 //#include "linphone/factory.h"
 //#include "linphone/linphonecore.h"
 
+//#import "linphone-sdk/apple-darwin/Frameworks/linphone.framework/Headers/linphonecore.h"
+
 //#import "<linphone/linphonecore.h>"
 
 //#define LC ([CansLinphoneManager getLc])
+
 
 
 //static LinphoneCore *theLinphoneCore = nil;

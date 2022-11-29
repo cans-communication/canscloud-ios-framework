@@ -12,6 +12,9 @@
 
 #include "CansConnect/CansConnect.h"
 
+//#include "CansConnect/Linphone.h"
+//#include "Linphone.h"
+
 @interface ViewController : UIViewController {
     
 }

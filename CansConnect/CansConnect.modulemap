@@ -1,8 +1,14 @@
 framework module CansConnect {
   umbrella header "CansConnect.h"
+
+  module LinphoneCore {
+      header "CansConnect/linphone-sdk/apple-darwin/Frameworks/Headers/linphonecore.h"
   
-  header "LinphoneManager.h"
-  
+      export *
+  }
+
   export *
   module * { export * }
 }
+
+

@@ -16,6 +16,5 @@ FOUNDATION_EXPORT const unsigned char CansConnectVersionString[];
 // In this header, you should import all the public headers of your framework using statements like #import <CansConnect/PublicHeader.h>
 
 //#import <CansConnect/LinphoneManager.h>
-//#import <CansConnect/linphone-sdk/apple-darwin/Frameworks/linphone.framework/Headers/linphonecore.h>
 
 

@@ -7,7 +7,6 @@
 	objects = {
 
 /* Begin PBXBuildFile section */
-		521F28652935CF99007FFCE7 /* Linphone.h in Headers */ = {isa = PBXBuildFile; fileRef = 521F28642935CF99007FFCE7 /* Linphone.h */; };
 		52670838292C79CD002CDDAE /* CansConnect.docc in Sources */ = {isa = PBXBuildFile; fileRef = 52670837292C79CD002CDDAE /* CansConnect.docc */; };
 		52670839292C79CD002CDDAE /* CansConnect.h in Headers */ = {isa = PBXBuildFile; fileRef = 52670836292C79CD002CDDAE /* CansConnect.h */; settings = {ATTRIBUTES = (Public, ); }; };
 		5291904F292E86CD00D87DF9 /* deploy.sh in Resources */ = {isa = PBXBuildFile; fileRef = 52918F9B292E86CD00D87DF9 /* deploy.sh */; };
@@ -231,7 +230,6 @@
 
 /* Begin PBXFileReference section */
 		521F285E2934C3F6007FFCE7 /* CansConnect.modulemap */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = "sourcecode.module-map"; path = CansConnect.modulemap; sourceTree = "<group>"; };
-		521F28642935CF99007FFCE7 /* Linphone.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = Linphone.h; sourceTree = "<group>"; };
 		52670833292C79CD002CDDAE /* CansConnect.framework */ = {isa = PBXFileReference; explicitFileType = wrapper.framework; includeInIndex = 0; path = CansConnect.framework; sourceTree = BUILT_PRODUCTS_DIR; };
 		52670836292C79CD002CDDAE /* CansConnect.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = CansConnect.h; sourceTree = "<group>"; };
 		52670837292C79CD002CDDAE /* CansConnect.docc */ = {isa = PBXFileReference; lastKnownFileType = folder.documentationcatalog; path = CansConnect.docc; sourceTree = "<group>"; };
@@ -461,7 +459,6 @@
 				52919130292F5B1300D87DF9 /* CansCoreManager.swift */,
 				5291912E292F5B1300D87DF9 /* CansProviderDelegate.swift */,
 				5291911D292F513F00D87DF9 /* CansBase.swift */,
-				521F28642935CF99007FFCE7 /* Linphone.h */,
 				52670836292C79CD002CDDAE /* CansConnect.h */,
 				521F285E2934C3F6007FFCE7 /* CansConnect.modulemap */,
 				52670837292C79CD002CDDAE /* CansConnect.docc */,
@@ -782,7 +779,6 @@
 			files = (
 				52670839292C79CD002CDDAE /* CansConnect.h in Headers */,
 				52919132292F5B1300D87DF9 /* CansLinphoneManager.h in Headers */,
-				521F28652935CF99007FFCE7 /* Linphone.h in Headers */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -1155,7 +1151,6 @@
 					"@loader_path/Frameworks",
 				);
 				MARKETING_VERSION = 1.0;
-				MODULEMAP_FILE = $SRCROOT/CansConnect/CansConnect.modulemap;
 				PRODUCT_BUNDLE_IDENTIFIER = cc.cans.CansConnect;
 				PRODUCT_NAME = "$(TARGET_NAME:c99extidentifier)";
 				SKIP_INSTALL = YES;
@@ -1193,7 +1188,6 @@
 					"@loader_path/Frameworks",
 				);
 				MARKETING_VERSION = 1.0;
-				MODULEMAP_FILE = $SRCROOT/CansConnect/CansConnect.modulemap;
 				PRODUCT_BUNDLE_IDENTIFIER = cc.cans.CansConnect;
 				PRODUCT_NAME = "$(TARGET_NAME:c99extidentifier)";
 				SKIP_INSTALL = YES;

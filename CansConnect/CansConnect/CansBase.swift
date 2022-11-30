@@ -9,7 +9,7 @@ import Foundation
 
 @objc public class CansBase: NSObject, URLSessionDelegate {
     
-    private let cansLinphoneManager = CansLinphoneManager()
+//    private let cansLinphoneManager = CansLinphoneManager()
     
     public override init() {
         
@@ -139,12 +139,12 @@ import Foundation
     }
     
     @objc public func configure() {
-//        CansLinphoneManager.createLinphoneCore()
+//        cansLinphoneManager.createLinphoneCore()
 //        setCore(core: CansLinphoneManager.getLc())
     }
     
     @objc public func registerWithObjC() {
-//        CansLinphoneManager.registerSip()
+//        cansLinphoneManager.registerSip()
     }
 
 }

@@ -7,7 +7,9 @@
 
 #import <Foundation/Foundation.h>
 
-//#include "linphone/factory.h"
+#import "TestManager.h"
+
+#include "linphone/factory.h"
 //#include "linphone/linphonecore.h"
 
 //#import "linphone-sdk/apple-darwin/Frameworks/linphone.framework/Headers/linphonecore.h"

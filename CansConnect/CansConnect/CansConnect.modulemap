@@ -1,11 +1,12 @@
-framework module CansConnect {
-    umbrella header "CansConnect.h"
-    export *
-    module * { export * }
-}
-
-framework module Linphone {
-    umbrella header  "CansConnect/linphone-sdk/apple-darwin/Frameworks/linphone.framework/Modules/swift-umbrella.h"
-    export *
-    module * { export * }
-}
+//framework module CansConnect {
+//    umbrella header "CansConnect.h"
+//    export *
+//    module * { export * }
+//}
+//
+//framework module Linphone {
+//    header  "CansConnect/linphone-sdk/apple-darwin/Frameworks/linphone.framework/Modules/swift-umbrella.h"
+//    
+//    export *
+//    module * { export * }
+//}

@@ -457,15 +457,8 @@
 		52670835292C79CD002CDDAE /* CansConnect */ = {
 			isa = PBXGroup;
 			children = (
-				52E3A48A2939C4320033834A /* Alex.h */,
-				52E3A48B2939C4320033834A /* Alex.m */,
-				52E3A3072939C2620033834A /* LinphoneManager.h */,
-				52E3A3082939C2630033834A /* LinphoneManager.m */,
-				5291912D292F5B1300D87DF9 /* CansAppManager.swift */,
-				5291912F292F5B1300D87DF9 /* CansCallManager.swift */,
-				52919130292F5B1300D87DF9 /* CansCoreManager.swift */,
-				5291912E292F5B1300D87DF9 /* CansProviderDelegate.swift */,
-				5291911D292F513F00D87DF9 /* CansBase.swift */,
+				52E3A48E2939E5640033834A /* Swift */,
+				52E3A4902939E5860033834A /* ObjC */,
 				52670836292C79CD002CDDAE /* CansConnect.h */,
 				52670837292C79CD002CDDAE /* CansConnect.docc */,
 			);
@@ -783,6 +776,45 @@
 				52E3A3C12939C2C10033834A /* LinphoneWrapper.swift */,
 			);
 			path = linphonesw;
+			sourceTree = "<group>";
+		};
+		52E3A48E2939E5640033834A /* Swift */ = {
+			isa = PBXGroup;
+			children = (
+				5291912D292F5B1300D87DF9 /* CansAppManager.swift */,
+				5291911D292F513F00D87DF9 /* CansBase.swift */,
+				5291912F292F5B1300D87DF9 /* CansCallManager.swift */,
+				52919130292F5B1300D87DF9 /* CansCoreManager.swift */,
+				5291912E292F5B1300D87DF9 /* CansProviderDelegate.swift */,
+			);
+			path = Swift;
+			sourceTree = "<group>";
+		};
+		52E3A4902939E5860033834A /* ObjC */ = {
+			isa = PBXGroup;
+			children = (
+				52E3A4912939E5950033834A /* Alex */,
+				52E3A4922939E5A00033834A /* LinphoneManager */,
+			);
+			path = ObjC;
+			sourceTree = "<group>";
+		};
+		52E3A4912939E5950033834A /* Alex */ = {
+			isa = PBXGroup;
+			children = (
+				52E3A48A2939C4320033834A /* Alex.h */,
+				52E3A48B2939C4320033834A /* Alex.m */,
+			);
+			path = Alex;
+			sourceTree = "<group>";
+		};
+		52E3A4922939E5A00033834A /* LinphoneManager */ = {
+			isa = PBXGroup;
+			children = (
+				52E3A3072939C2620033834A /* LinphoneManager.h */,
+				52E3A3082939C2630033834A /* LinphoneManager.m */,
+			);
+			path = LinphoneManager;
 			sourceTree = "<group>";
 		};
 /* End PBXGroup section */

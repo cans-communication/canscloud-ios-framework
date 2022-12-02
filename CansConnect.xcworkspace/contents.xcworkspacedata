@@ -2,9 +2,9 @@
 <Workspace
    version = "1.0">
    <FileRef
-      location = "group:DemoApp/DemoApp.xcodeproj">
+      location = "group:CansConnect/CansConnect.xcodeproj">
    </FileRef>
    <FileRef
-      location = "group:CansConnect/CansConnect.xcodeproj">
+      location = "group:DemoApp/DemoApp.xcodeproj">
    </FileRef>
 </Workspace>

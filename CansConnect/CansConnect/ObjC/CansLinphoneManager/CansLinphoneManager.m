@@ -5,14 +5,14 @@
 //  Created by Siraphop Chaisirikul on 13/11/2565 BE.
 //
 
-#import "LinphoneManager.h"
+#import "CansLinphoneManager.h"
 
 
-@interface LinphoneManager ()
+@interface CansLinphoneManager ()
     
 @end
 
-@implementation LinphoneManager
+@implementation CansLinphoneManager
 
 - (void)registerSip {
     NSString *domain = @"test.cans.cc:8444";
@@ -84,7 +84,7 @@
 }
 
 - (void)overrideDefaultSettings {
-    NSString *factory = [LinphoneManager bundleFile:@"linphonerc-factory"];
+    NSString *factory = [CansLinphoneManager bundleFile:@"linphonerc-factory"];
     
     _configDb = linphone_config_new_for_shared_core(kLinphoneMsgNotificationAppGroupId.UTF8String, @"linphonerc".UTF8String, factory.UTF8String);
     linphone_config_clean_entry(_configDb, "misc", "max_calls");
@@ -147,7 +147,7 @@ void linphone_iphone_version_update_check_result_received (LinphoneCore *lc, Lin
 
 static void linphone_iphone_call_encryption_changed(LinphoneCore *lc, LinphoneCall *call, bool_t on,
                             const char *authentication_token) {
-    [(__bridge LinphoneManager *)linphone_core_cbs_get_user_data(linphone_core_get_current_callbacks(lc)) onCallEncryptionChanged:lc call:call on:on token:authentication_token];
+    [(__bridge CansLinphoneManager *)linphone_core_cbs_get_user_data(linphone_core_get_current_callbacks(lc)) onCallEncryptionChanged:lc call:call on:on token:authentication_token];
 }
 
 - (void)onCallEncryptionChanged:(LinphoneCore *)lc
@@ -167,7 +167,7 @@ token:(const char *)authentication_token {
 static void linphone_iphone_notify_presence_received_for_uri_or_tel(LinphoneCore *lc, LinphoneFriend *lf,
                                     const char *uri_or_tel,
                                     const LinphonePresenceModel *presence_model) {
-    [(__bridge LinphoneManager *)linphone_core_cbs_get_user_data(linphone_core_get_current_callbacks(lc)) onNotifyPresenceReceivedForUriOrTel:lc friend:lf uri:uri_or_tel presenceModel:presence_model];
+    [(__bridge CansLinphoneManager *)linphone_core_cbs_get_user_data(linphone_core_get_current_callbacks(lc)) onNotifyPresenceReceivedForUriOrTel:lc friend:lf uri:uri_or_tel presenceModel:presence_model];
 }
 
 - (void)onNotifyPresenceReceivedForUriOrTel:(LinphoneCore *)lc friend:(LinphoneFriend *)lf uri:(const char *)uri presenceModel:(const LinphonePresenceModel *)model {
@@ -194,7 +194,7 @@ static void linphone_iphone_notify_presence_received_for_uri_or_tel(LinphoneCore
 
 static void linphone_iphone_notify_received(LinphoneCore *lc, LinphoneEvent *lev, const char *notified_event,
                         const LinphoneContent *body) {
-    [(__bridge LinphoneManager *)linphone_core_cbs_get_user_data(linphone_core_get_current_callbacks(lc)) onNotifyReceived:lc event:lev notifyEvent:notified_event content:body];
+    [(__bridge CansLinphoneManager *)linphone_core_cbs_get_user_data(linphone_core_get_current_callbacks(lc)) onNotifyReceived:lc event:lev notifyEvent:notified_event content:body];
 }
 
 
@@ -288,14 +288,14 @@ static void linphone_iphone_popup_password_request(LinphoneCore *lc, LinphoneAut
 }
 
 static void linphone_iphone_is_composing_received(LinphoneCore *lc, LinphoneChatRoom *room) {
-    [(__bridge LinphoneManager *)linphone_core_cbs_get_user_data(linphone_core_get_current_callbacks(lc)) onMessageComposeReceived:lc forRoom:room];
+    [(__bridge CansLinphoneManager *)linphone_core_cbs_get_user_data(linphone_core_get_current_callbacks(lc)) onMessageComposeReceived:lc forRoom:room];
 }
 
 // MARK: - Registration State Functions
 
 static void linphone_iphone_registration_state(LinphoneCore *lc, LinphoneProxyConfig *cfg,
                            LinphoneRegistrationState state, const char *message) {
-    [(__bridge LinphoneManager *)linphone_core_cbs_get_user_data(linphone_core_get_current_callbacks(lc)) onRegister:lc cfg:cfg state:state message:message];
+    [(__bridge CansLinphoneManager *)linphone_core_cbs_get_user_data(linphone_core_get_current_callbacks(lc)) onRegister:lc cfg:cfg state:state message:message];
 }
 
 - (void)onRegister:(LinphoneCore *)lc cfg:(LinphoneProxyConfig *)cfg state:(LinphoneRegistrationState)state message:(const char *)cmessage {
@@ -369,7 +369,7 @@ static void linphone_iphone_registration_state(LinphoneCore *lc, LinphoneProxyCo
 
 static void linphone_iphone_configuring_status_changed(LinphoneCore *lc, LinphoneConfiguringState status,
                                const char *message) {
-    [(__bridge LinphoneManager *)linphone_core_cbs_get_user_data(linphone_core_get_current_callbacks(lc)) onConfiguringStatusChanged:status withMessage:message];
+    [(__bridge CansLinphoneManager *)linphone_core_cbs_get_user_data(linphone_core_get_current_callbacks(lc)) onConfiguringStatusChanged:status withMessage:message];
 }
 
 - (void)onConfiguringStatusChanged:(LinphoneConfiguringState)status withMessage:(const char *)message {
@@ -390,7 +390,7 @@ static void linphone_iphone_configuring_status_changed(LinphoneCore *lc, Linphon
 // MARK: - Global state change
 
 static void linphone_iphone_global_state_changed(LinphoneCore *lc, LinphoneGlobalState gstate, const char *message) {
-    [(__bridge LinphoneManager *)linphone_core_cbs_get_user_data(linphone_core_get_current_callbacks(lc)) onGlobalStateChanged:gstate withMessage:message];
+    [(__bridge CansLinphoneManager *)linphone_core_cbs_get_user_data(linphone_core_get_current_callbacks(lc)) onGlobalStateChanged:gstate withMessage:message];
 }
 
 - (void)onGlobalStateChanged:(LinphoneGlobalState)state withMessage:(const char *)message {

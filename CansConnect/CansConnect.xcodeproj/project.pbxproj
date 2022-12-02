@@ -195,8 +195,6 @@
 		52919134292F5B1300D87DF9 /* CansProviderDelegate.swift in Sources */ = {isa = PBXBuildFile; fileRef = 5291912E292F5B1300D87DF9 /* CansProviderDelegate.swift */; };
 		52919135292F5B1300D87DF9 /* CansCallManager.swift in Sources */ = {isa = PBXBuildFile; fileRef = 5291912F292F5B1300D87DF9 /* CansCallManager.swift */; };
 		52919136292F5B1300D87DF9 /* CansCoreManager.swift in Sources */ = {isa = PBXBuildFile; fileRef = 52919130292F5B1300D87DF9 /* CansCoreManager.swift */; };
-		52E3A128293766D60033834A /* TestManager.h in Headers */ = {isa = PBXBuildFile; fileRef = 52E3A126293766D60033834A /* TestManager.h */; };
-		52E3A129293766D60033834A /* TestManager.m in Sources */ = {isa = PBXBuildFile; fileRef = 52E3A127293766D60033834A /* TestManager.m */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXCopyFilesBuildPhase section */
@@ -403,8 +401,6 @@
 		5291912E292F5B1300D87DF9 /* CansProviderDelegate.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = CansProviderDelegate.swift; sourceTree = "<group>"; };
 		5291912F292F5B1300D87DF9 /* CansCallManager.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = CansCallManager.swift; sourceTree = "<group>"; };
 		52919130292F5B1300D87DF9 /* CansCoreManager.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = CansCoreManager.swift; sourceTree = "<group>"; };
-		52E3A126293766D60033834A /* TestManager.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = TestManager.h; sourceTree = "<group>"; };
-		52E3A127293766D60033834A /* TestManager.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = TestManager.m; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -466,8 +462,6 @@
 				52670836292C79CD002CDDAE /* CansConnect.h */,
 				521F285E2934C3F6007FFCE7 /* CansConnect.modulemap */,
 				52670837292C79CD002CDDAE /* CansConnect.docc */,
-				52E3A126293766D60033834A /* TestManager.h */,
-				52E3A127293766D60033834A /* TestManager.m */,
 			);
 			path = CansConnect;
 			sourceTree = "<group>";
@@ -783,7 +777,6 @@
 			isa = PBXHeadersBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
-				52E3A128293766D60033834A /* TestManager.h in Headers */,
 				52670839292C79CD002CDDAE /* CansConnect.h in Headers */,
 				52919132292F5B1300D87DF9 /* CansLinphoneManager.h in Headers */,
 			);
@@ -1003,7 +996,6 @@
 				52919136292F5B1300D87DF9 /* CansCoreManager.swift in Sources */,
 				52919131292F5B1300D87DF9 /* CansLinphoneManager.m in Sources */,
 				52919133292F5B1300D87DF9 /* CansAppManager.swift in Sources */,
-				52E3A129293766D60033834A /* TestManager.m in Sources */,
 				5291911E292F513F00D87DF9 /* CansBase.swift in Sources */,
 				52919135292F5B1300D87DF9 /* CansCallManager.swift in Sources */,
 				52919134292F5B1300D87DF9 /* CansProviderDelegate.swift in Sources */,

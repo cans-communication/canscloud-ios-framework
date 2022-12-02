@@ -430,6 +430,7 @@
 		52670829292C79CD002CDDAE = {
 			isa = PBXGroup;
 			children = (
+				52918F98292E86CD00D87DF9 /* linphone-sdk */,
 				52670835292C79CD002CDDAE /* CansConnect */,
 				52670834292C79CD002CDDAE /* Products */,
 			);
@@ -446,7 +447,6 @@
 		52670835292C79CD002CDDAE /* CansConnect */ = {
 			isa = PBXGroup;
 			children = (
-				52918F98292E86CD00D87DF9 /* linphone-sdk */,
 				5291912D292F5B1300D87DF9 /* CansAppManager.swift */,
 				5291912F292F5B1300D87DF9 /* CansCallManager.swift */,
 				52919130292F5B1300D87DF9 /* CansCoreManager.swift */,

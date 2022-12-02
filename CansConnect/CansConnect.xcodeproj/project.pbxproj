@@ -189,8 +189,6 @@
 		52919115292E879B00D87DF9 /* ortp.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 52919041292E86CD00D87DF9 /* ortp.framework */; };
 		52919116292E879C00D87DF9 /* ortp.framework in Embed Frameworks */ = {isa = PBXBuildFile; fileRef = 52919041292E86CD00D87DF9 /* ortp.framework */; settings = {ATTRIBUTES = (CodeSignOnCopy, RemoveHeadersOnCopy, ); }; };
 		5291911E292F513F00D87DF9 /* CansBase.swift in Sources */ = {isa = PBXBuildFile; fileRef = 5291911D292F513F00D87DF9 /* CansBase.swift */; };
-		52919131292F5B1300D87DF9 /* CansLinphoneManager.m in Sources */ = {isa = PBXBuildFile; fileRef = 5291912B292F5B1300D87DF9 /* CansLinphoneManager.m */; };
-		52919132292F5B1300D87DF9 /* CansLinphoneManager.h in Headers */ = {isa = PBXBuildFile; fileRef = 5291912C292F5B1300D87DF9 /* CansLinphoneManager.h */; settings = {ATTRIBUTES = (Public, ); }; };
 		52919133292F5B1300D87DF9 /* CansAppManager.swift in Sources */ = {isa = PBXBuildFile; fileRef = 5291912D292F5B1300D87DF9 /* CansAppManager.swift */; };
 		52919134292F5B1300D87DF9 /* CansProviderDelegate.swift in Sources */ = {isa = PBXBuildFile; fileRef = 5291912E292F5B1300D87DF9 /* CansProviderDelegate.swift */; };
 		52919135292F5B1300D87DF9 /* CansCallManager.swift in Sources */ = {isa = PBXBuildFile; fileRef = 5291912F292F5B1300D87DF9 /* CansCallManager.swift */; };
@@ -229,7 +227,6 @@
 /* End PBXCopyFilesBuildPhase section */
 
 /* Begin PBXFileReference section */
-		521F285E2934C3F6007FFCE7 /* CansConnect.modulemap */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = "sourcecode.module-map"; path = CansConnect.modulemap; sourceTree = "<group>"; };
 		52670833292C79CD002CDDAE /* CansConnect.framework */ = {isa = PBXFileReference; explicitFileType = wrapper.framework; includeInIndex = 0; path = CansConnect.framework; sourceTree = BUILT_PRODUCTS_DIR; };
 		52670836292C79CD002CDDAE /* CansConnect.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = CansConnect.h; sourceTree = "<group>"; };
 		52670837292C79CD002CDDAE /* CansConnect.docc */ = {isa = PBXFileReference; lastKnownFileType = folder.documentationcatalog; path = CansConnect.docc; sourceTree = "<group>"; };
@@ -395,8 +392,6 @@
 		5291904C292E86CD00D87DF9 /* LinphoneWrapper.cs */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text; path = LinphoneWrapper.cs; sourceTree = "<group>"; };
 		5291904E292E86CD00D87DF9 /* LinphoneWrapper.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = LinphoneWrapper.swift; sourceTree = "<group>"; };
 		5291911D292F513F00D87DF9 /* CansBase.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = CansBase.swift; sourceTree = "<group>"; };
-		5291912B292F5B1300D87DF9 /* CansLinphoneManager.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = CansLinphoneManager.m; sourceTree = "<group>"; };
-		5291912C292F5B1300D87DF9 /* CansLinphoneManager.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = CansLinphoneManager.h; sourceTree = "<group>"; };
 		5291912D292F5B1300D87DF9 /* CansAppManager.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = CansAppManager.swift; sourceTree = "<group>"; };
 		5291912E292F5B1300D87DF9 /* CansProviderDelegate.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = CansProviderDelegate.swift; sourceTree = "<group>"; };
 		5291912F292F5B1300D87DF9 /* CansCallManager.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = CansCallManager.swift; sourceTree = "<group>"; };
@@ -451,8 +446,6 @@
 		52670835292C79CD002CDDAE /* CansConnect */ = {
 			isa = PBXGroup;
 			children = (
-				5291912C292F5B1300D87DF9 /* CansLinphoneManager.h */,
-				5291912B292F5B1300D87DF9 /* CansLinphoneManager.m */,
 				52918F98292E86CD00D87DF9 /* linphone-sdk */,
 				5291912D292F5B1300D87DF9 /* CansAppManager.swift */,
 				5291912F292F5B1300D87DF9 /* CansCallManager.swift */,
@@ -460,7 +453,6 @@
 				5291912E292F5B1300D87DF9 /* CansProviderDelegate.swift */,
 				5291911D292F513F00D87DF9 /* CansBase.swift */,
 				52670836292C79CD002CDDAE /* CansConnect.h */,
-				521F285E2934C3F6007FFCE7 /* CansConnect.modulemap */,
 				52670837292C79CD002CDDAE /* CansConnect.docc */,
 			);
 			path = CansConnect;
@@ -778,7 +770,6 @@
 			buildActionMask = 2147483647;
 			files = (
 				52670839292C79CD002CDDAE /* CansConnect.h in Headers */,
-				52919132292F5B1300D87DF9 /* CansLinphoneManager.h in Headers */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -994,7 +985,6 @@
 			buildActionMask = 2147483647;
 			files = (
 				52919136292F5B1300D87DF9 /* CansCoreManager.swift in Sources */,
-				52919131292F5B1300D87DF9 /* CansLinphoneManager.m in Sources */,
 				52919133292F5B1300D87DF9 /* CansAppManager.swift in Sources */,
 				5291911E292F513F00D87DF9 /* CansBase.swift in Sources */,
 				52919135292F5B1300D87DF9 /* CansCallManager.swift in Sources */,

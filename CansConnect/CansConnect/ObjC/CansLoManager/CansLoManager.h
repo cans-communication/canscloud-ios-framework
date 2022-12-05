@@ -13,7 +13,7 @@
 @import linphone;
 
 
-#define LC ([CansLinphoneManager getLc])
+#define LC ([CansLoManager getLc])
 
 
 static LinphoneCore *theLinphoneCore = nil;
@@ -40,7 +40,7 @@ NSString *const kLinphoneQRCodeFound = @"LinphoneQRCodeFound";
 NSString *const kLinphoneChatCreateViewChange = @"LinphoneChatCreateViewChange";
 NSString *const kLinphoneMsgNotificationAppGroupId = @"group.cc.cans.canscloud.msgNotification";
 
-@interface CansLinphoneManager : NSObject {
+@interface CansLoManager : NSObject {
     
 }
 

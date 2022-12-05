@@ -1,0 +1,6 @@
+framework module CansConnect {
+  umbrella header "CansConnect.h"
+
+  export *
+  module * { export * }
+}

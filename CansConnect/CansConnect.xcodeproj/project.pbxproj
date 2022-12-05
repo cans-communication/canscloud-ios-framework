@@ -406,6 +406,7 @@
 		52E3A3C12939C2C10033834A /* LinphoneWrapper.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = LinphoneWrapper.swift; sourceTree = "<group>"; };
 		52E3A48A2939C4320033834A /* Alex.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = Alex.h; sourceTree = "<group>"; };
 		52E3A48B2939C4320033834A /* Alex.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = Alex.m; sourceTree = "<group>"; };
+		52E3A493293A12CB0033834A /* CansConnect.modulemap */ = {isa = PBXFileReference; lastKnownFileType = "sourcecode.module-map"; path = CansConnect.modulemap; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -460,6 +461,7 @@
 				52E3A48E2939E5640033834A /* Swift */,
 				52E3A4902939E5860033834A /* ObjC */,
 				52670836292C79CD002CDDAE /* CansConnect.h */,
+				52E3A493293A12CB0033834A /* CansConnect.modulemap */,
 				52670837292C79CD002CDDAE /* CansConnect.docc */,
 			);
 			path = CansConnect;

@@ -74,7 +74,6 @@
 /* End PBXCopyFilesBuildPhase section */
 
 /* Begin PBXFileReference section */
-		526224F8293332B10090FF0F /* DemoApp-Bridging-Header.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = "DemoApp-Bridging-Header.h"; sourceTree = "<group>"; };
 		526224F9293332B20090FF0F /* TestImport.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TestImport.swift; sourceTree = "<group>"; };
 		5262251F29333E1C0090FF0F /* msgNotificationContent.appex */ = {isa = PBXFileReference; explicitFileType = "wrapper.app-extension"; includeInIndex = 0; path = msgNotificationContent.appex; sourceTree = BUILT_PRODUCTS_DIR; };
 		5262252029333E1C0090FF0F /* UserNotifications.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = UserNotifications.framework; path = System/Library/Frameworks/UserNotifications.framework; sourceTree = SDKROOT; };
@@ -187,7 +186,6 @@
 				526708A3292CA6E5002CDDAE /* Info.plist */,
 				526708A4292CA6E5002CDDAE /* main.m */,
 				526224F9293332B20090FF0F /* TestImport.swift */,
-				526224F8293332B10090FF0F /* DemoApp-Bridging-Header.h */,
 			);
 			path = DemoApp;
 			sourceTree = "<group>";
@@ -667,7 +665,6 @@
 				PROVISIONING_PROFILE_SPECIFIER = "";
 				"PROVISIONING_PROFILE_SPECIFIER[sdk=iphoneos*]" = "CANS Cloud Development";
 				SWIFT_EMIT_LOC_STRINGS = YES;
-				SWIFT_OBJC_BRIDGING_HEADER = "DemoApp/DemoApp-Bridging-Header.h";
 				SWIFT_OPTIMIZATION_LEVEL = "-Onone";
 				SWIFT_VERSION = 5.0;
 				TARGETED_DEVICE_FAMILY = "1,2";
@@ -703,7 +700,6 @@
 				PROVISIONING_PROFILE_SPECIFIER = "";
 				"PROVISIONING_PROFILE_SPECIFIER[sdk=iphoneos*]" = "CANS Cloud Development";
 				SWIFT_EMIT_LOC_STRINGS = YES;
-				SWIFT_OBJC_BRIDGING_HEADER = "DemoApp/DemoApp-Bridging-Header.h";
 				SWIFT_VERSION = 5.0;
 				TARGETED_DEVICE_FAMILY = "1,2";
 			};

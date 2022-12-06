@@ -8,9 +8,35 @@
 #import "CansLoManager.h"
 
 
+static LinphoneCore *theLinphoneCore = nil;
+
+NSString *const kLinphoneCoreUpdate = @"LinphoneCoreUpdate";
+NSString *const kLinphoneDisplayStatusUpdate = @"LinphoneDisplayStatusUpdate";
+NSString *const kLinphoneMessageReceived = @"LinphoneMessageReceived";
+NSString *const kLinphoneTextComposeEvent = @"LinphoneTextComposeStarted";
+NSString *const kLinphoneCallUpdate = @"LinphoneCallUpdate";
+NSString *const kLinphoneRegistrationUpdate = @"LinphoneRegistrationUpdate";
+NSString *const kLinphoneAddressBookUpdate = @"LinphoneAddressBookUpdate";
+NSString *const kLinphoneMainViewChange = @"LinphoneMainViewChange";
+NSString *const kLinphoneLogsUpdate = @"LinphoneLogsUpdate";
+NSString *const kLinphoneSettingsUpdate = @"LinphoneSettingsUpdate";
+NSString *const kLinphoneBluetoothAvailabilityUpdate = @"LinphoneBluetoothAvailabilityUpdate";
+NSString *const kLinphoneConfiguringStateUpdate = @"LinphoneConfiguringStateUpdate";
+NSString *const kLinphoneGlobalStateUpdate = @"LinphoneGlobalStateUpdate";
+NSString *const kLinphoneNotifyReceived = @"LinphoneNotifyReceived";
+NSString *const kLinphoneNotifyPresenceReceivedForUriOrTel = @"LinphoneNotifyPresenceReceivedForUriOrTel";
+NSString *const kLinphoneCallEncryptionChanged = @"LinphoneCallEncryptionChanged";
+NSString *const kLinphoneFileTransferSendUpdate = @"LinphoneFileTransferSendUpdate";
+NSString *const kLinphoneFileTransferRecvUpdate = @"LinphoneFileTransferRecvUpdate";
+NSString *const kLinphoneQRCodeFound = @"LinphoneQRCodeFound";
+NSString *const kLinphoneChatCreateViewChange = @"LinphoneChatCreateViewChange";
+NSString *const kLinphoneMsgNotificationAppGroupId = @"group.cc.cans.canscloud.msgNotification";
+
+
 @interface CansLoManager ()
     
 @end
+
 
 @implementation CansLoManager
 
@@ -412,6 +438,21 @@ static void linphone_iphone_global_state_changed(LinphoneCore *lc, LinphoneGloba
 
 + (NSString *)bundleFile:(NSString *)file {
     return [[NSBundle mainBundle] pathForResource:[file stringByDeletingPathExtension] ofType:[file pathExtension]];
+}
+
++ (NSString *)cacheDirectory {
+    LinphoneFactory *factory = linphone_factory_get();
+    NSString *cachePath = [NSString stringWithUTF8String:linphone_factory_get_download_dir(factory, kLinphoneMsgNotificationAppGroupId.UTF8String)];
+    BOOL isDir = NO;
+    NSError *error;
+    // cache directory must be created if not existing
+    if (![[NSFileManager defaultManager] fileExistsAtPath:cachePath isDirectory:&isDir] && isDir == NO) {
+        [[NSFileManager defaultManager] createDirectoryAtPath:cachePath
+         withIntermediateDirectories:NO
+         attributes:nil
+         error:&error];
+    }
+    return cachePath;
 }
 
 @end

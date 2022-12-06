@@ -58,7 +58,7 @@ enum NetworkType: Int {
 		var writablePath = paths[0]
 		writablePath = writablePath.appending("/\(filePath)")
 		let message:String = "file path is \(writablePath)"
-//		Log.directLog(BCTBX_LOG_MESSAGE, text: message)
+		Log.directLog(BCTBX_LOG_MESSAGE, text: message)
 		return writablePath
 		//file name is recording_contact-name_dayName-day-monthName-year-hour-minutes-seconds
 		//The recording prefix is used to identify recordings in the cache directory.

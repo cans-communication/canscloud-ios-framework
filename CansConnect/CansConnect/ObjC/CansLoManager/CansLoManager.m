@@ -79,8 +79,6 @@
     
     theLinphoneCore = linphone_factory_create_shared_core_with_config(factory, _configDb, NULL, [kLinphoneMsgNotificationAppGroupId UTF8String], true);
     linphone_core_add_callbacks(theLinphoneCore, cbs);
-    
-//    [CallManager]
 }
 
 - (void)overrideDefaultSettings {

@@ -24,7 +24,7 @@ import os
 import CallKit
 import AVFoundation
 
-@objc class CansCallAppData: NSObject {
+@objc class CallAppData: NSObject {
 	@objc var batteryWarningShown = false
 	@objc var videoRequested = false /*set when user has requested for video*/
 }
@@ -68,26 +68,26 @@ import AVFoundation
 		lc?.addDelegate(delegate: self)
 	}
 
-	@objc static func getAppData(call: OpaquePointer) -> CansCallAppData? {
+	@objc static func getAppData(call: OpaquePointer) -> CallAppData? {
 		let sCall = Call.getSwiftObject(cObject: call)
 		return getAppData(sCall: sCall)
 	}
 	
-	static func getAppData(sCall:Call) -> CansCallAppData? {
+	static func getAppData(sCall:Call) -> CallAppData? {
 		if (sCall.userData == nil) {
 			return nil
 		}
-		return Unmanaged<CansCallAppData>.fromOpaque(sCall.userData!).takeUnretainedValue()
+		return Unmanaged<CallAppData>.fromOpaque(sCall.userData!).takeUnretainedValue()
 	}
 
-	@objc static func setAppData(call:OpaquePointer, appData: CansCallAppData) {
+	@objc static func setAppData(call:OpaquePointer, appData: CallAppData) {
 		let sCall = Call.getSwiftObject(cObject: call)
 		setAppData(sCall: sCall, appData: appData)
 	}
 	
-	static func setAppData(sCall:Call, appData:CansCallAppData?) {
+	static func setAppData(sCall:Call, appData:CallAppData?) {
 		if (sCall.userData != nil) {
-			Unmanaged<CansCallAppData>.fromOpaque(sCall.userData!).release()
+			Unmanaged<CallAppData>.fromOpaque(sCall.userData!).release()
 		}
 		if (appData == nil) {
 			sCall.userData = nil
@@ -271,7 +271,7 @@ import AVFoundation
 			}
 			let call = CansCallManager.instance().lc!.inviteAddressWithParams(addr: addr, params: lcallParams)
 			if (call != nil) {
-				// The LinphoneCansCallAppData object should be set on call creation with callback
+				// The LinphoneCallAppData object should be set on call creation with callback
 				// - (void)onCall:StateChanged:withMessage:. If not, we are in big trouble and expect it to crash
 				// We are NOT responsible for creating the AppData.
 				let data = CansCallManager.getAppData(sCall: call!)
@@ -450,7 +450,7 @@ import AVFoundation
             let video = (core.videoActivationPolicy?.automaticallyAccept ?? false) && (call.remoteParams?.videoEnabled ?? false)
 
             if (call.userData == nil) {
-                let appData = CansCallAppData()
+                let appData = CallAppData()
                 CansCallManager.setAppData(sCall: call, appData: appData)
             }
 

@@ -24,7 +24,7 @@ import UIKit
 import AVFoundation
 import os
 
-@objc class CansCallInfo: NSObject {
+@objc class CallInfo: NSObject {
 	var callId: String = ""
 	var accepted = false
 	var toAddr: Address?
@@ -35,14 +35,14 @@ import os
 	var reason: Reason = Reason.None
 	var displayName: String?
 
-	static func newIncomingCallInfo(callId: String) -> CansCallInfo {
-		let callInfo = CansCallInfo()
+	static func newIncomingCallInfo(callId: String) -> CallInfo {
+		let callInfo = CallInfo()
 		callInfo.callId = callId
 		return callInfo
 	}
 	
-	static func newOutgoingCallInfo(addr: Address, isSas: Bool, displayName: String) -> CansCallInfo {
-		let callInfo = CansCallInfo()
+	static func newOutgoingCallInfo(addr: Address, isSas: Bool, displayName: String) -> CallInfo {
+		let callInfo = CallInfo()
 		callInfo.isOutgoing = true
 		callInfo.sasEnabled = isSas
 		callInfo.toAddr = addr
@@ -54,13 +54,13 @@ import os
 /*
 * A delegate to support callkit.
 */
-class CansProviderDelegate: NSObject {
+class ProviderDelegate: NSObject {
     private var provider: CXProvider?
 	var uuids: [String : UUID] = [:]
-	var callInfos: [UUID : CansCallInfo] = [:]
+	var callInfos: [UUID : CallInfo] = [:]
 
 	override init() {
-        provider = CXProvider(configuration: CansProviderDelegate.providerConfiguration)
+        provider = CXProvider(configuration: ProviderDelegate.providerConfiguration)
 //        provider = nil
 		super.init()
         provider?.setDelegate(self, queue: nil)
@@ -164,7 +164,7 @@ class CansProviderDelegate: NSObject {
 }
 
 // MARK: - CXProviderDelegate
-extension CansProviderDelegate: CXProviderDelegate {
+extension ProviderDelegate: CXProviderDelegate {
     public func provider(_ provider: CXProvider, perform action: CXEndCallAction) {
 		let uuid = action.callUUID
 		let callId = callInfos[uuid]?.callId

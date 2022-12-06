@@ -35,7 +35,7 @@ import AVFoundation
 */
 @objc class CallManager: NSObject, CoreDelegate {
 	static public var theCansCallManager: CallManager?
-    public let providerDelegate: CansProviderDelegate! // to support callkit
+    public let providerDelegate: ProviderDelegate! // to support callkit
 	public let callController: CXCallController! // to support callkit
 	var lc: Core?
 	@objc public var speakerBeforePause : Bool = false
@@ -52,7 +52,7 @@ import AVFoundation
     @objc var backgroundContextCameraIsEnabled : Bool = false
 
     fileprivate override init() {
-		providerDelegate = CansProviderDelegate()
+		providerDelegate = ProviderDelegate()
 		callController = CXCallController()
 	}
 
@@ -171,7 +171,7 @@ import AVFoundation
 
 	func displayIncomingCall(call:Call?, handle: String, hasVideo: Bool, callId: String, displayName:String) {
 		let uuid = UUID()
-		let callInfo = CansCallInfo.newIncomingCallInfo(callId: callId)
+		let callInfo = CallInfo.newIncomingCallInfo(callId: callId)
 
         providerDelegate?.callInfos.updateValue(callInfo, forKey: uuid)
         providerDelegate?.uuids.updateValue(uuid, forKey: callId)
@@ -228,7 +228,7 @@ import AVFoundation
 			let startCallAction = CXStartCallAction(call: uuid, handle: handle)
 			let transaction = CXTransaction(action: startCallAction)
 
-			let callInfo = CansCallInfo.newOutgoingCallInfo(addr: sAddr, isSas: isSas, displayName: name)
+			let callInfo = CallInfo.newOutgoingCallInfo(addr: sAddr, isSas: isSas, displayName: name)
             providerDelegate?.callInfos.updateValue(callInfo, forKey: uuid)
             providerDelegate?.uuids.updateValue(uuid, forKey: "")
 
@@ -341,7 +341,7 @@ import AVFoundation
 //			Log.directLog(BCTBX_LOG_MESSAGE, text: "Mark call \(callId) as declined.")
 			let uuid = UUID()
             providerDelegate?.uuids.updateValue(uuid, forKey: callId)
-			let callInfo = CansCallInfo.newIncomingCallInfo(callId: callId)
+			let callInfo = CallInfo.newIncomingCallInfo(callId: callId)
 			callInfo.declined = true
 			callInfo.reason = Reason.Busy
             providerDelegate?.callInfos.updateValue(callInfo, forKey: uuid)

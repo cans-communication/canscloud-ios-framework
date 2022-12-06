@@ -135,7 +135,7 @@ import Foundation
     
     @objc public func setCore(core: OpaquePointer) {
         CallManager.instance().setCore(core: core)
-        CansCoreManager.instance().setCore(core: core)
+        CoreManager.instance().setCore(core: core)
     }
     
     @objc public func configure() {

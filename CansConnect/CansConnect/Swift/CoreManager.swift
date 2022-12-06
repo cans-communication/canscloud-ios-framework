@@ -18,16 +18,16 @@
 */
 
 import Foundation
-//import linphonesw
 
-@objc class CansCoreManager: NSObject {
-	static var theCansCoreManager: CansCoreManager?
+
+@objc class CoreManager: NSObject {
+	static var theCansCoreManager: CoreManager?
 	var lc: Core?
 	private var mIterateTimer: Timer?
 
-	@objc static func instance() -> CansCoreManager {
+	@objc static func instance() -> CoreManager {
 		if (theCansCoreManager == nil) {
-			theCansCoreManager = CansCoreManager()
+			theCansCoreManager = CoreManager()
 		}
 		return theCansCoreManager!
 	}

@@ -202,7 +202,7 @@ import AVFoundation
 
 			//We set the record file name here because we can't do it after the call is started.
 			let address = call.callLog?.fromAddress
-			let writablePath = CansAppManager.recordingFilePathFromCall(address: address?.username ?? "")
+			let writablePath = AppManager.recordingFilePathFromCall(address: address?.username ?? "")
 //			Log.directLog(BCTBX_LOG_MESSAGE, text: "Record file path: \(String(describing: writablePath))")
 			callParams.recordFile = writablePath
 
@@ -263,7 +263,7 @@ import AVFoundation
 			CallManager.instance().nextCallIsTransfer = false
 		} else {
 			//We set the record file name here because we can't do it after the call is started.
-			let writablePath = CansAppManager.recordingFilePathFromCall(address: addr.username )
+			let writablePath = AppManager.recordingFilePathFromCall(address: addr.username )
 //			Log.directLog(BCTBX_LOG_DEBUG, text: "record file path: \(writablePath)")
 			lcallParams.recordFile = writablePath
 			if (isSas) {

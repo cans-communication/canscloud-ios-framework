@@ -33,8 +33,8 @@ import AVFoundation
 * CansCallManager is a class that manages application calls and supports callkit.
 * There is only one CansCallManager by calling CansCallManager.instance().
 */
-@objc class CansCallManager: NSObject, CoreDelegate {
-	static public var theCansCallManager: CansCallManager?
+@objc class CallManager: NSObject, CoreDelegate {
+	static public var theCansCallManager: CallManager?
     public let providerDelegate: CansProviderDelegate! // to support callkit
 	public let callController: CXCallController! // to support callkit
 	var lc: Core?
@@ -56,9 +56,9 @@ import AVFoundation
 		callController = CXCallController()
 	}
 
-	@objc public static func instance() -> CansCallManager {
+	@objc public static func instance() -> CallManager {
 		if (theCansCallManager == nil) {
-			theCansCallManager = CansCallManager()
+			theCansCallManager = CallManager()
 		}
 		return theCansCallManager!
 	}
@@ -132,10 +132,10 @@ import AVFoundation
 	}
 	
 	@objc func updateCallId(previous: String, current: String) {
-        let uuid = CansCallManager.instance().providerDelegate?.uuids["\(previous)"]
+        let uuid = CallManager.instance().providerDelegate?.uuids["\(previous)"]
 		if (uuid != nil) {
-            CansCallManager.instance().providerDelegate?.uuids.removeValue(forKey: previous)
-            CansCallManager.instance().providerDelegate?.uuids.updateValue(uuid!, forKey: current)
+            CallManager.instance().providerDelegate?.uuids.removeValue(forKey: previous)
+            CallManager.instance().providerDelegate?.uuids.updateValue(uuid!, forKey: current)
             let callInfo = providerDelegate?.callInfos[uuid!]
 			if (callInfo != nil) {
 				callInfo!.callId = current
@@ -146,7 +146,7 @@ import AVFoundation
 
 	// From ios13, display the callkit view when the notification is received.
 	@objc func displayIncomingCall(callId: String) {
-        let uuid = CansCallManager.instance().providerDelegate?.uuids["\(callId)"]
+        let uuid = CallManager.instance().providerDelegate?.uuids["\(callId)"]
 		if (uuid != nil) {
             let callInfo = providerDelegate?.callInfos[uuid!]
 			if (callInfo?.declined ?? false) {
@@ -157,7 +157,7 @@ import AVFoundation
 			return
 		}
 
-		let call = CansCallManager.instance().callByCallId(callId: callId)
+		let call = CallManager.instance().callByCallId(callId: callId)
 		if (call != nil) {
 //			let displayName = FastAddressBook.displayName(for: call?.remoteAddress?.getCobject) ?? "Unknow"
             let displayName = "Unknow"
@@ -220,7 +220,7 @@ import AVFoundation
         }
 
 		let sAddr = Address.getSwiftObject(cObject: addr)
-		if (CansCallManager.callKitEnabled() && !CansCallManager.instance().nextCallIsTransfer) {
+		if (CallManager.callKitEnabled() && !CallManager.instance().nextCallIsTransfer) {
 			let uuid = UUID()
 //			let name = FastAddressBook.displayName(for: addr) ?? "unknow"
             let name = "unknow"
@@ -243,7 +243,7 @@ import AVFoundation
 //		let displayName = FastAddressBook.displayName(for: addr.getCobject)
         var displayName: String?
 
-		let lcallParams = try CansCallManager.instance().lc!.createCallParams(call: nil)
+		let lcallParams = try CallManager.instance().lc!.createCallParams(call: nil)
 //		if ConfigManager.instance().lpConfigBoolForKey(key: "edge_opt_preference") && CansAppManager.network() == .network_2g {
 //			Log.directLog(BCTBX_LOG_MESSAGE, text: "Enabling low bandwidth mode")
 //			lcallParams.lowBandwidthEnabled = true
@@ -257,10 +257,10 @@ import AVFoundation
 //			try addr.setDomain(newValue: ConfigManager.instance().lpConfigStringForKey(key: "domain", section: "assistant"))
 //		}
 
-		if (CansCallManager.instance().nextCallIsTransfer) {
-			let call = CansCallManager.instance().lc!.currentCall
+		if (CallManager.instance().nextCallIsTransfer) {
+			let call = CallManager.instance().lc!.currentCall
 			try call?.transferTo(referTo: addr)
-			CansCallManager.instance().nextCallIsTransfer = false
+			CallManager.instance().nextCallIsTransfer = false
 		} else {
 			//We set the record file name here because we can't do it after the call is started.
 			let writablePath = CansAppManager.recordingFilePathFromCall(address: addr.username )
@@ -269,25 +269,25 @@ import AVFoundation
 			if (isSas) {
 				lcallParams.mediaEncryption = .ZRTP
 			}
-			let call = CansCallManager.instance().lc!.inviteAddressWithParams(addr: addr, params: lcallParams)
+			let call = CallManager.instance().lc!.inviteAddressWithParams(addr: addr, params: lcallParams)
 			if (call != nil) {
 				// The LinphoneCallAppData object should be set on call creation with callback
 				// - (void)onCall:StateChanged:withMessage:. If not, we are in big trouble and expect it to crash
 				// We are NOT responsible for creating the AppData.
-				let data = CansCallManager.getAppData(sCall: call!)
+				let data = CallManager.getAppData(sCall: call!)
 				if (data == nil) {
 //					Log.directLog(BCTBX_LOG_ERROR, text: "New call instanciated but app data was not set. Expect it to crash.")
 					/* will be used later to notify user if video was not activated because of the linphone core*/
 				} else {
 					data!.videoRequested = lcallParams.videoEnabled
-					CansCallManager.setAppData(sCall: call!, appData: data)
+					CallManager.setAppData(sCall: call!, appData: data)
 				}
 			}
 		}
 	}
 
 	@objc func groupCall() {
-		if (CansCallManager.callKitEnabled()) {
+		if (CallManager.callKitEnabled()) {
 			let calls = lc?.calls
 			if (calls == nil || calls!.isEmpty) {
 				return
@@ -295,13 +295,13 @@ import AVFoundation
 			let firstCall = calls!.first?.callLog?.callId ?? ""
 			let lastCall = (calls!.count > 1) ? calls!.last?.callLog?.callId ?? "" : ""
 
-            let currentUuid = CansCallManager.instance().providerDelegate?.uuids["\(firstCall)"]
+            let currentUuid = CallManager.instance().providerDelegate?.uuids["\(firstCall)"]
 			if (currentUuid == nil) {
 //				Log.directLog(BCTBX_LOG_ERROR, text: "Can not find correspondant call to group.")
 				return
 			}
 
-            let newUuid = CansCallManager.instance().providerDelegate?.uuids["\(lastCall)"]
+            let newUuid = CallManager.instance().providerDelegate?.uuids["\(lastCall)"]
 			let groupAction = CXSetGroupCallAction(call: currentUuid!, callUUIDToGroupWith: newUuid)
 			let transcation = CXTransaction(action: groupAction)
 			requestTransaction(transcation, action: "groupCall")
@@ -332,7 +332,7 @@ import AVFoundation
 	}
 
 	@objc func markCallAsDeclined(callId: String) {
-		if !CansCallManager.callKitEnabled() {
+		if !CallManager.callKitEnabled() {
 			return
 		}
 
@@ -372,7 +372,7 @@ import AVFoundation
 	}
 
 	@objc func setHeldOtherCalls(exceptCallid: String) {
-		for call in CansCallManager.instance().lc!.calls {
+		for call in CallManager.instance().lc!.calls {
 			if (call.callLog?.callId != exceptCallid && call.state != .Paused && call.state != .Pausing && call.state != .PausedByRemote) {
 				setHeld(call: call, hold: true)
 			}
@@ -380,7 +380,7 @@ import AVFoundation
 	}
 
 	func setResumeCalls() {
-		for call in CansCallManager.instance().lc!.calls {
+		for call in CallManager.instance().lc!.calls {
 			if (call.state == .Paused || call.state == .Pausing || call.state == .PausedByRemote) {
 				setHeld(call: call, hold: false)
 			}
@@ -415,22 +415,22 @@ import AVFoundation
     public func onRegistrationStateChanged(core: Core, proxyConfig: ProxyConfig, state: RegistrationState, message: String) {
 		if core.proxyConfigList.count == 1 && (state == .Failed || state == .Cleared){
 			// terminate callkit immediately when registration failed or cleared, supporting single proxy configuration
-            guard let uuids = CansCallManager.instance().providerDelegate?.uuids else { return }
+            guard let uuids = CallManager.instance().providerDelegate?.uuids else { return }
             for call in uuids {
-                let callId = CansCallManager.instance().providerDelegate?.callInfos[call.value]?.callId
+                let callId = CallManager.instance().providerDelegate?.callInfos[call.value]?.callId
 				if (callId != nil) {
-					let call = CansCallManager.instance().lc?.getCallByCallid(callId: callId!)
+					let call = CallManager.instance().lc?.getCallByCallid(callId: callId!)
 					if (call != nil) {
 						// sometimes (for example) due to network, registration failed, in this case, keep the call
 						continue
 					}
 				}
 
-                CansCallManager.instance().providerDelegate?.endCall(uuid: call.value)
+                CallManager.instance().providerDelegate?.endCall(uuid: call.value)
 			}
-			CansCallManager.instance().endCallkit = true
+			CallManager.instance().endCallkit = true
 		} else {
-			CansCallManager.instance().endCallkit = false
+			CallManager.instance().endCallkit = false
 		}
 	}
     
@@ -451,7 +451,7 @@ import AVFoundation
 
             if (call.userData == nil) {
                 let appData = CallAppData()
-                CansCallManager.setAppData(sCall: call, appData: appData)
+                CallManager.setAppData(sCall: call, appData: appData)
             }
 
             switch cstate {
@@ -460,13 +460,13 @@ import AVFoundation
 //                    let displayName = FastAddressBook.displayName(for: addr?.getCobject) ?? "Unknown"
 //                    let displayName = CansBridgingUtils.instance().getDisplayName(for: addr?.getCobject) ?? "Unknow"
                     let displayName = "Unknown"
-                    if (CansCallManager.callKitEnabled()) {
-                        let uuid = CansCallManager.instance().providerDelegate.uuids["\(callId!)"]
+                    if (CallManager.callKitEnabled()) {
+                        let uuid = CallManager.instance().providerDelegate.uuids["\(callId!)"]
                         if (uuid != nil) {
                             // Tha app is now registered, updated the call already existed.
-                            CansCallManager.instance().providerDelegate.updateCall(uuid: uuid!, handle: addr!.asStringUriOnly(), hasVideo: video, displayName: displayName)
+                            CallManager.instance().providerDelegate.updateCall(uuid: uuid!, handle: addr!.asStringUriOnly(), hasVideo: video, displayName: displayName)
                         } else {
-                            CansCallManager.instance().displayIncomingCall(call: call, handle: addr!.asStringUriOnly(), hasVideo: video, callId: callId!, displayName: displayName)
+                            CallManager.instance().displayIncomingCall(call: call, handle: addr!.asStringUriOnly(), hasVideo: video, callId: callId!, displayName: displayName)
                         }
                     }
 //                    else if (UIApplication.shared.applicationState != .active) {
@@ -482,41 +482,41 @@ import AVFoundation
 //                    }
                     break
                 case .StreamsRunning:
-                    if (CansCallManager.callKitEnabled()) {
-                        let uuid = CansCallManager.instance().providerDelegate.uuids["\(callId!)"]
+                    if (CallManager.callKitEnabled()) {
+                        let uuid = CallManager.instance().providerDelegate.uuids["\(callId!)"]
                         if (uuid != nil) {
-                            let callInfo = CansCallManager.instance().providerDelegate.callInfos[uuid!]
+                            let callInfo = CallManager.instance().providerDelegate.callInfos[uuid!]
                             if (callInfo != nil && callInfo!.isOutgoing && !callInfo!.connected) {
 //                                Log.directLog(BCTBX_LOG_MESSAGE, text: "CallKit: outgoing call connected with uuid \(uuid!) and callId \(callId!)")
-                                CansCallManager.instance().providerDelegate.reportOutgoingCallConnected(uuid: uuid!)
+                                CallManager.instance().providerDelegate.reportOutgoingCallConnected(uuid: uuid!)
                                 callInfo!.connected = true
-                                CansCallManager.instance().providerDelegate.callInfos.updateValue(callInfo!, forKey: uuid!)
+                                CallManager.instance().providerDelegate.callInfos.updateValue(callInfo!, forKey: uuid!)
                             }
                         }
                     }
 
-                    if (CansCallManager.instance().speakerBeforePause) {
-                        CansCallManager.instance().speakerBeforePause = false
-                        CansCallManager.instance().changeRouteToSpeaker()
+                    if (CallManager.instance().speakerBeforePause) {
+                        CallManager.instance().speakerBeforePause = false
+                        CallManager.instance().changeRouteToSpeaker()
                     }
                     break
                 case .OutgoingInit,
                      .OutgoingProgress,
                      .OutgoingRinging,
                      .OutgoingEarlyMedia:
-                    if (CansCallManager.callKitEnabled()) {
-                        let uuid = CansCallManager.instance().providerDelegate.uuids[""]
+                    if (CallManager.callKitEnabled()) {
+                        let uuid = CallManager.instance().providerDelegate.uuids[""]
                         if (uuid != nil) {
-                            let callInfo = CansCallManager.instance().providerDelegate.callInfos[uuid!]
+                            let callInfo = CallManager.instance().providerDelegate.callInfos[uuid!]
                             callInfo!.callId = callId!
-                            CansCallManager.instance().providerDelegate.callInfos.updateValue(callInfo!, forKey: uuid!)
-                            CansCallManager.instance().providerDelegate.uuids.removeValue(forKey: "")
-                            CansCallManager.instance().providerDelegate.uuids.updateValue(uuid!, forKey: callId!)
+                            CallManager.instance().providerDelegate.callInfos.updateValue(callInfo!, forKey: uuid!)
+                            CallManager.instance().providerDelegate.uuids.removeValue(forKey: "")
+                            CallManager.instance().providerDelegate.uuids.updateValue(uuid!, forKey: callId!)
 
 //                            Log.directLog(BCTBX_LOG_MESSAGE, text: "CallKit: outgoing call started connecting with uuid \(uuid!) and callId \(callId!)")
-                            CansCallManager.instance().providerDelegate.reportOutgoingCallStartedConnecting(uuid: uuid!)
+                            CallManager.instance().providerDelegate.reportOutgoingCallStartedConnecting(uuid: uuid!)
                         } else {
-                            CansCallManager.instance().referedToCall = callId
+                            CallManager.instance().referedToCall = callId
                         }
                     }
                     break
@@ -528,8 +528,8 @@ import AVFoundation
 //                    }
                     
 //                    UIDevice.current.isProximityMonitoringEnabled = false
-                    if (CansCallManager.instance().lc!.callsNb == 0) {
-                        CansCallManager.instance().changeRouteToDefault()
+                    if (CallManager.instance().lc!.callsNb == 0) {
+                        CallManager.instance().changeRouteToDefault()
                         // disable this because I don't find anygood reason for it: _bluetoothAvailable = FALSE;
                         // furthermore it introduces a bug when calling multiple times since route may not be
                         // reconfigured between cause leading to bluetooth being disabled while it should not
@@ -552,34 +552,34 @@ import AVFoundation
 //                        }
 //                    }
 
-                    if (CansCallManager.callKitEnabled()) {
-                        var uuid = CansCallManager.instance().providerDelegate.uuids["\(callId!)"]
-                        if (callId == CansCallManager.instance().referedToCall) {
+                    if (CallManager.callKitEnabled()) {
+                        var uuid = CallManager.instance().providerDelegate.uuids["\(callId!)"]
+                        if (callId == CallManager.instance().referedToCall) {
                             // refered call ended before connecting
 //                            Log.directLog(BCTBX_LOG_MESSAGE, text: "Callkit: end refered to call :  \(String(describing: CansCallManager.instance().referedToCall))")
-                            CansCallManager.instance().referedFromCall = nil
-                            CansCallManager.instance().referedToCall = nil
+                            CallManager.instance().referedFromCall = nil
+                            CallManager.instance().referedToCall = nil
                         }
                         if uuid == nil {
                             // the call not yet connected
-                            uuid = CansCallManager.instance().providerDelegate.uuids[""]
+                            uuid = CallManager.instance().providerDelegate.uuids[""]
                         }
                         if (uuid != nil) {
-                            if (callId == CansCallManager.instance().referedFromCall) {
+                            if (callId == CallManager.instance().referedFromCall) {
 //                                Log.directLog(BCTBX_LOG_MESSAGE, text: "Callkit: end refered from call : \(String(describing: CansCallManager.instance().referedFromCall))")
-                                CansCallManager.instance().referedFromCall = nil
-                                let callInfo = CansCallManager.instance().providerDelegate.callInfos[uuid!]
-                                callInfo!.callId = CansCallManager.instance().referedToCall ?? ""
-                                CansCallManager.instance().providerDelegate.callInfos.updateValue(callInfo!, forKey: uuid!)
-                                CansCallManager.instance().providerDelegate.uuids.removeValue(forKey: callId!)
-                                CansCallManager.instance().providerDelegate.uuids.updateValue(uuid!, forKey: callInfo!.callId)
-                                CansCallManager.instance().referedToCall = nil
+                                CallManager.instance().referedFromCall = nil
+                                let callInfo = CallManager.instance().providerDelegate.callInfos[uuid!]
+                                callInfo!.callId = CallManager.instance().referedToCall ?? ""
+                                CallManager.instance().providerDelegate.callInfos.updateValue(callInfo!, forKey: uuid!)
+                                CallManager.instance().providerDelegate.uuids.removeValue(forKey: callId!)
+                                CallManager.instance().providerDelegate.uuids.updateValue(uuid!, forKey: callInfo!.callId)
+                                CallManager.instance().referedToCall = nil
                                 break
                             }
 
                             let transaction = CXTransaction(action:
                             CXEndCallAction(call: uuid!))
-                            CansCallManager.instance().requestTransaction(transaction, action: "endCall")
+                            CallManager.instance().requestTransaction(transaction, action: "endCall")
                         }
                     }
                     break
@@ -587,19 +587,19 @@ import AVFoundation
                     call.userData = nil
                     break
                 case .Referred:
-                    CansCallManager.instance().referedFromCall = call.callLog?.callId
+                    CallManager.instance().referedFromCall = call.callLog?.callId
                     break
                 default:
                     break
             }
 
-            let readyForRoutechange = CansCallManager.instance().callkitAudioSessionActivated == nil || (CansCallManager.instance().callkitAudioSessionActivated == true)
+            let readyForRoutechange = CallManager.instance().callkitAudioSessionActivated == nil || (CallManager.instance().callkitAudioSessionActivated == true)
             if (readyForRoutechange && (cstate == .IncomingReceived || cstate == .OutgoingInit || cstate == .Connected || cstate == .StreamsRunning)) {
-                if ((call.currentParams?.videoEnabled ?? false) && CansCallManager.instance().isReceiverEnabled()) {
-                    CansCallManager.instance().changeRouteToSpeaker()
+                if ((call.currentParams?.videoEnabled ?? false) && CallManager.instance().isReceiverEnabled()) {
+                    CallManager.instance().changeRouteToSpeaker()
                 } else if (isBluetoothAvailable()) {
                     // Use bluetooth device by default if one is available
-                    CansCallManager.instance().changeRouteToBluetooth()
+                    CallManager.instance().changeRouteToBluetooth()
                 }
             }
         }
@@ -613,7 +613,7 @@ import AVFoundation
     
     @objc func terminate() {
         guard
-            let lc = CansCallManager.instance().lc,
+            let lc = CallManager.instance().lc,
             let currentCall = lc.currentCall
         else { return }
         terminateCall(call: currentCall.getCobject)

@@ -99,10 +99,10 @@ class CansProviderDelegate: NSObject {
 
         provider?.reportNewIncomingCall(with: uuid, update: update) { error in
             if error == nil {
-                if CansCallManager.instance().endCallkit {
-                    CansCallManager.instance().providerDelegate?.endCall(uuid: uuid)
+                if CallManager.instance().endCallkit {
+                    CallManager.instance().providerDelegate?.endCall(uuid: uuid)
                 } else {
-                    CansCallManager.instance().providerDelegate?.endCallNotExist(uuid: uuid, timeout: .now() + 10)
+                    CallManager.instance().providerDelegate?.endCallNotExist(uuid: uuid, timeout: .now() + 10)
                 }
             } else {
 //                Log.directLog(BCTBX_LOG_ERROR, text: "CallKit: cannot complete incoming call with call-id: [\(String(describing: callId))] and UUID: [\(uuid.description)] from [\(handle)] caused by [\(error!.localizedDescription)]")
@@ -149,15 +149,15 @@ class CansProviderDelegate: NSObject {
 
 	func endCallNotExist(uuid: UUID, timeout: DispatchTime) {
 		DispatchQueue.main.asyncAfter(deadline: timeout) {
-            let callId = CansCallManager.instance().providerDelegate?.callInfos[uuid]?.callId
+            let callId = CallManager.instance().providerDelegate?.callInfos[uuid]?.callId
 			if (callId == nil) {
 				// callkit already ended
 				return
 			}
-			let call = CansCallManager.instance().callByCallId(callId: callId)
+			let call = CallManager.instance().callByCallId(callId: callId)
 			if (call == nil) {
 //				Log.directLog(BCTBX_LOG_MESSAGE, text: "CallKit: terminate call with call-id: \(String(describing: callId)) and UUID: \(uuid) which does not exist.")
-                CansCallManager.instance().providerDelegate?.endCall(uuid: uuid)
+                CallManager.instance().providerDelegate?.endCall(uuid: uuid)
 			}
 		}
 	}
@@ -175,9 +175,9 @@ extension CansProviderDelegate: CXProviderDelegate {
 		}
 		callInfos.removeValue(forKey: uuid)
 
-		let call = CansCallManager.instance().callByCallId(callId: callId)
+		let call = CallManager.instance().callByCallId(callId: callId)
 		if let call = call {
-			CansCallManager.instance().terminateCall(call: call.getCobject);
+			CallManager.instance().terminateCall(call: call.getCobject);
 //			Log.directLog(BCTBX_LOG_MESSAGE, text: "CallKit: Call ended with call-id: \(String(describing: callId)) an UUID: \(uuid.description).")
 		}
 		action.fulfill()
@@ -189,23 +189,23 @@ extension CansProviderDelegate: CXProviderDelegate {
         let callId = callInfo?.callId
 //        Log.directLog(BCTBX_LOG_MESSAGE, text: "CallKit: answer call with call-id: \(String(describing: callId)) and UUID: \(uuid.description).")
 
-        let call = CansCallManager.instance().callByCallId(callId: callId)
+        let call = CallManager.instance().callByCallId(callId: callId)
         
         if (UIApplication.shared.applicationState != .active) {
-            CansCallManager.instance().backgroundContextCall = call
-            CansCallManager.instance().backgroundContextCameraIsEnabled = call!.params?.videoEnabled ?? false
+            CallManager.instance().backgroundContextCall = call
+            CallManager.instance().backgroundContextCameraIsEnabled = call!.params?.videoEnabled ?? false
             call?.cameraEnabled = false // Disable camera while app is not on foreground
         }
-        CansCallManager.instance().callkitAudioSessionActivated = false
-        CansCallManager.instance().lc?.configureAudioSession()
-        CansCallManager.instance().acceptCall(call: call!, hasVideo: call!.params?.videoEnabled ?? false)
+        CallManager.instance().callkitAudioSessionActivated = false
+        CallManager.instance().lc?.configureAudioSession()
+        CallManager.instance().acceptCall(call: call!, hasVideo: call!.params?.videoEnabled ?? false)
         action.fulfill()
 	}
 
     public func provider(_ provider: CXProvider, perform action: CXSetHeldCallAction) {
 		let uuid = action.callUUID
 		let callId = callInfos[uuid]?.callId
-		let call = CansCallManager.instance().callByCallId(callId: callId)
+		let call = CallManager.instance().callByCallId(callId: callId)
 		action.fulfill()
 		if (call == nil) {
 			return
@@ -213,7 +213,7 @@ extension CansProviderDelegate: CXProviderDelegate {
 
 		do {
 			if (call?.conference != nil && action.isOnHold) {
-				try CansCallManager.instance().lc?.leaveConference()
+				try CallManager.instance().lc?.leaveConference()
 //				Log.directLog(BCTBX_LOG_DEBUG, text: "CallKit: call-id: [\(String(describing: callId))] leaving conference")
 				NotificationCenter.default.post(name: Notification.Name("LinphoneCallUpdate"), object: self)
 				return
@@ -225,11 +225,11 @@ extension CansProviderDelegate: CXProviderDelegate {
 				if (call!.params?.localConferenceMode ?? false) {
 					return
 				}
-                CansCallManager.instance().speakerBeforePause = CansCallManager.instance().isSpeakerEnabled()
+                CallManager.instance().speakerBeforePause = CallManager.instance().isSpeakerEnabled()
 				try call!.pause()
 			} else {
-				if (call?.conference != nil && CansCallManager.instance().lc?.callsNb ?? 0 > 1) {
-					try CansCallManager.instance().lc?.enterConference()
+				if (call?.conference != nil && CallManager.instance().lc?.callsNb ?? 0 > 1) {
+					try CallManager.instance().lc?.enterConference()
 					NotificationCenter.default.post(name: Notification.Name("LinphoneCallUpdate"), object: self)
 				} else {
 					try call!.resume()
@@ -255,8 +255,8 @@ extension CansProviderDelegate: CXProviderDelegate {
 				action.fail()
 			}
 
-			CansCallManager.instance().lc?.configureAudioSession()
-			try CansCallManager.instance().doCall(addr: addr!, isSas: callInfo?.sasEnabled ?? false)
+			CallManager.instance().lc?.configureAudioSession()
+			try CallManager.instance().doCall(addr: addr!, isSas: callInfo?.sasEnabled ?? false)
 		} catch {
 //			Log.directLog(BCTBX_LOG_ERROR, text: "CallKit: Call started failed because \(error)")
 			action.fail()
@@ -267,7 +267,7 @@ extension CansProviderDelegate: CXProviderDelegate {
     public func provider(_ provider: CXProvider, perform action: CXSetGroupCallAction) {
 //		Log.directLog(BCTBX_LOG_MESSAGE, text: "CallKit: Call grouped callUUid : \(action.callUUID) with callUUID: \(String(describing: action.callUUIDToGroupWith)).")
 		do {
-			try CansCallManager.instance().lc?.addAllToConference()
+			try CallManager.instance().lc?.addAllToConference()
 		} catch {
 //			Log.directLog(BCTBX_LOG_ERROR, text: "CallKit: Call grouped failed because \(error)")
 		}
@@ -278,7 +278,7 @@ extension CansProviderDelegate: CXProviderDelegate {
 		let uuid = action.callUUID
 		let callId = callInfos[uuid]?.callId
 //		Log.directLog(BCTBX_LOG_MESSAGE, text: "CallKit: Call muted with call-id: \(String(describing: callId)) an UUID: \(uuid.description).")
-		CansCallManager.instance().lc!.micEnabled = !CansCallManager.instance().lc!.micEnabled
+		CallManager.instance().lc!.micEnabled = !CallManager.instance().lc!.micEnabled
 		action.fulfill()
 	}
 
@@ -286,7 +286,7 @@ extension CansProviderDelegate: CXProviderDelegate {
 		let uuid = action.callUUID
 		let callId = callInfos[uuid]?.callId
 //		Log.directLog(BCTBX_LOG_MESSAGE, text: "CallKit: Call send dtmf with call-id: \(String(describing: callId)) an UUID: \(uuid.description).")
-		let call = CansCallManager.instance().callByCallId(callId: callId)
+		let call = CallManager.instance().callByCallId(callId: callId)
 		if (call != nil) {
 			let digit = (action.digits.cString(using: String.Encoding.utf8)?[0])!
 			do {
@@ -311,14 +311,14 @@ extension CansProviderDelegate: CXProviderDelegate {
 
     public func provider(_ provider: CXProvider, didActivate audioSession: AVAudioSession) {
 //        Log.directLog(BCTBX_LOG_MESSAGE, text: "CallKit: audio session activated.")
-        CansCallManager.instance().lc?.activateAudioSession(actived: true)
-        CansCallManager.instance().callkitAudioSessionActivated = true
+        CallManager.instance().lc?.activateAudioSession(actived: true)
+        CallManager.instance().callkitAudioSessionActivated = true
     }
 
     public func provider(_ provider: CXProvider, didDeactivate audioSession: AVAudioSession) {
 //        Log.directLog(BCTBX_LOG_MESSAGE, text: "CallKit: audio session deactivated.")
-        CansCallManager.instance().lc?.activateAudioSession(actived: false)
-        CansCallManager.instance().callkitAudioSessionActivated = nil
+        CallManager.instance().lc?.activateAudioSession(actived: false)
+        CallManager.instance().callkitAudioSessionActivated = nil
     }
 }
 

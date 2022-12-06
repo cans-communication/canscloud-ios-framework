@@ -135,7 +135,7 @@ static void linphone_iphone_transfer_state_changed(LinphoneCore *lc, LinphoneCal
 // MARK: - Text Received Functions
 
 static void linphone_iphone_call_id_updated(LinphoneCore *lc, const char *previous_call_id, const char *current_call_id) {
-//    [CallManager.instance updateCallIdWithPrevious:[NSString stringWithUTF8String:previous_call_id] current:[NSString stringWithUTF8String:current_call_id]];
+    [CallManager.instance updateCallIdWithPrevious:[NSString stringWithUTF8String:previous_call_id] current:[NSString stringWithUTF8String:current_call_id]];
 }
 
 static void linphone_iphone_call_log_updated(LinphoneCore *lc, LinphoneCallLog *newcl) {

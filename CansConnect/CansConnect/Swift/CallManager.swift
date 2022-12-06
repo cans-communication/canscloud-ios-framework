@@ -33,10 +33,10 @@ import AVFoundation
 * CansCallManager is a class that manages application calls and supports callkit.
 * There is only one CansCallManager by calling CansCallManager.instance().
 */
-@objc class CallManager: NSObject, CoreDelegate {
+@objc public class CallManager: NSObject, CoreDelegate {
 	static public var theCansCallManager: CallManager?
-    public let providerDelegate: ProviderDelegate! // to support callkit
-	public let callController: CXCallController! // to support callkit
+    let providerDelegate: ProviderDelegate! // to support callkit
+	let callController: CXCallController! // to support callkit
 	var lc: Core?
 	@objc public var speakerBeforePause : Bool = false
 	@objc var nextCallIsTransfer: Bool = false
@@ -113,25 +113,25 @@ import AVFoundation
 	}
 
 	@objc static func callKitEnabled() -> Bool {
-//		#if !targetEnvironment(simulator)
-//		if ConfigManager.instance().lpConfigBoolForKey(key: "use_callkit", section: "app") {
-//			return true
-//		}
-//		#endif
+		#if !targetEnvironment(simulator)
+		if ConfigManager.instance().lpConfigBoolForKey(key: "use_callkit", section: "app") {
+			return true
+		}
+		#endif
 		return false
 	}
 
 	func requestTransaction(_ transaction: CXTransaction, action: String) {
 		callController.request(transaction) { error in
 			if let error = error {
-//				Log.directLog(BCTBX_LOG_ERROR, text: "CallKit: Requested transaction \(action) failed because: \(error)")
+				Log.directLog(BCTBX_LOG_ERROR, text: "CallKit: Requested transaction \(action) failed because: \(error)")
 			} else {
-//				Log.directLog(BCTBX_LOG_MESSAGE, text: "CallKit: Requested transaction \(action) successfully")
+				Log.directLog(BCTBX_LOG_MESSAGE, text: "CallKit: Requested transaction \(action) successfully")
 			}
 		}
 	}
 	
-	@objc func updateCallId(previous: String, current: String) {
+	@objc public func updateCallId(previous: String, current: String) {
         let uuid = CallManager.instance().providerDelegate?.uuids["\(previous)"]
 		if (uuid != nil) {
             CallManager.instance().providerDelegate?.uuids.removeValue(forKey: previous)
@@ -181,7 +181,7 @@ import AVFoundation
 
 	@objc func acceptCall(call: OpaquePointer?, hasVideo:Bool) {
 		if (call == nil) {
-//			Log.directLog(BCTBX_LOG_ERROR, text: "Can not accept null call!")
+			Log.directLog(BCTBX_LOG_ERROR, text: "Can not accept null call!")
 			return
 		}
 		let call = Call.getSwiftObject(cObject: call!)
@@ -192,23 +192,23 @@ import AVFoundation
 		do {
 			let callParams = try lc!.createCallParams(call: call)
 			callParams.videoEnabled = hasVideo
-//			if (ConfigManager.instance().lpConfigBoolForKey(key: "edge_opt_preference")) {
-//				let low_bandwidth = (CansAppManager.network() == .network_2g)
-//				if (low_bandwidth) {
-//					Log.directLog(BCTBX_LOG_MESSAGE, text: "Low bandwidth mode")
-//				}
-//				callParams.lowBandwidthEnabled = low_bandwidth
-//			}
+			if (ConfigManager.instance().lpConfigBoolForKey(key: "edge_opt_preference")) {
+				let low_bandwidth = (AppManager.network() == .network_2g)
+				if (low_bandwidth) {
+					Log.directLog(BCTBX_LOG_MESSAGE, text: "Low bandwidth mode")
+				}
+				callParams.lowBandwidthEnabled = low_bandwidth
+			}
 
 			//We set the record file name here because we can't do it after the call is started.
 			let address = call.callLog?.fromAddress
 			let writablePath = AppManager.recordingFilePathFromCall(address: address?.username ?? "")
-//			Log.directLog(BCTBX_LOG_MESSAGE, text: "Record file path: \(String(describing: writablePath))")
+			Log.directLog(BCTBX_LOG_MESSAGE, text: "Record file path: \(String(describing: writablePath))")
 			callParams.recordFile = writablePath
 
 			try call.acceptWithParams(params: callParams)
 		} catch {
-//			Log.directLog(BCTBX_LOG_ERROR, text: "accept call failed \(error)")
+			Log.directLog(BCTBX_LOG_ERROR, text: "accept call failed \(error)")
 		}
 	}
 

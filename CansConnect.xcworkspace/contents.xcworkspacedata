@@ -5,6 +5,12 @@
       location = "group:CansConnect/CansConnect.xcodeproj">
    </FileRef>
    <FileRef
-      location = "group:DemoApp/DemoApp.xcodeproj">
+      location = "group:DemoObjCApp/DemoObjCApp.xcodeproj">
+   </FileRef>
+   <FileRef
+      location = "group:DemoSwiftStoryboardApp/DemoSwiftStoryboardApp.xcodeproj">
+   </FileRef>
+   <FileRef
+      location = "group:DemoSwiftUIApp/DemoSwiftUIApp.xcodeproj">
    </FileRef>
 </Workspace>

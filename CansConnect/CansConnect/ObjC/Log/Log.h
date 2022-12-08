@@ -19,7 +19,6 @@
 
 
 #import <Foundation/Foundation.h>
-#import "CansLoManager.h"
 
 @import linphone;
 

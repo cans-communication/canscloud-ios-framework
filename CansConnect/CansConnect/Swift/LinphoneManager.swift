@@ -70,5 +70,24 @@ class LinphoneManager {
         // Enable debug log to stdout
         linphone_core_set_log_file(nil)
         linphone_core_set_log_level(BCTBX_LOG_DEBUG)
+        
+        // Load config
+        let configFilename = documentFile("linphonerc")
+        let factoryConfigFilename = bundleFile("linphonerc-factory")
+        
+        let configFilenamePtr: UnsafePointer<Int8> = configFilename.cString(using: String.Encoding.utf8.rawValue)!
+        let factoryConfigFilenamePtr: UnsafePointer<Int8> = factoryConfigFilename.cString(using: String.Encoding.utf8.rawValue)!
+//        let lpConfig = lp_config_new_with_factory(configFilenamePtr, factoryConfigFilenamePtr)
+    }
+    
+    fileprivate func bundleFile(_ file: NSString) -> NSString{
+        return Bundle.main.path(forResource: file.deletingPathExtension, ofType: file.pathExtension)! as NSString
+    }
+    
+    fileprivate func documentFile(_ file: NSString) -> NSString {
+        let paths = NSSearchPathForDirectoriesInDomains(FileManager.SearchPathDirectory.documentDirectory, FileManager.SearchPathDomainMask.userDomainMask, true)
+        
+        let documentsPath: NSString = paths[0] as NSString
+        return documentsPath.appendingPathComponent(file as String) as NSString
     }
 }

@@ -331,7 +331,7 @@ import AVFoundation
 		}
 	}
 
-	@objc func markCallAsDeclined(callId: String) {
+	@objc public func markCallAsDeclined(callId: String) {
 		if !CallManager.callKitEnabled() {
 			return
 		}

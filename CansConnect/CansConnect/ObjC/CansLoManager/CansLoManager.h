@@ -6,7 +6,7 @@
 //
 
 #import <Foundation/Foundation.h>
-//#import <CansConnect/CansConnect-Swift.h>
+#import <Log.h>
 
 
 @import linphone;

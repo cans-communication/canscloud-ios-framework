@@ -62,28 +62,10 @@ import linphone
         CallManager.instance().acceptCall(call: call, hasVideo: hasVideo)
     }
     
-    @objc public func setCore(core: OpaquePointer) {
-        CallManager.instance().setCore(core: core)
-        CoreManager.instance().setCore(core: core)
-    }
-    
     @objc public func configure() {
         linphoneManager.createLinphoneCore()
-        setCore(core: CansLoManager.getLc())
+        CallManager.instance().setCore(core: CansLoManager.getLc())
+        CoreManager.instance().setCore(core: CansLoManager.getLc())
     }
-    
-    @objc public func registerWithObjC() {
-        linphoneManager.registerSip()
-    }
-    
-}
 
-extension String {
-    func fileName() -> String {
-        return URL(fileURLWithPath: self).deletingPathExtension().lastPathComponent
-    }
-    
-    func fileExtension() -> String {
-        return URL(fileURLWithPath: self).pathExtension
-    }
 }

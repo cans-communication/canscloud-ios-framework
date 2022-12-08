@@ -6,6 +6,7 @@
 //
 
 #import "CansLoManager.h"
+#import <CansConnect/CansConnect-Swift.h>
 
 
 static LinphoneCore *theLinphoneCore = nil;
@@ -39,6 +40,36 @@ NSString *const kLinphoneMsgNotificationAppGroupId = @"group.cc.cans.canscloud.m
 
 
 @implementation CansLoManager
+
+- (void)overrideDefaultSettings {
+    NSString *factory = [CansLoManager bundleFile:@"linphonerc-factory"];
+    
+    _configDb = linphone_config_new_for_shared_core(kLinphoneMsgNotificationAppGroupId.UTF8String, @"linphonerc".UTF8String, factory.UTF8String);
+    linphone_config_clean_entry(_configDb, "misc", "max_calls");
+}
+
+- (void)createLinphoneCore {
+    [self overrideDefaultSettings];
+    
+    LinphoneFactory *factory = linphone_factory_get();
+    LinphoneCoreCbs *cbs = linphone_factory_create_core_cbs(factory);
+    linphone_core_cbs_set_registration_state_changed(cbs,linphone_iphone_registration_state);
+    linphone_core_cbs_set_notify_presence_received_for_uri_or_tel(cbs, linphone_iphone_notify_presence_received_for_uri_or_tel);
+    linphone_core_cbs_set_authentication_requested(cbs, linphone_iphone_popup_password_request);
+    linphone_core_cbs_set_transfer_state_changed(cbs, linphone_iphone_transfer_state_changed);
+    linphone_core_cbs_set_is_composing_received(cbs, linphone_iphone_is_composing_received);
+    linphone_core_cbs_set_configuring_status(cbs, linphone_iphone_configuring_status_changed);
+    linphone_core_cbs_set_global_state_changed(cbs, linphone_iphone_global_state_changed);
+    linphone_core_cbs_set_notify_received(cbs, linphone_iphone_notify_received);
+    linphone_core_cbs_set_call_encryption_changed(cbs, linphone_iphone_call_encryption_changed);
+    linphone_core_cbs_set_version_update_check_result_received(cbs, linphone_iphone_version_update_check_result_received);
+    linphone_core_cbs_set_call_log_updated(cbs, linphone_iphone_call_log_updated);
+    linphone_core_cbs_set_call_id_updated(cbs, linphone_iphone_call_id_updated);
+    linphone_core_cbs_set_user_data(cbs, (__bridge void *)(self));
+    
+    theLinphoneCore = linphone_factory_create_shared_core_with_config(factory, _configDb, NULL, [kLinphoneMsgNotificationAppGroupId UTF8String], true);
+    linphone_core_add_callbacks(theLinphoneCore, cbs);
+}
 
 - (void)registerSip {
     NSString *domain = @"test.cans.cc:8444";
@@ -82,36 +113,6 @@ NSString *const kLinphoneMsgNotificationAppGroupId = @"group.cc.cans.canscloud.m
             linphone_core_set_default_account(LC, account);
         }
     }
-}
-
-- (void)createLinphoneCore {
-    [self overrideDefaultSettings];
-    
-    LinphoneFactory *factory = linphone_factory_get();
-    LinphoneCoreCbs *cbs = linphone_factory_create_core_cbs(factory);
-    linphone_core_cbs_set_registration_state_changed(cbs,linphone_iphone_registration_state);
-    linphone_core_cbs_set_notify_presence_received_for_uri_or_tel(cbs, linphone_iphone_notify_presence_received_for_uri_or_tel);
-    linphone_core_cbs_set_authentication_requested(cbs, linphone_iphone_popup_password_request);
-    linphone_core_cbs_set_transfer_state_changed(cbs, linphone_iphone_transfer_state_changed);
-    linphone_core_cbs_set_is_composing_received(cbs, linphone_iphone_is_composing_received);
-    linphone_core_cbs_set_configuring_status(cbs, linphone_iphone_configuring_status_changed);
-    linphone_core_cbs_set_global_state_changed(cbs, linphone_iphone_global_state_changed);
-    linphone_core_cbs_set_notify_received(cbs, linphone_iphone_notify_received);
-    linphone_core_cbs_set_call_encryption_changed(cbs, linphone_iphone_call_encryption_changed);
-    linphone_core_cbs_set_version_update_check_result_received(cbs, linphone_iphone_version_update_check_result_received);
-    linphone_core_cbs_set_call_log_updated(cbs, linphone_iphone_call_log_updated);
-    linphone_core_cbs_set_call_id_updated(cbs, linphone_iphone_call_id_updated);
-    linphone_core_cbs_set_user_data(cbs, (__bridge void *)(self));
-    
-    theLinphoneCore = linphone_factory_create_shared_core_with_config(factory, _configDb, NULL, [kLinphoneMsgNotificationAppGroupId UTF8String], true);
-    linphone_core_add_callbacks(theLinphoneCore, cbs);
-}
-
-- (void)overrideDefaultSettings {
-    NSString *factory = [CansLoManager bundleFile:@"linphonerc-factory"];
-    
-    _configDb = linphone_config_new_for_shared_core(kLinphoneMsgNotificationAppGroupId.UTF8String, @"linphonerc".UTF8String, factory.UTF8String);
-    linphone_config_clean_entry(_configDb, "misc", "max_calls");
 }
 
 // MARK: - Linphone Core Functions

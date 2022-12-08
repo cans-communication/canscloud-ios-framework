@@ -6,7 +6,7 @@
 //
 
 #import <Foundation/Foundation.h>
-#import <CansConnect/CansConnect-Swift.h>
+//#import <CansConnect/CansConnect-Swift.h>
 
 
 @import linphone;
@@ -47,7 +47,8 @@ extern NSString *const kLinphoneMsgNotificationAppGroupId;
 
 
 + (LinphoneCore*) getLc;
-+ (NSString*)cacheDirectory;
++ (NSString *)bundleFile:(NSString *)file;
++ (NSString *)cacheDirectory;
 
 - (void)createLinphoneCore;
 - (void)registerSip;

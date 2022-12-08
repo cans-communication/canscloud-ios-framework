@@ -6,6 +6,7 @@
 //
 
 import Foundation
+import linphone
 
 @objc public class CansBase: NSObject, URLSessionDelegate {
     

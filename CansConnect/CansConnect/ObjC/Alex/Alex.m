@@ -9,4 +9,8 @@
 
 @implementation Alex
 
++ (LinphoneCore *)getLc {
+    return nil;
+}
+
 @end

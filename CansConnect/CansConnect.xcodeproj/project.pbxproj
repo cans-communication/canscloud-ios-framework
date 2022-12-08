@@ -10,6 +10,7 @@
 		52344D20293F240000662E20 /* Log.m in Sources */ = {isa = PBXBuildFile; fileRef = 52344D1E293F240000662E20 /* Log.m */; };
 		52344D21293F240000662E20 /* Log.h in Headers */ = {isa = PBXBuildFile; fileRef = 52344D1F293F240000662E20 /* Log.h */; settings = {ATTRIBUTES = (Public, ); }; };
 		52344D23293F36A700662E20 /* ConfigManager.swift in Sources */ = {isa = PBXBuildFile; fileRef = 52344D22293F36A700662E20 /* ConfigManager.swift */; };
+		52344D3329405F2900662E20 /* LinphoneManager.swift in Sources */ = {isa = PBXBuildFile; fileRef = 52344D3229405F2900662E20 /* LinphoneManager.swift */; };
 		52670838292C79CD002CDDAE /* CansConnect.docc in Sources */ = {isa = PBXBuildFile; fileRef = 52670837292C79CD002CDDAE /* CansConnect.docc */; };
 		52670839292C79CD002CDDAE /* CansConnect.h in Headers */ = {isa = PBXBuildFile; fileRef = 52670836292C79CD002CDDAE /* CansConnect.h */; settings = {ATTRIBUTES = (Public, ); }; };
 		5291911E292F513F00D87DF9 /* CansBase.swift in Sources */ = {isa = PBXBuildFile; fileRef = 5291911D292F513F00D87DF9 /* CansBase.swift */; };
@@ -238,6 +239,7 @@
 		52344D1E293F240000662E20 /* Log.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = Log.m; sourceTree = "<group>"; };
 		52344D1F293F240000662E20 /* Log.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = Log.h; sourceTree = "<group>"; };
 		52344D22293F36A700662E20 /* ConfigManager.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = ConfigManager.swift; sourceTree = "<group>"; };
+		52344D3229405F2900662E20 /* LinphoneManager.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = LinphoneManager.swift; sourceTree = "<group>"; };
 		52670833292C79CD002CDDAE /* CansConnect.framework */ = {isa = PBXFileReference; explicitFileType = wrapper.framework; includeInIndex = 0; path = CansConnect.framework; sourceTree = BUILT_PRODUCTS_DIR; };
 		52670836292C79CD002CDDAE /* CansConnect.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = CansConnect.h; sourceTree = "<group>"; };
 		52670837292C79CD002CDDAE /* CansConnect.docc */ = {isa = PBXFileReference; lastKnownFileType = folder.documentationcatalog; path = CansConnect.docc; sourceTree = "<group>"; };
@@ -801,6 +803,7 @@
 				5291911D292F513F00D87DF9 /* CansBase.swift */,
 				52344D22293F36A700662E20 /* ConfigManager.swift */,
 				52919130292F5B1300D87DF9 /* CoreManager.swift */,
+				52344D3229405F2900662E20 /* LinphoneManager.swift */,
 				5291912E292F5B1300D87DF9 /* ProviderDelegate.swift */,
 			);
 			path = Swift;
@@ -1069,6 +1072,7 @@
 				52E3A48D2939C4320033834A /* Alex.m in Sources */,
 				52E3A30A2939C2630033834A /* CansLoManager.m in Sources */,
 				52344D20293F240000662E20 /* Log.m in Sources */,
+				52344D3329405F2900662E20 /* LinphoneManager.swift in Sources */,
 				52919134292F5B1300D87DF9 /* ProviderDelegate.swift in Sources */,
 				52E3A4652939C2C30033834A /* LinphoneWrapper.swift in Sources */,
 				52670838292C79CD002CDDAE /* CansConnect.docc in Sources */,

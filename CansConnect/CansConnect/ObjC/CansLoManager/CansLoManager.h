@@ -7,6 +7,7 @@
 
 #import <Foundation/Foundation.h>
 #import "Log.h"
+#import "FastAddressBook.h"
 
 
 @import linphone;
@@ -43,9 +44,6 @@ extern NSString *const kLinphoneMsgNotificationAppGroupId;
 }
 
 
-@property (readonly) LpConfig *configDb;
-
-
 + (LinphoneCore*) getLc;
 + (NSString *)bundleFile:(NSString *)file;
 + (NSString *)cacheDirectory;
@@ -53,6 +51,8 @@ extern NSString *const kLinphoneMsgNotificationAppGroupId;
 - (void)createLinphoneCore;
 - (void)registerSip;
 
+@property (readonly) LpConfig *configDb;
+//@property(readonly, strong) FastAddressBook *fastAddressBook;
 
 @end
 

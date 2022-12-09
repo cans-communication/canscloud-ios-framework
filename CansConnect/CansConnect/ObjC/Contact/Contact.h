@@ -21,9 +21,11 @@
 #import <Contacts/Contacts.h>
 #import <Foundation/Foundation.h>
 #import <UIKit/UIKit.h>
-#include <linphone/linphonecore.h>
 
 #import "CansLoManager.h"
+
+@import linphone;
+
 
 @interface Contact : NSObject
 

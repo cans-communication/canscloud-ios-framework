@@ -114,6 +114,7 @@ NSString *const kLinphoneMsgNotificationAppGroupId = @"group.cc.cans.canscloud.m
     }
 }
 
+
 // MARK: - Linphone Core Functions
 
 + (LinphoneCore *)getLc {

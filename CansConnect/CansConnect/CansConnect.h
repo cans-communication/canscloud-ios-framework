@@ -16,6 +16,14 @@ FOUNDATION_EXPORT const unsigned char CansConnectVersionString[];
 
 // In this header, you should import all the public headers of your framework using statements like #import <CansConnect/PublicHeader.h>
 
-#import "CansLoManager.h"
-#import "Log.h"
 #import "Alex.h"
+
+#import "CansLoManager.h"
+#import "Contact.h"
+
+#import "FastAddressBook.h"
+
+#import "Log.h"
+
+
+

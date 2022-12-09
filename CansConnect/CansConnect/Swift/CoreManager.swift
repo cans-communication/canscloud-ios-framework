@@ -20,12 +20,12 @@
 import Foundation
 
 
-@objc class CoreManager: NSObject {
+@objc public class CoreManager: NSObject {
 	static var theCansCoreManager: CoreManager?
 	var lc: Core?
 	private var mIterateTimer: Timer?
 
-	@objc static func instance() -> CoreManager {
+	@objc public static func instance() -> CoreManager {
 		if (theCansCoreManager == nil) {
 			theCansCoreManager = CoreManager()
 		}
@@ -50,7 +50,7 @@ import Foundation
 
 	}
 
-	@objc func stopIterateTimer() {
+	@objc public func stopIterateTimer() {
 		if let timer = mIterateTimer {
 //			Log.directLog(BCTBX_LOG_DEBUG, text: "stop iterate timer")
 			timer.invalidate()

@@ -14,6 +14,8 @@
 		52670838292C79CD002CDDAE /* CansConnect.docc in Sources */ = {isa = PBXBuildFile; fileRef = 52670837292C79CD002CDDAE /* CansConnect.docc */; };
 		52670839292C79CD002CDDAE /* CansConnect.h in Headers */ = {isa = PBXBuildFile; fileRef = 52670836292C79CD002CDDAE /* CansConnect.h */; settings = {ATTRIBUTES = (Public, ); }; };
 		527801372941E38500360D88 /* CdrHistoryWorker.swift in Sources */ = {isa = PBXBuildFile; fileRef = 527801362941E38500360D88 /* CdrHistoryWorker.swift */; };
+		5278016429433E1F00360D88 /* Contact.m in Sources */ = {isa = PBXBuildFile; fileRef = 5278016229433E1F00360D88 /* Contact.m */; };
+		5278016529433E1F00360D88 /* Contact.h in Headers */ = {isa = PBXBuildFile; fileRef = 5278016329433E1F00360D88 /* Contact.h */; };
 		5291911E292F513F00D87DF9 /* CansBase.swift in Sources */ = {isa = PBXBuildFile; fileRef = 5291911D292F513F00D87DF9 /* CansBase.swift */; };
 		52919133292F5B1300D87DF9 /* AppManager.swift in Sources */ = {isa = PBXBuildFile; fileRef = 5291912D292F5B1300D87DF9 /* AppManager.swift */; };
 		52919134292F5B1300D87DF9 /* ProviderDelegate.swift in Sources */ = {isa = PBXBuildFile; fileRef = 5291912E292F5B1300D87DF9 /* ProviderDelegate.swift */; };
@@ -245,6 +247,8 @@
 		52670836292C79CD002CDDAE /* CansConnect.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = CansConnect.h; sourceTree = "<group>"; };
 		52670837292C79CD002CDDAE /* CansConnect.docc */ = {isa = PBXFileReference; lastKnownFileType = folder.documentationcatalog; path = CansConnect.docc; sourceTree = "<group>"; };
 		527801362941E38500360D88 /* CdrHistoryWorker.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CdrHistoryWorker.swift; sourceTree = "<group>"; };
+		5278016229433E1F00360D88 /* Contact.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = Contact.m; sourceTree = "<group>"; };
+		5278016329433E1F00360D88 /* Contact.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = Contact.h; sourceTree = "<group>"; };
 		5291911D292F513F00D87DF9 /* CansBase.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = CansBase.swift; sourceTree = "<group>"; };
 		5291912D292F5B1300D87DF9 /* AppManager.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = AppManager.swift; sourceTree = "<group>"; };
 		5291912E292F5B1300D87DF9 /* ProviderDelegate.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = ProviderDelegate.swift; sourceTree = "<group>"; };
@@ -482,6 +486,15 @@
 				52670837292C79CD002CDDAE /* CansConnect.docc */,
 			);
 			path = CansConnect;
+			sourceTree = "<group>";
+		};
+		5278016129433E1F00360D88 /* Contact */ = {
+			isa = PBXGroup;
+			children = (
+				5278016329433E1F00360D88 /* Contact.h */,
+				5278016229433E1F00360D88 /* Contact.m */,
+			);
+			path = Contact;
 			sourceTree = "<group>";
 		};
 		52E3A30B2939C2C00033834A /* linphone-sdk */ = {
@@ -817,6 +830,7 @@
 			children = (
 				52E3A4912939E5950033834A /* Alex */,
 				52E3A4922939E5A00033834A /* CansLoManager */,
+				5278016129433E1F00360D88 /* Contact */,
 				52344D1D293F240000662E20 /* Log */,
 			);
 			path = ObjC;
@@ -849,6 +863,7 @@
 			files = (
 				52E3A48C2939C4320033834A /* Alex.h in Headers */,
 				52344D21293F240000662E20 /* Log.h in Headers */,
+				5278016529433E1F00360D88 /* Contact.h in Headers */,
 				52670839292C79CD002CDDAE /* CansConnect.h in Headers */,
 				52E3A3092939C2630033834A /* CansLoManager.h in Headers */,
 			);
@@ -1071,6 +1086,7 @@
 				52344D23293F36A700662E20 /* ConfigManager.swift in Sources */,
 				527801372941E38500360D88 /* CdrHistoryWorker.swift in Sources */,
 				52919133292F5B1300D87DF9 /* AppManager.swift in Sources */,
+				5278016429433E1F00360D88 /* Contact.m in Sources */,
 				5291911E292F513F00D87DF9 /* CansBase.swift in Sources */,
 				52919135292F5B1300D87DF9 /* CallManager.swift in Sources */,
 				52E3A48D2939C4320033834A /* Alex.m in Sources */,

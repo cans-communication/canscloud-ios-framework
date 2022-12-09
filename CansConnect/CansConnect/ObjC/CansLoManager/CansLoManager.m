@@ -222,58 +222,31 @@ static void linphone_iphone_popup_password_request(LinphoneCore *lc, LinphoneAut
         LOGW(@"Received an authentication request from %s@%s, but ignored it did not match any current user", usernameC, domainC);
         return;
     }
+
+    NSString *realm = [NSString stringWithUTF8String:realmC?:domainC];
+    NSString *username = [NSString stringWithUTF8String:usernameC];
+    NSString *domain = [NSString stringWithUTF8String:domainC];
     
-    // avoid having multiple popups
-//    [PhoneMainView.instance dismissViewControllerAnimated:YES completion:nil];
-//
-//    // dont pop up if we are in background, in any case we will refresh registers when entering
-//    // the application again
-//    if ([[UIApplication sharedApplication] applicationState] != UIApplicationStateActive) {
-//        return;
-//    }
-//
-//    NSString *realm = [NSString stringWithUTF8String:realmC?:domainC];
-//    NSString *username = [NSString stringWithUTF8String:usernameC];
-//    NSString *domain = [NSString stringWithUTF8String:domainC];
-//    alertView = [UIAlertController alertControllerWithTitle:NSLocalizedString(@"Authentification needed", nil)
-//                                                    message:[NSString stringWithFormat:NSLocalizedString(@"Connection failed because authentication is "
-//                                                                                                         @"missing or invalid for %@@%@.\nYou can "
-//                                                                                                         @"provide password again, or check your "
-//                                                                                                         @"account configuration in the settings.", nil), username, realm]
-//                                             preferredStyle:UIAlertControllerStyleAlert];
-//
-//    UIAlertAction* defaultAction = [UIAlertAction actionWithTitle:NSLocalizedString(@"Cancel", nil)
-//                                                            style:UIAlertActionStyleDefault
-//                                                          handler:^(UIAlertAction * action) {}];
-//
-//    [alertView addTextFieldWithConfigurationHandler:^(UITextField *textField) {
-//        textField.placeholder = NSLocalizedString(@"Password", nil);
-//        textField.clearButtonMode = UITextFieldViewModeWhileEditing;
-//        textField.borderStyle = UITextBorderStyleRoundedRect;
-//        textField.secureTextEntry = YES;
-//    }];
-//
-//    UIAlertAction* continueAction = [UIAlertAction actionWithTitle:NSLocalizedString(@"Confirm password", nil)
-//                                                             style:UIAlertActionStyleDefault
-//                                                           handler:^(UIAlertAction * action) {
-//        NSString *password = alertView.textFields[0].text;
-//        LinphoneAuthInfo *info =
-//        linphone_auth_info_new(username.UTF8String, NULL, password.UTF8String, NULL,
-//                               realm.UTF8String, domain.UTF8String);
-//        linphone_core_add_auth_info(LC, info);
-//        [CoreManager.instance refreshRegisters];
-//    }];
-//
-//    UIAlertAction* settingsAction = [UIAlertAction actionWithTitle:NSLocalizedString(@"Go to settings", nil)
-//                                                             style:UIAlertActionStyleDefault
-//                                                           handler:^(UIAlertAction * action) {
-//        [PhoneMainView.instance changeCurrentView:SettingsView.compositeViewDescription];
-//    }];
-//
-//    [alertView addAction:defaultAction];
-//    [alertView addAction:continueAction];
-//    [alertView addAction:settingsAction];
-//    [PhoneMainView.instance presentViewController:alertView animated:YES completion:nil];
+    NSLog(@"%@%@", @"Title : ", NSLocalizedString(@"Authentification needed", nil));
+    NSLog(
+          @"%@%@%@%@%@",
+          @"Message : ",
+          NSLocalizedString(@"Authentification needed", nil),
+          NSLocalizedString(@"Connection failed because authentication is "
+                            @"missing or invalid for %@@%@.\nYou can "
+                            @"provide password again, or check your "
+                            @"account configuration in the settings.", nil),
+          username,
+          realm);
+    
+    /*
+     NSString *password = alertView.textFields[0].text;
+     LinphoneAuthInfo *info =
+     linphone_auth_info_new(username.UTF8String, NULL, password.UTF8String, NULL,
+                            realm.UTF8String, domain.UTF8String);
+     linphone_core_add_auth_info(LC, info);
+     [CoreManager.instance refreshRegisters];
+     */
 }
 
 // MARK: - Message composition start
@@ -298,7 +271,7 @@ static void linphone_iphone_registration_state(LinphoneCore *lc, LinphoneProxyCo
 }
 
 - (void)onRegister:(LinphoneCore *)lc cfg:(LinphoneProxyConfig *)cfg state:(LinphoneRegistrationState)state message:(const char *)cmessage {
-//    LOGI(@"New registration state: %s (message: %s)", linphone_registration_state_to_string(state), cmessage);
+    LOGI(@"New registration state: %s (message: %s)", linphone_registration_state_to_string(state), cmessage);
 
     LinphoneReason reason = linphone_proxy_config_get_error(cfg);
     NSString *message = nil;
@@ -372,8 +345,8 @@ static void linphone_iphone_configuring_status_changed(LinphoneCore *lc, Linphon
 }
 
 - (void)onConfiguringStatusChanged:(LinphoneConfiguringState)status withMessage:(const char *)message {
-//    LOGI(@"onConfiguringStatusChanged: %s %@", linphone_configuring_state_to_string(status),
-//         message ? [NSString stringWithFormat:@"(message: %s)", message] : @"");
+    LOGI(@"onConfiguringStatusChanged: %s %@", linphone_configuring_state_to_string(status),
+         message ? [NSString stringWithFormat:@"(message: %s)", message] : @"");
     NSDictionary *dict = [NSDictionary
                   dictionaryWithObjectsAndKeys:[NSNumber numberWithInt:status], @"state",
                   [NSString stringWithUTF8String:message ? message : ""], @"message", nil];
@@ -393,20 +366,20 @@ static void linphone_iphone_global_state_changed(LinphoneCore *lc, LinphoneGloba
 }
 
 - (void)onGlobalStateChanged:(LinphoneGlobalState)state withMessage:(const char *)message {
-//    LOGI(@"onGlobalStateChanged: %d (message: %s)", state, message);
+    LOGI(@"onGlobalStateChanged: %d (message: %s)", state, message);
 
     NSDictionary *dict = [NSDictionary
                   dictionaryWithObjectsAndKeys:[NSNumber numberWithInt:state], @"state",
                   [NSString stringWithUTF8String:message ? message : ""], @"message", nil];
 
-//    if (theLinphoneCore && linphone_core_get_global_state(theLinphoneCore) == LinphoneGlobalOff) {
-//        [CoreManager.instance stopIterateTimer];
-//    }
-//    // dispatch the notification asynchronously
-//    dispatch_async(dispatch_get_main_queue(), ^(void) {
-//        if (theLinphoneCore && linphone_core_get_global_state(theLinphoneCore) != LinphoneGlobalOff)
-//            [NSNotificationCenter.defaultCenter postNotificationName:kLinphoneGlobalStateUpdate object:self userInfo:dict];
-//    });
+    if (theLinphoneCore && linphone_core_get_global_state(theLinphoneCore) == LinphoneGlobalOff) {
+        [CoreManager.instance stopIterateTimer];
+    }
+    // dispatch the notification asynchronously
+    dispatch_async(dispatch_get_main_queue(), ^(void) {
+        if (theLinphoneCore && linphone_core_get_global_state(theLinphoneCore) != LinphoneGlobalOff)
+            [NSNotificationCenter.defaultCenter postNotificationName:kLinphoneGlobalStateUpdate object:self userInfo:dict];
+    });
 }
 
 // MARK: - Misc Functions

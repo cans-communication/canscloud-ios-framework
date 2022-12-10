@@ -20,7 +20,7 @@
 #import <Foundation/Foundation.h>
 #import <AddressBook/AddressBook.h>
 
-#include "Contact.h"
+#import "Contact.h"
 
 @import linphone;
 
@@ -31,32 +31,32 @@
 @property BOOL needToUpdate;
 
 - (void)fetchContactsInBackGroundThread;
-- (BOOL)deleteContact:(Contact *)contact;
+//- (BOOL)deleteContact:(Contact *)contact;
 - (BOOL)deleteCNContact:(CNContact *)CNContact;
 - (BOOL)deleteAllContacts;
-- (BOOL)saveContact:(Contact *)contact;
-- (BOOL)saveCNContact:(CNContact *)CNContact contact:(Contact *)Contact;
+//- (BOOL)saveContact:(Contact *)contact;
+//- (BOOL)saveCNContact:(CNContact *)CNContact contact:(Contact *)Contact;
 - (void)reloadFriends;
 - (void)clearFriends;
 
 - (void)dumpContactsDisplayNamesToUserDefaults;
-- (void)removeContactFromUserDefaults:(Contact *)contact;
+//- (void)removeContactFromUserDefaults:(Contact *)contact;
 
 + (BOOL)isAuthorized;
 
 // TOOLS
 
-+ (Contact *)getContactWithAddress:(const LinphoneAddress *)address;
-- (CNContact *)getCNContactFromContact:(Contact *)acontact;
+//+ (Contact *)getContactWithAddress:(const LinphoneAddress *)address;
+//- (CNContact *)getCNContactFromContact:(Contact *)acontact;
 
-+ (UIImage *)imageForContact:(Contact *)contact;
+//+ (UIImage *)imageForContact:(Contact *)contact;
 + (UIImage *)imageForAddress:(const LinphoneAddress *)addr;
 + (UIImage *)imageForSecurityLevel:(LinphoneChatRoomSecurityLevel)level;
 
-+ (BOOL)contactHasValidSipDomain:(Contact *)person;
+//+ (BOOL)contactHasValidSipDomain:(Contact *)person;
 + (BOOL)isSipURIValid:(NSString*)addr;
 
-+ (NSString *)displayNameForContact:(Contact *)person;
+//+ (NSString *)displayNameForContact:(Contact *)person;
 + (NSString *)displayNameForAddress:(const LinphoneAddress *)addr;
 
 + (BOOL)isSipURI:(NSString *)address;
@@ -64,6 +64,6 @@
 + (NSString *)normalizeSipURI:(NSString *)address;
 
 + (NSString *)localizedLabel:(NSString *)label;
-- (void)registerAddrsFor:(Contact *)contact;
+//- (void)registerAddrsFor:(Contact *)contact;
 
 @end

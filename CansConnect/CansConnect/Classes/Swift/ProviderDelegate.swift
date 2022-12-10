@@ -68,7 +68,7 @@ class ProviderDelegate: NSObject {
 		let providerConfiguration = CXProviderConfiguration(localizedName: Bundle.main.infoDictionary!["CFBundleName"] as! String)
 		providerConfiguration.ringtoneSound = "notes_of_the_optimistic.caf"
 		providerConfiguration.supportsVideo = true
-//        providerConfiguration.iconTemplateImageData = ImageAsset.load(asset: .callkitLogo).pngData()
+        providerConfiguration.iconTemplateImageData = ImageAsset.load(asset: .callkitLogo).pngData()
 		providerConfiguration.supportedHandleTypes = [.generic, .phoneNumber, .emailAddress]
 
 		providerConfiguration.maximumCallsPerCallGroup = 10

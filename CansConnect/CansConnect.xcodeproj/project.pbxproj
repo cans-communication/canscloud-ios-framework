@@ -18,6 +18,8 @@
 		5278016529433E1F00360D88 /* Contact.h in Headers */ = {isa = PBXBuildFile; fileRef = 5278016329433E1F00360D88 /* Contact.h */; settings = {ATTRIBUTES = (Public, ); }; };
 		5278016929438DAF00360D88 /* FastAddressBook.m in Sources */ = {isa = PBXBuildFile; fileRef = 5278016729438DAF00360D88 /* FastAddressBook.m */; };
 		5278016A29438DAF00360D88 /* FastAddressBook.h in Headers */ = {isa = PBXBuildFile; fileRef = 5278016829438DAF00360D88 /* FastAddressBook.h */; settings = {ATTRIBUTES = (Public, ); }; };
+		5278016C29447DEB00360D88 /* CansImage.swift in Sources */ = {isa = PBXBuildFile; fileRef = 5278016B29447DEA00360D88 /* CansImage.swift */; };
+		5278016F29447E4F00360D88 /* callkit_logo.png in Resources */ = {isa = PBXBuildFile; fileRef = 5278016E29447E4F00360D88 /* callkit_logo.png */; };
 		5291911E292F513F00D87DF9 /* CansBase.swift in Sources */ = {isa = PBXBuildFile; fileRef = 5291911D292F513F00D87DF9 /* CansBase.swift */; };
 		52919133292F5B1300D87DF9 /* AppManager.swift in Sources */ = {isa = PBXBuildFile; fileRef = 5291912D292F5B1300D87DF9 /* AppManager.swift */; };
 		52919134292F5B1300D87DF9 /* ProviderDelegate.swift in Sources */ = {isa = PBXBuildFile; fileRef = 5291912E292F5B1300D87DF9 /* ProviderDelegate.swift */; };
@@ -253,6 +255,8 @@
 		5278016329433E1F00360D88 /* Contact.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = Contact.h; sourceTree = "<group>"; };
 		5278016729438DAF00360D88 /* FastAddressBook.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = FastAddressBook.m; sourceTree = "<group>"; };
 		5278016829438DAF00360D88 /* FastAddressBook.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = FastAddressBook.h; sourceTree = "<group>"; };
+		5278016B29447DEA00360D88 /* CansImage.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = CansImage.swift; sourceTree = "<group>"; };
+		5278016E29447E4F00360D88 /* callkit_logo.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = callkit_logo.png; sourceTree = "<group>"; };
 		5291911D292F513F00D87DF9 /* CansBase.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = CansBase.swift; sourceTree = "<group>"; };
 		5291912D292F5B1300D87DF9 /* AppManager.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = AppManager.swift; sourceTree = "<group>"; };
 		5291912E292F5B1300D87DF9 /* ProviderDelegate.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = ProviderDelegate.swift; sourceTree = "<group>"; };
@@ -484,10 +488,9 @@
 		52670835292C79CD002CDDAE /* CansConnect */ = {
 			isa = PBXGroup;
 			children = (
-				52E3A48E2939E5640033834A /* Swift */,
-				52E3A4902939E5860033834A /* ObjC */,
 				52670836292C79CD002CDDAE /* CansConnect.h */,
-				52670837292C79CD002CDDAE /* CansConnect.docc */,
+				5278017129447EFB00360D88 /* Classes */,
+				5278017029447ED300360D88 /* Resources */,
 			);
 			path = CansConnect;
 			sourceTree = "<group>";
@@ -508,6 +511,32 @@
 				5278016729438DAF00360D88 /* FastAddressBook.m */,
 			);
 			path = FastAddressBook;
+			sourceTree = "<group>";
+		};
+		5278016D29447E4100360D88 /* Images */ = {
+			isa = PBXGroup;
+			children = (
+				5278016E29447E4F00360D88 /* callkit_logo.png */,
+			);
+			path = Images;
+			sourceTree = "<group>";
+		};
+		5278017029447ED300360D88 /* Resources */ = {
+			isa = PBXGroup;
+			children = (
+				52670837292C79CD002CDDAE /* CansConnect.docc */,
+				5278016D29447E4100360D88 /* Images */,
+			);
+			path = Resources;
+			sourceTree = "<group>";
+		};
+		5278017129447EFB00360D88 /* Classes */ = {
+			isa = PBXGroup;
+			children = (
+				52E3A4902939E5860033834A /* ObjC */,
+				52E3A48E2939E5640033834A /* Swift */,
+			);
+			path = Classes;
 			sourceTree = "<group>";
 		};
 		52E3A30B2939C2C00033834A /* linphone-sdk */ = {
@@ -829,6 +858,7 @@
 				5291912D292F5B1300D87DF9 /* AppManager.swift */,
 				5291912F292F5B1300D87DF9 /* CallManager.swift */,
 				5291911D292F513F00D87DF9 /* CansBase.swift */,
+				5278016B29447DEA00360D88 /* CansImage.swift */,
 				527801362941E38500360D88 /* CdrHistoryWorker.swift */,
 				52344D22293F36A700662E20 /* ConfigManager.swift */,
 				52919130292F5B1300D87DF9 /* CoreManager.swift */,
@@ -999,6 +1029,7 @@
 				52E3A3D52939C2C10033834A /* user2_revoked_key.pem in Resources */,
 				52E3A40B2939C2C10033834A /* marie_remote_localfile2_rc in Resources */,
 				52E3A3D72939C2C10033834A /* cert2.pem in Resources */,
+				5278016F29447E4F00360D88 /* callkit_logo.png in Resources */,
 				52E3A4382939C2C10033834A /* marie_remote_rc in Resources */,
 				52E3A4282939C2C10033834A /* chloe_rc in Resources */,
 				52E3A3E42939C2C10033834A /* hello44100.wav in Resources */,
@@ -1099,6 +1130,7 @@
 			files = (
 				52919136292F5B1300D87DF9 /* CoreManager.swift in Sources */,
 				52344D23293F36A700662E20 /* ConfigManager.swift in Sources */,
+				5278016C29447DEB00360D88 /* CansImage.swift in Sources */,
 				527801372941E38500360D88 /* CdrHistoryWorker.swift in Sources */,
 				52919133292F5B1300D87DF9 /* AppManager.swift in Sources */,
 				5278016429433E1F00360D88 /* Contact.m in Sources */,

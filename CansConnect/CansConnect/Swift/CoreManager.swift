@@ -42,17 +42,16 @@ import Foundation
 
 	@objc func startIterateTimer() {
 		if (mIterateTimer?.isValid ?? false) {
-//			Log.directLog(BCTBX_LOG_DEBUG, text: "Iterate timer is already started, skipping ...")
+			Log.directLog(BCTBX_LOG_DEBUG, text: "Iterate timer is already started, skipping ...")
 			return
 		}
 		mIterateTimer = Timer.scheduledTimer(timeInterval: 0.02, target: self, selector: #selector(self.iterate), userInfo: nil, repeats: true)
-//		Log.directLog(BCTBX_LOG_DEBUG, text: "start iterate timer")
-
+		Log.directLog(BCTBX_LOG_DEBUG, text: "start iterate timer")
 	}
 
 	@objc public func stopIterateTimer() {
 		if let timer = mIterateTimer {
-//			Log.directLog(BCTBX_LOG_DEBUG, text: "stop iterate timer")
+			Log.directLog(BCTBX_LOG_DEBUG, text: "stop iterate timer")
 			timer.invalidate()
 		}
 	}

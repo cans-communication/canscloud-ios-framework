@@ -11,6 +11,8 @@
 
 static LinphoneCore *theLinphoneCore = nil;
 
+NSString *const LINPHONERC_APPLICATION_KEY = @"app";
+
 NSString *const kLinphoneCoreUpdate = @"LinphoneCoreUpdate";
 NSString *const kLinphoneDisplayStatusUpdate = @"LinphoneDisplayStatusUpdate";
 NSString *const kLinphoneMessageReceived = @"LinphoneMessageReceived";
@@ -41,6 +43,57 @@ NSString *const kLinphoneMsgNotificationAppGroupId = @"group.cc.cans.canscloud.m
 
 @implementation CansLoManager
 
+#pragma mark - Lifecycle Functions
+
+- (id)init {
+    if ((self = [super init])) {
+        NSString *path = [[NSBundle mainBundle] pathForResource:@"msg" ofType:@"wav"];
+//        self.messagePlayer = [[AVAudioPlayer alloc] initWithContentsOfURL:[NSURL URLWithString:path] error:nil];
+//
+//        _sounds.vibrate = kSystemSoundID_Vibrate;
+//
+//        _logs = [[NSMutableArray alloc] init];
+//        _pushDict = [[NSMutableDictionary alloc] init];
+//        _database = NULL;
+//        _conf = FALSE;
+//        _canConfigurePushTokenForProxyConfigs = FALSE;
+//        _fileTransferDelegates = [[NSMutableArray alloc] init];
+//        _linphoneManagerAddressBookMap = [[OrderedDictionary alloc] init];
+//        pushCallIDs = [[NSMutableArray alloc] init];
+//        _isTesting = [LinphoneManager isRunningTests];
+//        [self copyDefaultSettings];
+        [self overrideDefaultSettings];
+
+//        [self lpConfigSetString:[LinphoneManager dataFile:@"linphone.db"] forKey:@"uri" inSection:@"storage"];
+//        [self lpConfigSetString:[LinphoneManager dataFile:@"x3dh.c25519.sqlite3"] forKey:@"x3dh_db_path" inSection:@"lime"];
+//        // set default values for first boot
+//        if ([self lpConfigStringForKey:@"debugenable_preference"] == nil) {
+//#ifdef DEBUG
+//            [self lpConfigSetInt:1 forKey:@"debugenable_preference"];
+//#else
+//            [self lpConfigSetInt:0 forKey:@"debugenable_preference"];
+//#endif
+//        }
+
+        // by default if handle_content_encoding is not set, we use plain text for debug purposes only
+//        if ([self lpConfigStringForKey:@"handle_content_encoding" inSection:@"misc"] == nil) {
+//#ifdef DEBUG
+//            [self lpConfigSetString:@"none" forKey:@"handle_content_encoding" inSection:@"misc"];
+//#else
+//            [self lpConfigSetString:@"conflate" forKey:@"handle_content_encoding" inSection:@"misc"];
+//#endif
+//        }
+//
+//        [self migrateFromUserPrefs];
+//        [self loadAvatar];
+    }
+    return self;
+}
+
+- (void)dealloc {
+    [NSNotificationCenter.defaultCenter removeObserver:self];
+}
+
 - (void)overrideDefaultSettings {
     NSString *factory = [CansLoManager bundleFile:@"linphonerc-factory"];
     
@@ -49,7 +102,28 @@ NSString *const kLinphoneMsgNotificationAppGroupId = @"group.cc.cans.canscloud.m
 }
 
 - (void)createLinphoneCore {
-    [self overrideDefaultSettings];
+//    [self migrationAllPre];
+    if (theLinphoneCore != nil) {
+        LOGI(@"linphonecore is already created");
+        return;
+    }
+
+    // Set audio assets
+//    NSString *ring =
+//        ([LinphoneManager bundleFile:[self lpConfigStringForKey:@"local_ring" inSection:@"sound"].lastPathComponent]
+//         ?: [LinphoneManager bundleFile:@"notes_of_the_optimistic.caf"])
+//        .lastPathComponent;
+//    NSString *ringback =
+//        ([LinphoneManager bundleFile:[self lpConfigStringForKey:@"remote_ring" inSection:@"sound"].lastPathComponent]
+//         ?: [LinphoneManager bundleFile:@"ringback.wav"])
+//        .lastPathComponent;
+//    NSString *hold =
+//        ([LinphoneManager bundleFile:[self lpConfigStringForKey:@"hold_music" inSection:@"sound"].lastPathComponent]
+//         ?: [LinphoneManager bundleFile:@"hold.mkv"])
+//        .lastPathComponent;
+//    [self lpConfigSetString:[LinphoneManager bundleFile:ring] forKey:@"local_ring" inSection:@"sound"];
+//    [self lpConfigSetString:[LinphoneManager bundleFile:ringback] forKey:@"remote_ring" inSection:@"sound"];
+//    [self lpConfigSetString:[LinphoneManager bundleFile:hold] forKey:@"hold_music" inSection:@"sound"];
     
     LinphoneFactory *factory = linphone_factory_get();
     LinphoneCoreCbs *cbs = linphone_factory_create_core_cbs(factory);
@@ -68,6 +142,53 @@ NSString *const kLinphoneMsgNotificationAppGroupId = @"group.cc.cans.canscloud.m
     
     theLinphoneCore = linphone_factory_create_shared_core_with_config(factory, _configDb, NULL, [kLinphoneMsgNotificationAppGroupId UTF8String], true);
     linphone_core_add_callbacks(theLinphoneCore, cbs);
+    
+//    [CallManager.instance setCoreWithCore:theLinphoneCore];
+//    [CoreManager.instance setCoreWithCore:theLinphoneCore];
+//    [ConfigManager.instance setDbWithDb:_configDb];
+
+    linphone_core_start(theLinphoneCore);
+
+    // Let the core handle cbs
+    linphone_core_cbs_unref(cbs);
+
+    LOGI(@"Create linphonecore %p", theLinphoneCore);
+
+    // Load plugins if available in the linphone SDK - otherwise these calls will do nothing
+    MSFactory *f = linphone_core_get_ms_factory(theLinphoneCore);
+//    libmssilk_init(f);
+//    libmsamr_init(f);
+//    libmsx264_init(f);
+//    libmsopenh264_init(f);
+//    libmswebrtc_init(f);
+//    libmscodec2_init(f);
+
+    linphone_core_reload_ms_plugins(theLinphoneCore, NULL);
+//    [self migrationAllPost];
+
+    /* Use the rootca from framework, which is already set*/
+    //linphone_core_set_root_ca(theLinphoneCore, [LinphoneManager bundleFile:@"rootca.pem"].UTF8String);
+//    linphone_core_set_user_certificates_path(theLinphoneCore, [LinphoneManager cacheDirectory].UTF8String);
+
+    /* The core will call the linphone_iphone_configuring_status_changed callback when the remote provisioning is loaded
+       (or skipped).
+       Wait for this to finish the code configuration */
+
+//    [NSNotificationCenter.defaultCenter addObserver:self
+//     selector:@selector(globalStateChangedNotificationHandler:)
+//     name:kLinphoneGlobalStateUpdate
+//     object:nil];
+//    [NSNotificationCenter.defaultCenter addObserver:self
+//     selector:@selector(configuringStateChangedNotificationHandler:)
+//     name:kLinphoneConfiguringStateUpdate
+//     object:nil];
+//    [NSNotificationCenter.defaultCenter addObserver:self selector:@selector(inappReady:) name:kIAPReady object:nil];
+
+    /*call iterate once immediately in order to initiate background connections with sip server or remote provisioning
+     * grab, if any */
+//    [self iterate];
+    // start scheduler
+//    [CoreManager.instance startIterateTimer];
 }
 
 - (void)registerSip {
@@ -403,5 +524,22 @@ static void linphone_iphone_global_state_changed(LinphoneCore *lc, LinphoneGloba
     }
     return cachePath;
 }
+
+- (NSString *)lpConfigStringForKey:(NSString *)key {
+    return [self lpConfigStringForKey:key withDefault:nil];
+}
+- (NSString *)lpConfigStringForKey:(NSString *)key withDefault:(NSString *)defaultValue {
+    return [self lpConfigStringForKey:key inSection:LINPHONERC_APPLICATION_KEY withDefault:defaultValue];
+}
+- (NSString *)lpConfigStringForKey:(NSString *)key inSection:(NSString *)section {
+    return [self lpConfigStringForKey:key inSection:section withDefault:nil];
+}
+- (NSString *)lpConfigStringForKey:(NSString *)key inSection:(NSString *)section withDefault:(NSString *)defaultValue {
+    if (!key)
+        return defaultValue;
+    const char *value = linphone_config_get_string(_configDb, [section UTF8String], [key UTF8String], NULL);
+    return value ? [NSString stringWithUTF8String:value] : defaultValue;
+}
+
 
 @end

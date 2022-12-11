@@ -38,6 +38,8 @@ extern NSString *const kLinphoneQRCodeFound;
 extern NSString *const kLinphoneChatCreateViewChange;
 extern NSString *const kLinphoneMsgNotificationAppGroupId;
 
+extern const int kLinphoneAudioVbrCodecDefaultBitrate;
+
 
 @interface CansLoManager : NSObject {
     
@@ -50,6 +52,11 @@ extern NSString *const kLinphoneMsgNotificationAppGroupId;
 
 - (void)createLinphoneCore;
 - (void)registerSip;
+
+- (NSString *)lpConfigStringForKey:(NSString *)key;
+- (NSString *)lpConfigStringForKey:(NSString *)key inSection:(NSString *)section;
+- (NSString *)lpConfigStringForKey:(NSString *)key withDefault:(NSString *)value;
+- (NSString *)lpConfigStringForKey:(NSString *)key inSection:(NSString *)section withDefault:(NSString *)value;
 
 @property (readonly) LpConfig *configDb;
 //@property(readonly, strong) FastAddressBook *fastAddressBook;

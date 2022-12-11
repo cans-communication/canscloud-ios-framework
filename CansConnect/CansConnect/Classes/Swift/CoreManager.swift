@@ -32,7 +32,7 @@ import Foundation
 		return theCansCoreManager!
 	}
 
-	@objc func setCore(core: OpaquePointer) {
+	@objc public func setCore(core: OpaquePointer) {
 		lc = Core.getSwiftObject(cObject: core)
 	}
 
@@ -40,7 +40,7 @@ import Foundation
 		lc?.iterate()
 	}
 
-	@objc func startIterateTimer() {
+	@objc public func startIterateTimer() {
 		if (mIterateTimer?.isValid ?? false) {
 			Log.directLog(BCTBX_LOG_DEBUG, text: "Iterate timer is already started, skipping ...")
 			return

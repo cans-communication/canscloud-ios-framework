@@ -6,6 +6,8 @@
 //
 
 #import <Foundation/Foundation.h>
+#import <Photos/Photos.h>
+
 #import "Log.h"
 #import "FastAddressBook.h"
 
@@ -45,19 +47,45 @@ extern const int kLinphoneAudioVbrCodecDefaultBitrate;
     
 }
 
-
++ (CansLoManager*)instance;
 + (LinphoneCore*) getLc;
-+ (NSString *)bundleFile:(NSString *)file;
 + (NSString *)cacheDirectory;
++ (NSString *)bundleFile:(NSString *)file;
++ (NSString*)dataFile:(NSString*)file;
++ (NSString *)preferenceFile:(NSString *)file;
 
 - (void)createLinphoneCore;
 - (void)registerSip;
+
+- (void)configurePushTokenForProxyConfig: (LinphoneProxyConfig*)cfg;
+
+- (void)lpConfigSetString:(NSString*)value forKey:(NSString*)key;
+- (void)lpConfigSetString:(NSString *)value forKey:(NSString *)key inSection:(NSString *)section;
+
+- (void)lpConfigSetInt:(int)value forKey:(NSString *)key;
+- (void)lpConfigSetInt:(int)value forKey:(NSString *)key inSection:(NSString *)section;
+
+- (void)lpConfigSetBool:(BOOL)value forKey:(NSString*)key;
+- (void)lpConfigSetBool:(BOOL)value forKey:(NSString *)key inSection:(NSString *)section;
 
 - (NSString *)lpConfigStringForKey:(NSString *)key;
 - (NSString *)lpConfigStringForKey:(NSString *)key inSection:(NSString *)section;
 - (NSString *)lpConfigStringForKey:(NSString *)key withDefault:(NSString *)value;
 - (NSString *)lpConfigStringForKey:(NSString *)key inSection:(NSString *)section withDefault:(NSString *)value;
 
+- (int)lpConfigIntForKey:(NSString *)key;
+- (int)lpConfigIntForKey:(NSString *)key inSection:(NSString *)section;
+- (int)lpConfigIntForKey:(NSString *)key withDefault:(int)value;
+- (int)lpConfigIntForKey:(NSString *)key inSection:(NSString *)section withDefault:(int)value;
+
+- (BOOL)lpConfigBoolForKey:(NSString *)key;
+- (BOOL)lpConfigBoolForKey:(NSString *)key inSection:(NSString *)section;
+- (BOOL)lpConfigBoolForKey:(NSString *)key withDefault:(BOOL)value;
+- (BOOL)lpConfigBoolForKey:(NSString *)key inSection:(NSString *)section withDefault:(BOOL)value;
+
++ (BOOL)copyFile:(NSString*)src destination:(NSString*)dst override:(BOOL)override ignore:(BOOL)ignore;
+
+@property (readonly) BOOL wasRemoteProvisioned;
 @property (readonly) LpConfig *configDb;
 //@property(readonly, strong) FastAddressBook *fastAddressBook;
 

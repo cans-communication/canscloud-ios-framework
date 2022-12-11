@@ -63,7 +63,7 @@ import AVFoundation
 		return theCansCallManager!
 	}
 
-	@objc func setCore(core: OpaquePointer) {
+	@objc public func setCore(core: OpaquePointer) {
 		lc = Core.getSwiftObject(cObject: core)
 		lc?.addDelegate(delegate: self)
 	}

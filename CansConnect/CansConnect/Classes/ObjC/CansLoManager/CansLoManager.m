@@ -10,6 +10,7 @@
 
 
 static LinphoneCore *theLinphoneCore = nil;
+static CansLoManager *theLinphoneManager = nil;
 
 NSString *const LINPHONERC_APPLICATION_KEY = @"app";
 
@@ -35,6 +36,13 @@ NSString *const kLinphoneQRCodeFound = @"LinphoneQRCodeFound";
 NSString *const kLinphoneChatCreateViewChange = @"LinphoneChatCreateViewChange";
 NSString *const kLinphoneMsgNotificationAppGroupId = @"group.cc.cans.canscloud.msgNotification";
 
+extern void libmsamr_init(MSFactory *factory);
+extern void libmsx264_init(MSFactory *factory);
+extern void libmsopenh264_init(MSFactory *factory);
+extern void libmssilk_init(MSFactory *factory);
+extern void libmswebrtc_init(MSFactory *factory);
+extern void libmscodec2_init(MSFactory *factory);
+
 
 @interface CansLoManager ()
     
@@ -47,51 +55,46 @@ NSString *const kLinphoneMsgNotificationAppGroupId = @"group.cc.cans.canscloud.m
 
 - (id)init {
     if ((self = [super init])) {
-        NSString *path = [[NSBundle mainBundle] pathForResource:@"msg" ofType:@"wav"];
-//        self.messagePlayer = [[AVAudioPlayer alloc] initWithContentsOfURL:[NSURL URLWithString:path] error:nil];
-//
-//        _sounds.vibrate = kSystemSoundID_Vibrate;
-//
-//        _logs = [[NSMutableArray alloc] init];
-//        _pushDict = [[NSMutableDictionary alloc] init];
-//        _database = NULL;
-//        _conf = FALSE;
-//        _canConfigurePushTokenForProxyConfigs = FALSE;
-//        _fileTransferDelegates = [[NSMutableArray alloc] init];
-//        _linphoneManagerAddressBookMap = [[OrderedDictionary alloc] init];
-//        pushCallIDs = [[NSMutableArray alloc] init];
-//        _isTesting = [LinphoneManager isRunningTests];
-//        [self copyDefaultSettings];
+        [self copyDefaultSettings];
         [self overrideDefaultSettings];
-
-//        [self lpConfigSetString:[LinphoneManager dataFile:@"linphone.db"] forKey:@"uri" inSection:@"storage"];
-//        [self lpConfigSetString:[LinphoneManager dataFile:@"x3dh.c25519.sqlite3"] forKey:@"x3dh_db_path" inSection:@"lime"];
-//        // set default values for first boot
-//        if ([self lpConfigStringForKey:@"debugenable_preference"] == nil) {
-//#ifdef DEBUG
-//            [self lpConfigSetInt:1 forKey:@"debugenable_preference"];
-//#else
-//            [self lpConfigSetInt:0 forKey:@"debugenable_preference"];
-//#endif
-//        }
-
+        
+        [self lpConfigSetString:[CansLoManager dataFile:@"linphone.db"] forKey:@"uri" inSection:@"storage"];
+        [self lpConfigSetString:[CansLoManager dataFile:@"x3dh.c25519.sqlite3"] forKey:@"x3dh_db_path" inSection:@"lime"];
+        // set default values for first boot
+        if ([self lpConfigStringForKey:@"debugenable_preference"] == nil) {
+#ifdef DEBUG
+            [self lpConfigSetInt:1 forKey:@"debugenable_preference"];
+#else
+            [self lpConfigSetInt:0 forKey:@"debugenable_preference"];
+#endif
+        }
+        
         // by default if handle_content_encoding is not set, we use plain text for debug purposes only
-//        if ([self lpConfigStringForKey:@"handle_content_encoding" inSection:@"misc"] == nil) {
-//#ifdef DEBUG
-//            [self lpConfigSetString:@"none" forKey:@"handle_content_encoding" inSection:@"misc"];
-//#else
-//            [self lpConfigSetString:@"conflate" forKey:@"handle_content_encoding" inSection:@"misc"];
-//#endif
-//        }
-//
-//        [self migrateFromUserPrefs];
-//        [self loadAvatar];
+        if ([self lpConfigStringForKey:@"handle_content_encoding" inSection:@"misc"] == nil) {
+#ifdef DEBUG
+            [self lpConfigSetString:@"none" forKey:@"handle_content_encoding" inSection:@"misc"];
+#else
+            [self lpConfigSetString:@"conflate" forKey:@"handle_content_encoding" inSection:@"misc"];
+#endif
+        }
+        
+        [self migrateFromUserPrefs];
+        [self loadAvatar];
     }
     return self;
 }
 
 - (void)dealloc {
     [NSNotificationCenter.defaultCenter removeObserver:self];
+}
+
++ (CansLoManager *)instance {
+    @synchronized(self) {
+        if (theLinphoneManager == nil) {
+            theLinphoneManager = [[CansLoManager alloc] init];
+        }
+    }
+    return theLinphoneManager;
 }
 
 - (void)overrideDefaultSettings {
@@ -102,28 +105,28 @@ NSString *const kLinphoneMsgNotificationAppGroupId = @"group.cc.cans.canscloud.m
 }
 
 - (void)createLinphoneCore {
-//    [self migrationAllPre];
+    [self migrationAllPre];
     if (theLinphoneCore != nil) {
         LOGI(@"linphonecore is already created");
         return;
     }
 
     // Set audio assets
-//    NSString *ring =
-//        ([LinphoneManager bundleFile:[self lpConfigStringForKey:@"local_ring" inSection:@"sound"].lastPathComponent]
-//         ?: [LinphoneManager bundleFile:@"notes_of_the_optimistic.caf"])
-//        .lastPathComponent;
-//    NSString *ringback =
-//        ([LinphoneManager bundleFile:[self lpConfigStringForKey:@"remote_ring" inSection:@"sound"].lastPathComponent]
-//         ?: [LinphoneManager bundleFile:@"ringback.wav"])
-//        .lastPathComponent;
-//    NSString *hold =
-//        ([LinphoneManager bundleFile:[self lpConfigStringForKey:@"hold_music" inSection:@"sound"].lastPathComponent]
-//         ?: [LinphoneManager bundleFile:@"hold.mkv"])
-//        .lastPathComponent;
-//    [self lpConfigSetString:[LinphoneManager bundleFile:ring] forKey:@"local_ring" inSection:@"sound"];
-//    [self lpConfigSetString:[LinphoneManager bundleFile:ringback] forKey:@"remote_ring" inSection:@"sound"];
-//    [self lpConfigSetString:[LinphoneManager bundleFile:hold] forKey:@"hold_music" inSection:@"sound"];
+    NSString *ring =
+        ([CansLoManager bundleFile:[self lpConfigStringForKey:@"local_ring" inSection:@"sound"].lastPathComponent]
+         ?: [CansLoManager bundleFile:@"notes_of_the_optimistic.caf"])
+        .lastPathComponent;
+    NSString *ringback =
+        ([CansLoManager bundleFile:[self lpConfigStringForKey:@"remote_ring" inSection:@"sound"].lastPathComponent]
+         ?: [CansLoManager bundleFile:@"ringback.wav"])
+        .lastPathComponent;
+    NSString *hold =
+        ([CansLoManager bundleFile:[self lpConfigStringForKey:@"hold_music" inSection:@"sound"].lastPathComponent]
+         ?: [CansLoManager bundleFile:@"hold.mkv"])
+        .lastPathComponent;
+    [self lpConfigSetString:[CansLoManager bundleFile:ring] forKey:@"local_ring" inSection:@"sound"];
+    [self lpConfigSetString:[CansLoManager bundleFile:ringback] forKey:@"remote_ring" inSection:@"sound"];
+    [self lpConfigSetString:[CansLoManager bundleFile:hold] forKey:@"hold_music" inSection:@"sound"];
     
     LinphoneFactory *factory = linphone_factory_get();
     LinphoneCoreCbs *cbs = linphone_factory_create_core_cbs(factory);
@@ -143,9 +146,9 @@ NSString *const kLinphoneMsgNotificationAppGroupId = @"group.cc.cans.canscloud.m
     theLinphoneCore = linphone_factory_create_shared_core_with_config(factory, _configDb, NULL, [kLinphoneMsgNotificationAppGroupId UTF8String], true);
     linphone_core_add_callbacks(theLinphoneCore, cbs);
     
-//    [CallManager.instance setCoreWithCore:theLinphoneCore];
-//    [CoreManager.instance setCoreWithCore:theLinphoneCore];
-//    [ConfigManager.instance setDbWithDb:_configDb];
+    [CallManager.instance setCoreWithCore:theLinphoneCore];
+    [CoreManager.instance setCoreWithCore:theLinphoneCore];
+    [ConfigManager.instance setDbWithDb:_configDb];
 
     linphone_core_start(theLinphoneCore);
 
@@ -156,39 +159,38 @@ NSString *const kLinphoneMsgNotificationAppGroupId = @"group.cc.cans.canscloud.m
 
     // Load plugins if available in the linphone SDK - otherwise these calls will do nothing
     MSFactory *f = linphone_core_get_ms_factory(theLinphoneCore);
-//    libmssilk_init(f);
-//    libmsamr_init(f);
-//    libmsx264_init(f);
-//    libmsopenh264_init(f);
-//    libmswebrtc_init(f);
-//    libmscodec2_init(f);
+    libmssilk_init(f);
+    libmsamr_init(f);
+    libmsx264_init(f);
+    libmsopenh264_init(f);
+    libmswebrtc_init(f);
+    libmscodec2_init(f);
 
     linphone_core_reload_ms_plugins(theLinphoneCore, NULL);
-//    [self migrationAllPost];
+    [self migrationAllPost];
 
     /* Use the rootca from framework, which is already set*/
-    //linphone_core_set_root_ca(theLinphoneCore, [LinphoneManager bundleFile:@"rootca.pem"].UTF8String);
-//    linphone_core_set_user_certificates_path(theLinphoneCore, [LinphoneManager cacheDirectory].UTF8String);
+    linphone_core_set_user_certificates_path(theLinphoneCore, [CansLoManager cacheDirectory].UTF8String);
 
     /* The core will call the linphone_iphone_configuring_status_changed callback when the remote provisioning is loaded
        (or skipped).
        Wait for this to finish the code configuration */
 
-//    [NSNotificationCenter.defaultCenter addObserver:self
-//     selector:@selector(globalStateChangedNotificationHandler:)
-//     name:kLinphoneGlobalStateUpdate
-//     object:nil];
-//    [NSNotificationCenter.defaultCenter addObserver:self
-//     selector:@selector(configuringStateChangedNotificationHandler:)
-//     name:kLinphoneConfiguringStateUpdate
-//     object:nil];
-//    [NSNotificationCenter.defaultCenter addObserver:self selector:@selector(inappReady:) name:kIAPReady object:nil];
+    [NSNotificationCenter.defaultCenter addObserver:self
+     selector:@selector(globalStateChangedNotificationHandler:)
+     name:kLinphoneGlobalStateUpdate
+     object:nil];
+    
+    [NSNotificationCenter.defaultCenter addObserver:self
+     selector:@selector(configuringStateChangedNotificationHandler:)
+     name:kLinphoneConfiguringStateUpdate
+     object:nil];
 
     /*call iterate once immediately in order to initiate background connections with sip server or remote provisioning
      * grab, if any */
-//    [self iterate];
+    [self iterate];
     // start scheduler
-//    [CoreManager.instance startIterateTimer];
+    [CoreManager.instance startIterateTimer];
 }
 
 - (void)registerSip {
@@ -235,6 +237,17 @@ NSString *const kLinphoneMsgNotificationAppGroupId = @"group.cc.cans.canscloud.m
     }
 }
 
+- (void)copyDefaultSettings {
+    NSString *src = [CansLoManager bundleFile:@"linphonerc"];
+    NSString *dst = [CansLoManager preferenceFile:@"linphonerc"];
+    [CansLoManager copyFile:src destination:dst override:FALSE ignore:FALSE];
+}
+
+// scheduling loop
+- (void)iterate {
+    linphone_core_iterate(theLinphoneCore);
+}
+
 
 // MARK: - Linphone Core Functions
 
@@ -245,6 +258,185 @@ NSString *const kLinphoneMsgNotificationAppGroupId = @"group.cc.cans.canscloud.m
             userInfo:nil]);
     }
     return theLinphoneCore;
+}
+
+#pragma mark - Migration
+
+- (void)migrationAllPost {
+    [self migrationLinphoneSettings];
+    [self migrationPerAccount];
+}
+
+- (void)migrationAllPre {
+    // migrate xmlrpc URL if needed
+    if ([self lpConfigBoolForKey:@"migration_xmlrpc"] == NO) {
+        [self lpConfigSetString:@"https://subscribe.linphone.org:444/wizard.php"
+         forKey:@"xmlrpc_url"
+         inSection:@"assistant"];
+        [self lpConfigSetString:@"sip:rls@voxxycloud.com" forKey:@"rls_uri" inSection:@"sip"];
+        [self lpConfigSetBool:YES forKey:@"migration_xmlrpc"];
+    }
+    [self lpConfigSetBool:NO forKey:@"store_friends" inSection:@"misc"]; //so far, storing friends in files is not needed. may change in the future.
+}
+
+static int check_should_migrate_images(void *data, int argc, char **argv, char **cnames) {
+    *((BOOL *)data) = TRUE;
+    return 0;
+}
+
+- (void)migrateFromUserPrefs {
+    static NSString *migration_flag = @"userpref_migration_done";
+
+    if (_configDb == nil)
+        return;
+
+    if ([self lpConfigIntForKey:migration_flag withDefault:0]) {
+        return;
+    }
+
+    NSDictionary *defaults = [[NSUserDefaults standardUserDefaults] dictionaryRepresentation];
+    NSArray *defaults_keys = [defaults allKeys];
+    NSDictionary *values =
+        @{ @"backgroundmode_preference" : @NO,
+           @"debugenable_preference" : @NO,
+           @"start_at_boot_preference" : @YES };
+    BOOL shouldSync = FALSE;
+
+    LOGI(@"%lu user prefs", (unsigned long)[defaults_keys count]);
+
+    for (NSString *userpref in values) {
+        if ([defaults_keys containsObject:userpref]) {
+            LOGI(@"Migrating %@ from user preferences: %d", userpref, [[defaults objectForKey:userpref] boolValue]);
+            [self lpConfigSetBool:[[defaults objectForKey:userpref] boolValue] forKey:userpref];
+            [[NSUserDefaults standardUserDefaults] removeObjectForKey:userpref];
+            shouldSync = TRUE;
+        } else if ([self lpConfigStringForKey:userpref] == nil) {
+            // no default value found in our linphonerc, we need to add them
+            [self lpConfigSetBool:[[values objectForKey:userpref] boolValue] forKey:userpref];
+        }
+    }
+
+    if (shouldSync) {
+        LOGI(@"Synchronizing...");
+        [[NSUserDefaults standardUserDefaults] synchronize];
+    }
+    
+    // don't get back here in the future
+    [self lpConfigSetBool:YES forKey:migration_flag];
+}
+
+- (void)migrationLinphoneSettings {
+    /* AVPF migration */
+    if ([self lpConfigBoolForKey:@"avpf_migration_done"] == FALSE) {
+        const MSList *proxies = linphone_core_get_proxy_config_list(theLinphoneCore);
+        while (proxies) {
+            LinphoneProxyConfig *proxy = (LinphoneProxyConfig *)proxies->data;
+            const char *addr = linphone_proxy_config_get_addr(proxy);
+            // we want to enable AVPF for the proxies
+            if (addr &&
+                strstr(addr, [CansLoManager.instance lpConfigStringForKey:@"domain_name"
+                      inSection:@"app"
+                      withDefault:@"voxxycloud.com"]
+                   .UTF8String) != 0) {
+                LOGI(@"Migrating proxy config to use AVPF");
+                linphone_proxy_config_set_avpf_mode(proxy, LinphoneAVPFEnabled);
+            }
+            proxies = proxies->next;
+        }
+        [self lpConfigSetBool:TRUE forKey:@"avpf_migration_done"];
+    }
+    /* Quality Reporting migration */
+    if ([self lpConfigBoolForKey:@"quality_report_migration_done"] == FALSE) {
+        const MSList *proxies = linphone_core_get_proxy_config_list(theLinphoneCore);
+        while (proxies) {
+            LinphoneProxyConfig *proxy = (LinphoneProxyConfig *)proxies->data;
+            const char *addr = linphone_proxy_config_get_addr(proxy);
+            // we want to enable quality reporting for the proxies that are on linphone.org
+            if (addr &&
+                strstr(addr, [CansLoManager.instance lpConfigStringForKey:@"domain_name"
+                      inSection:@"app"
+                      withDefault:@"voxxycloud.com"]
+                   .UTF8String) != 0) {
+                LOGI(@"Migrating proxy config to send quality report");
+                linphone_proxy_config_set_quality_reporting_collector(
+                                              proxy, "sip:voip-metrics@voxxycloud.com;transport=tls");
+                linphone_proxy_config_set_quality_reporting_interval(proxy, 180);
+                linphone_proxy_config_enable_quality_reporting(proxy, TRUE);
+            }
+            proxies = proxies->next;
+        }
+        [self lpConfigSetBool:TRUE forKey:@"quality_report_migration_done"];
+    }
+    /* File transfer migration */
+    if ([self lpConfigBoolForKey:@"file_transfer_migration_done"] == FALSE) {
+        const char *newURL = "https://www.linphone.org:444/lft.php";
+        LOGI(@"Migrating sharing server url from %s to %s", linphone_core_get_file_transfer_server(LC), newURL);
+        linphone_core_set_file_transfer_server(LC, newURL);
+        [self lpConfigSetBool:TRUE forKey:@"file_transfer_migration_done"];
+    }
+    
+    if ([self lpConfigBoolForKey:@"lime_migration_done"] == FALSE) {
+        const MSList *proxies = linphone_core_get_proxy_config_list(LC);
+        while (proxies) {
+            if (!strcmp(linphone_proxy_config_get_domain((LinphoneProxyConfig *)proxies->data),"voxxycloud.com")) {
+                linphone_core_set_lime_x3dh_server_url(LC, "https://lime.linphone.org/lime-server/lime-server.php");
+                break;
+            }
+            proxies = proxies->next;
+        }
+        [self lpConfigSetBool:TRUE forKey:@"lime_migration_done"];
+    }
+
+    if ([self lpConfigBoolForKey:@"push_notification_migration_done"] == FALSE) {
+        const MSList *proxies = linphone_core_get_proxy_config_list(LC);
+        bool_t pushEnabled;
+        while (proxies) {
+            const char *refkey = linphone_proxy_config_get_ref_key(proxies->data);
+            if (refkey) {
+                pushEnabled = (strcmp(refkey, "push_notification") == 0);
+            } else {
+                pushEnabled = true;
+            }
+            linphone_proxy_config_set_push_notification_allowed(proxies->data, pushEnabled);
+            proxies = proxies->next;
+        }
+        [self lpConfigSetBool:TRUE forKey:@"push_notification_migration_done"];
+    }
+}
+
+- (void)migrationPerAccount {
+    const bctbx_list_t * proxies = linphone_core_get_proxy_config_list(LC);
+    NSString *appDomain  = [CansLoManager.instance lpConfigStringForKey:@"domain_name"
+                inSection:@"app"
+                withDefault:@"voxxycloud.com"];
+    while (proxies) {
+        LinphoneProxyConfig *config = proxies->data;
+        // can not create group chat without conference factory
+        if (!linphone_proxy_config_get_conference_factory_uri(config)) {
+            if (strcmp(appDomain.UTF8String, linphone_proxy_config_get_domain(config)) == 0) {
+                linphone_proxy_config_set_conference_factory_uri(config, "sip:conference-factory@voxxycloud.com");
+            }
+        }
+        proxies = proxies->next;
+    }
+    
+    NSString *s = [self lpConfigStringForKey:@"pushnotification_preference"];
+    if (s && s.boolValue) {
+        LOGI(@"Migrating push notification per account, enabling for ALL");
+        [self lpConfigSetBool:NO forKey:@"pushnotification_preference"];
+        const MSList *proxies = linphone_core_get_proxy_config_list(LC);
+        while (proxies) {
+            linphone_proxy_config_set_push_notification_allowed(proxies->data, true);
+            [self configurePushTokenForProxyConfig:proxies->data];
+            proxies = proxies->next;
+        }
+    }
+}
+
+static void migrateWizardToAssistant(const char *entry, void *user_data) {
+    CansLoManager *thiz = (__bridge CansLoManager *)(user_data);
+    NSString *key = [NSString stringWithUTF8String:entry];
+    [thiz lpConfigSetString:[thiz lpConfigStringForKey:key inSection:@"wizard"] forKey:key inSection:@"assistant"];
 }
 
 
@@ -481,6 +673,17 @@ static void linphone_iphone_configuring_status_changed(LinphoneCore *lc, Linphon
         });
 }
 
+- (void)configuringStateChangedNotificationHandler:(NSNotification *)notif {
+    _wasRemoteProvisioned = ((LinphoneConfiguringState)[[[notif userInfo] valueForKey:@"state"] integerValue] ==
+                 LinphoneConfiguringSuccessful);
+    if (_wasRemoteProvisioned) {
+        LinphoneProxyConfig *cfg = linphone_core_get_default_proxy_config(LC);
+        if (cfg) {
+            [self configurePushTokenForProxyConfig:cfg];
+        }
+    }
+}
+
 // MARK: - Global state change
 
 static void linphone_iphone_global_state_changed(LinphoneCore *lc, LinphoneGlobalState gstate, const char *message) {
@@ -504,10 +707,28 @@ static void linphone_iphone_global_state_changed(LinphoneCore *lc, LinphoneGloba
     });
 }
 
+- (void)globalStateChangedNotificationHandler:(NSNotification *)notif {
+    if ((LinphoneGlobalState)[[[notif userInfo] valueForKey:@"state"] integerValue] == LinphoneGlobalOn) {
+//        [self finishCoreConfiguration];
+    }
+}
+
 // MARK: - Misc Functions
 
 + (NSString *)bundleFile:(NSString *)file {
     return [[NSBundle mainBundle] pathForResource:[file stringByDeletingPathExtension] ofType:[file pathExtension]];
+}
+
++ (NSString *)preferenceFile:(NSString *)file {
+    LinphoneFactory *factory = linphone_factory_get();
+    NSString *fullPath = [NSString stringWithUTF8String:linphone_factory_get_config_dir(factory, kLinphoneMsgNotificationAppGroupId.UTF8String)];
+    return [fullPath stringByAppendingPathComponent:file];
+}
+
++ (NSString *)dataFile:(NSString *)file {
+    LinphoneFactory *factory = linphone_factory_get();
+    NSString *fullPath = [NSString stringWithUTF8String:linphone_factory_get_data_dir(factory, kLinphoneMsgNotificationAppGroupId.UTF8String)];
+    return [fullPath stringByAppendingPathComponent:file];
 }
 
 + (NSString *)cacheDirectory {
@@ -525,21 +746,220 @@ static void linphone_iphone_global_state_changed(LinphoneCore *lc, LinphoneGloba
     return cachePath;
 }
 
+#pragma mark - LPConfig Functions
+
+- (void)lpConfigSetInt:(int)value forKey:(NSString *)key {
+    [self lpConfigSetInt:value forKey:key inSection:LINPHONERC_APPLICATION_KEY];
+}
+
+- (void)lpConfigSetInt:(int)value forKey:(NSString *)key inSection:(NSString *)section {
+    if (!key)
+        return;
+    linphone_config_set_int(_configDb, [section UTF8String], [key UTF8String], (int)value);
+}
+
+- (void)lpConfigSetString:(NSString *)value forKey:(NSString *)key {
+    [self lpConfigSetString:value forKey:key inSection:LINPHONERC_APPLICATION_KEY];
+}
+
+- (void)lpConfigSetString:(NSString *)value forKey:(NSString *)key inSection:(NSString *)section {
+    if (!key)
+        return;
+    linphone_config_set_string(_configDb, [section UTF8String], [key UTF8String], value ? [value UTF8String] : NULL);
+}
+
 - (NSString *)lpConfigStringForKey:(NSString *)key {
     return [self lpConfigStringForKey:key withDefault:nil];
 }
+
 - (NSString *)lpConfigStringForKey:(NSString *)key withDefault:(NSString *)defaultValue {
     return [self lpConfigStringForKey:key inSection:LINPHONERC_APPLICATION_KEY withDefault:defaultValue];
 }
+
 - (NSString *)lpConfigStringForKey:(NSString *)key inSection:(NSString *)section {
     return [self lpConfigStringForKey:key inSection:section withDefault:nil];
 }
+
 - (NSString *)lpConfigStringForKey:(NSString *)key inSection:(NSString *)section withDefault:(NSString *)defaultValue {
     if (!key)
         return defaultValue;
     const char *value = linphone_config_get_string(_configDb, [section UTF8String], [key UTF8String], NULL);
     return value ? [NSString stringWithUTF8String:value] : defaultValue;
 }
+
+- (void)lpConfigSetBool:(BOOL)value forKey:(NSString *)key {
+    [self lpConfigSetBool:value forKey:key inSection:LINPHONERC_APPLICATION_KEY];
+}
+
+- (void)lpConfigSetBool:(BOOL)value forKey:(NSString *)key inSection:(NSString *)section {
+    [self lpConfigSetInt:(int)(value == TRUE) forKey:key inSection:section];
+}
+
+- (BOOL)lpConfigBoolForKey:(NSString *)key {
+    return [self lpConfigBoolForKey:key withDefault:FALSE];
+}
+
+- (BOOL)lpConfigBoolForKey:(NSString *)key withDefault:(BOOL)defaultValue {
+    return [self lpConfigBoolForKey:key inSection:LINPHONERC_APPLICATION_KEY withDefault:defaultValue];
+}
+
+- (BOOL)lpConfigBoolForKey:(NSString *)key inSection:(NSString *)section {
+    return [self lpConfigBoolForKey:key inSection:section withDefault:FALSE];
+}
+
+- (BOOL)lpConfigBoolForKey:(NSString *)key inSection:(NSString *)section withDefault:(BOOL)defaultValue {
+    if (!key)
+        return defaultValue;
+    int val = [self lpConfigIntForKey:key inSection:section withDefault:-1];
+    return (val != -1) ? (val == 1) : defaultValue;
+}
+
+- (int)lpConfigIntForKey:(NSString *)key {
+    return [self lpConfigIntForKey:key withDefault:-1];
+}
+
+- (int)lpConfigIntForKey:(NSString *)key withDefault:(int)defaultValue {
+    return [self lpConfigIntForKey:key inSection:LINPHONERC_APPLICATION_KEY withDefault:defaultValue];
+}
+
+- (int)lpConfigIntForKey:(NSString *)key inSection:(NSString *)section {
+    return [self lpConfigIntForKey:key inSection:section withDefault:-1];
+}
+
+- (int)lpConfigIntForKey:(NSString *)key inSection:(NSString *)section withDefault:(int)defaultValue {
+    if (!key)
+        return defaultValue;
+    return linphone_config_get_int(_configDb, [section UTF8String], [key UTF8String], (int)defaultValue);
+}
+
+- (void)loadAvatar {
+    NSString *assetId = [self lpConfigStringForKey:@"avatar"];
+    __block UIImage *ret = nil;
+    if (assetId) {
+        PHFetchResult<PHAsset *> *assets = [PHAsset fetchAssetsWithLocalIdentifiers:[NSArray arrayWithObject:assetId] options:nil];
+        if (![assets firstObject]) {
+            LOGE(@"Can't fetch avatar image.");
+        }
+        PHAsset *asset = [assets firstObject];
+        // load avatar synchronously so that we can return UIIMage* directly - since we are
+        // only using thumbnail, it must be pretty fast to fetch even without cache.
+        PHImageRequestOptions *options = [[PHImageRequestOptions alloc] init];
+        options.synchronous = TRUE;
+        [[PHImageManager defaultManager] requestImageForAsset:asset targetSize:PHImageManagerMaximumSize contentMode:PHImageContentModeDefault options:options
+         resultHandler:^(UIImage *image, NSDictionary * info) {
+//                if (image)
+//                    ret = [UIImage UIImageThumbnail:image thumbSize:150];
+//                else
+//                    LOGE(@"Can't read avatar");
+            }];
+    }
+    
+    if (!ret) {
+//        ret = CansImage.shared.avatar;
+    }
+//    _avatar = ret;
+}
+
++ (BOOL)copyFile:(NSString *)src destination:(NSString *)dst override:(BOOL)override ignore:(BOOL)ignore {
+    NSFileManager *fileManager = NSFileManager.defaultManager;
+    NSError *error = nil;
+    if ([fileManager fileExistsAtPath:src] == NO) {
+        if (!ignore)
+            LOGE(@"Can't find \"%@\": %@", src, [error localizedDescription]);
+        return FALSE;
+    }
+    if ([fileManager fileExistsAtPath:dst] == YES) {
+        if (override) {
+            [fileManager removeItemAtPath:dst error:&error];
+            if (error != nil) {
+                LOGE(@"Can't remove \"%@\": %@", dst, [error localizedDescription]);
+                return FALSE;
+            }
+        } else {
+            LOGW(@"\"%@\" already exists", dst);
+            return FALSE;
+        }
+    }
+    [fileManager copyItemAtPath:src toPath:dst error:&error];
+    if (error != nil) {
+        LOGE(@"Can't copy \"%@\" to \"%@\": %@", src, dst, [error localizedDescription]);
+        return FALSE;
+    }
+    return TRUE;
+}
+
+- (void)configurePushTokenForProxyConfig:(LinphoneProxyConfig *)proxyCfg {
+    linphone_proxy_config_edit(proxyCfg);
+
+//    NSData *remoteTokenData = _remoteNotificationToken;
+//    NSData *PKTokenData = _pushKitToken;
+//    BOOL pushNotifEnabled = linphone_proxy_config_is_push_notification_allowed(proxyCfg);
+//    if ((remoteTokenData != nil || PKTokenData != nil) && pushNotifEnabled) {
+//
+//        const unsigned char *remoteTokenBuffer = [remoteTokenData bytes];
+//        NSMutableString *remoteTokenString = [NSMutableString stringWithCapacity:[remoteTokenData length] * 2];
+//        for (int i = 0; i < [remoteTokenData length]; ++i) {
+//            [remoteTokenString appendFormat:@"%02X", (unsigned int)remoteTokenBuffer[i]];
+//        }
+//
+//        const unsigned char *PKTokenBuffer = [PKTokenData bytes];
+//        NSMutableString *PKTokenString = [NSMutableString stringWithCapacity:[PKTokenData length] * 2];
+//        for (int i = 0; i < [PKTokenData length]; ++i) {
+//            [PKTokenString appendFormat:@"%02X", (unsigned int)PKTokenBuffer[i]];
+//        }
+//
+//        NSString *token;
+//        NSString *services;
+//        if (remoteTokenString && PKTokenString) {
+//            token = [NSString stringWithFormat:@"%@:remote&%@:voip", remoteTokenString, PKTokenString];
+//            services = @"remote&voip";
+//        } else if (remoteTokenString) {
+//            token = [NSString stringWithFormat:@"%@:remote", remoteTokenString];
+//            services = @"remote";
+//        } else {
+//            token = [NSString stringWithFormat:@"%@:voip", PKTokenString];
+//            services = @"voip";
+//        }
+//
+//#ifdef DEBUG
+//#define APPMODE_SUFFIX @".dev"
+//#else
+//#define APPMODE_SUFFIX @""
+//#endif
+//        NSString *ring =
+//            ([LinphoneManager bundleFile:[self lpConfigStringForKey:@"local_ring" inSection:@"sound"].lastPathComponent]
+//             ?: [LinphoneManager bundleFile:@"notes_of_the_optimistic.caf"])
+//            .lastPathComponent;
+//
+//        NSString *timeout;
+//        if (floor(NSFoundationVersionNumber) > NSFoundationVersionNumber_iOS_9_x_Max) {
+//            timeout = @";pn-timeout=0";
+//        } else {
+//            timeout = @"";
+//        }
+//
+//        // dummy value, for later use
+//        NSString *teamId = @"ABCD1234";
+//
+//        NSString *params = [NSString
+//                    stringWithFormat:@"pn-provider=apns%@;pn-prid=%@;pn-param=%@.%@.%@;pn-msg-str=IM_MSG;pn-call-str=IC_MSG;pn-groupchat-str=GC_MSG;pn-"
+//                    @"call-snd=%@;pn-msg-snd=msg.caf%@;pn-silent=1",
+//                    APPMODE_SUFFIX, token, teamId, [[NSBundle mainBundle] bundleIdentifier], services, ring, timeout];
+//
+//        LOGI(@"Proxy config %s configured for push notifications with contact: %@",
+//        linphone_proxy_config_get_identity(proxyCfg), params);
+//        linphone_proxy_config_set_contact_uri_parameters(proxyCfg, [params UTF8String]);
+//        linphone_proxy_config_set_contact_parameters(proxyCfg, NULL);
+//    } else {
+//        LOGI(@"Proxy config %s NOT configured for push notifications", linphone_proxy_config_get_identity(proxyCfg));
+//        // no push token:
+//        linphone_proxy_config_set_contact_uri_parameters(proxyCfg, NULL);
+//        linphone_proxy_config_set_contact_parameters(proxyCfg, NULL);
+//    }
+//
+    linphone_proxy_config_done(proxyCfg);
+}
+
 
 
 @end

@@ -23,19 +23,19 @@ import Foundation
 * ConfigManager is a class that manipulates the configuration of the application.
 * There is only one ConfigManager by calling ConfigManager.instance().
 */
-@objc class ConfigManager: NSObject {
+@objc public class ConfigManager: NSObject {
 	static var theConfigManager: ConfigManager?
 	var config: Config?
 	let applicationKey = "app"
 
-	@objc static func instance() -> ConfigManager {
+	@objc public static func instance() -> ConfigManager {
 		if (theConfigManager == nil) {
 			theConfigManager = ConfigManager()
 		}
 		return theConfigManager!
 	}
 
-	@objc func setDb(db:OpaquePointer) {
+	@objc public func setDb(db:OpaquePointer) {
 		config = Config.getSwiftObject(cObject: db)
 	}
 

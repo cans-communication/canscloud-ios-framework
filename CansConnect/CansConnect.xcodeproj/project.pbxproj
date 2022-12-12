@@ -20,6 +20,8 @@
 		5278016A29438DAF00360D88 /* FastAddressBook.h in Headers */ = {isa = PBXBuildFile; fileRef = 5278016829438DAF00360D88 /* FastAddressBook.h */; settings = {ATTRIBUTES = (Public, ); }; };
 		5278016C29447DEB00360D88 /* CansImage.swift in Sources */ = {isa = PBXBuildFile; fileRef = 5278016B29447DEA00360D88 /* CansImage.swift */; };
 		5278016F29447E4F00360D88 /* callkit_logo.png in Resources */ = {isa = PBXBuildFile; fileRef = 5278016E29447E4F00360D88 /* callkit_logo.png */; };
+		5278017A2946E43900360D88 /* Utils.h in Headers */ = {isa = PBXBuildFile; fileRef = 527801782946E43900360D88 /* Utils.h */; settings = {ATTRIBUTES = (Public, ); }; };
+		5278017B2946E43900360D88 /* Utils.m in Sources */ = {isa = PBXBuildFile; fileRef = 527801792946E43900360D88 /* Utils.m */; };
 		5291911E292F513F00D87DF9 /* CansBase.swift in Sources */ = {isa = PBXBuildFile; fileRef = 5291911D292F513F00D87DF9 /* CansBase.swift */; };
 		52919133292F5B1300D87DF9 /* AppManager.swift in Sources */ = {isa = PBXBuildFile; fileRef = 5291912D292F5B1300D87DF9 /* AppManager.swift */; };
 		52919134292F5B1300D87DF9 /* ProviderDelegate.swift in Sources */ = {isa = PBXBuildFile; fileRef = 5291912E292F5B1300D87DF9 /* ProviderDelegate.swift */; };
@@ -257,6 +259,8 @@
 		5278016829438DAF00360D88 /* FastAddressBook.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = FastAddressBook.h; sourceTree = "<group>"; };
 		5278016B29447DEA00360D88 /* CansImage.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = CansImage.swift; sourceTree = "<group>"; };
 		5278016E29447E4F00360D88 /* callkit_logo.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = callkit_logo.png; sourceTree = "<group>"; };
+		527801782946E43900360D88 /* Utils.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = Utils.h; sourceTree = "<group>"; };
+		527801792946E43900360D88 /* Utils.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = Utils.m; sourceTree = "<group>"; };
 		5291911D292F513F00D87DF9 /* CansBase.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = CansBase.swift; sourceTree = "<group>"; };
 		5291912D292F5B1300D87DF9 /* AppManager.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = AppManager.swift; sourceTree = "<group>"; };
 		5291912E292F5B1300D87DF9 /* ProviderDelegate.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = ProviderDelegate.swift; sourceTree = "<group>"; };
@@ -539,6 +543,16 @@
 			path = Classes;
 			sourceTree = "<group>";
 		};
+		527801772946E43900360D88 /* Utils */ = {
+			isa = PBXGroup;
+			children = (
+				527801782946E43900360D88 /* Utils.h */,
+				527801792946E43900360D88 /* Utils.m */,
+			);
+			name = Utils;
+			path = ../../../../../../../../Downloads/Utils;
+			sourceTree = "<group>";
+		};
 		52E3A30B2939C2C00033834A /* linphone-sdk */ = {
 			isa = PBXGroup;
 			children = (
@@ -805,24 +819,24 @@
 		52E3A3AA2939C2C10033834A /* Frameworks */ = {
 			isa = PBXGroup;
 			children = (
-				52E3A3AB2939C2C10033834A /* belr.framework */,
-				52E3A3AC2939C2C10033834A /* mediastreamer2.framework */,
-				52E3A3AD2939C2C10033834A /* msopenh264.framework */,
-				52E3A3AE2939C2C10033834A /* bctoolbox.framework */,
-				52E3A3AF2939C2C10033834A /* mswebrtc.framework */,
-				52E3A3B02939C2C10033834A /* msamr.framework */,
-				52E3A3B12939C2C10033834A /* belle-sip.framework */,
-				52E3A3B22939C2C10033834A /* linphonetester.framework */,
-				52E3A3B32939C2C10033834A /* bctoolbox-tester.framework */,
-				52E3A3B42939C2C10033834A /* ortp.framework */,
-				52E3A3B52939C2C10033834A /* limetester.framework */,
-				52E3A3B62939C2C10033834A /* mscodec2.framework */,
-				52E3A3B72939C2C10033834A /* mssilk.framework */,
-				52E3A3B82939C2C10033834A /* lime.framework */,
-				52E3A3B92939C2C10033834A /* belcard.framework */,
-				52E3A3BA2939C2C10033834A /* msx264.framework */,
 				52E3A3BB2939C2C10033834A /* bctoolbox-ios.framework */,
+				52E3A3B32939C2C10033834A /* bctoolbox-tester.framework */,
+				52E3A3AE2939C2C10033834A /* bctoolbox.framework */,
+				52E3A3B92939C2C10033834A /* belcard.framework */,
+				52E3A3B12939C2C10033834A /* belle-sip.framework */,
+				52E3A3AB2939C2C10033834A /* belr.framework */,
+				52E3A3B82939C2C10033834A /* lime.framework */,
+				52E3A3B52939C2C10033834A /* limetester.framework */,
 				52E3A3BC2939C2C10033834A /* linphone.framework */,
+				52E3A3B22939C2C10033834A /* linphonetester.framework */,
+				52E3A3AC2939C2C10033834A /* mediastreamer2.framework */,
+				52E3A3B02939C2C10033834A /* msamr.framework */,
+				52E3A3B62939C2C10033834A /* mscodec2.framework */,
+				52E3A3AD2939C2C10033834A /* msopenh264.framework */,
+				52E3A3B72939C2C10033834A /* mssilk.framework */,
+				52E3A3AF2939C2C10033834A /* mswebrtc.framework */,
+				52E3A3BA2939C2C10033834A /* msx264.framework */,
+				52E3A3B42939C2C10033834A /* ortp.framework */,
 			);
 			path = Frameworks;
 			sourceTree = "<group>";
@@ -872,10 +886,11 @@
 			isa = PBXGroup;
 			children = (
 				52E3A4912939E5950033834A /* Alex */,
-				52E3A4922939E5A00033834A /* LinphoneManager */,
 				5278016129433E1F00360D88 /* Contact */,
 				5278016629438DAF00360D88 /* FastAddressBook */,
+				52E3A4922939E5A00033834A /* LinphoneManager */,
 				52344D1D293F240000662E20 /* Log */,
+				527801772946E43900360D88 /* Utils */,
 			);
 			path = ObjC;
 			sourceTree = "<group>";
@@ -909,6 +924,7 @@
 				52E3A48C2939C4320033834A /* Alex.h in Headers */,
 				52344D21293F240000662E20 /* Log.h in Headers */,
 				5278016529433E1F00360D88 /* Contact.h in Headers */,
+				5278017A2946E43900360D88 /* Utils.h in Headers */,
 				52670839292C79CD002CDDAE /* CansConnect.h in Headers */,
 				52E3A3092939C2630033834A /* LinphoneManager.h in Headers */,
 			);
@@ -1144,6 +1160,7 @@
 				5278016929438DAF00360D88 /* FastAddressBook.m in Sources */,
 				52E3A4652939C2C30033834A /* LinphoneWrapper.swift in Sources */,
 				52670838292C79CD002CDDAE /* CansConnect.docc in Sources */,
+				5278017B2946E43900360D88 /* Utils.m in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};

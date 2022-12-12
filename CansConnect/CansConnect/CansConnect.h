@@ -20,10 +20,9 @@ FOUNDATION_EXPORT const unsigned char CansConnectVersionString[];
 
 #import "LinphoneManager.h"
 #import "Contact.h"
-
 #import "FastAddressBook.h"
-
 #import "Log.h"
+#import "Utils.h"
 
 
 

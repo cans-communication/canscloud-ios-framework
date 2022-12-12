@@ -15,9 +15,6 @@
 @import linphone;
 
 
-#define LC ([LinphoneManager getLc])
-
-
 extern NSString *const kLinphoneCoreUpdate;
 extern NSString *const kLinphoneDisplayStatusUpdate;
 extern NSString *const kLinphoneMessageReceived;
@@ -87,6 +84,7 @@ extern const int kLinphoneAudioVbrCodecDefaultBitrate;
 
 @property (readonly) BOOL wasRemoteProvisioned;
 @property (readonly) LpConfig *configDb;
+@property UIImage *avatar;
 //@property(readonly, strong) FastAddressBook *fastAddressBook;
 
 @end

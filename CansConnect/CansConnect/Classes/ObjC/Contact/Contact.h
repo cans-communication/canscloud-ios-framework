@@ -23,6 +23,7 @@
 #import <UIKit/UIKit.h>
 
 #import "LinphoneManager.h"
+#import "Utils.h"
 
 @import linphone;
 

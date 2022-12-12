@@ -10,7 +10,7 @@ import linphone
 
 @objc public class CansBase: NSObject {
     
-    private let linphoneManager = CansLoManager()
+    private let linphoneManager = LinphoneManager()
     
     public override init() {
         
@@ -64,8 +64,6 @@ import linphone
     
     @objc public func configure() {
         linphoneManager.createLinphoneCore()
-        CallManager.instance().setCore(core: CansLoManager.getLc())
-        CoreManager.instance().setCore(core: CansLoManager.getLc())
     }
 
 }

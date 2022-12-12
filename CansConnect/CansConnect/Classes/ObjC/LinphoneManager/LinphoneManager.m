@@ -5,12 +5,12 @@
 //  Created by Siraphop Chaisirikul on 13/11/2565 BE.
 //
 
-#import "CansLoManager.h"
+#import "LinphoneManager.h"
 #import <CansConnect/CansConnect-Swift.h>
 
 
 static LinphoneCore *theLinphoneCore = nil;
-static CansLoManager *theLinphoneManager = nil;
+static LinphoneManager *theLinphoneManager = nil;
 
 NSString *const LINPHONERC_APPLICATION_KEY = @"app";
 
@@ -44,12 +44,12 @@ extern void libmswebrtc_init(MSFactory *factory);
 extern void libmscodec2_init(MSFactory *factory);
 
 
-@interface CansLoManager ()
+@interface LinphoneManager ()
     
 @end
 
 
-@implementation CansLoManager
+@implementation LinphoneManager
 
 #pragma mark - Lifecycle Functions
 
@@ -58,8 +58,8 @@ extern void libmscodec2_init(MSFactory *factory);
         [self copyDefaultSettings];
         [self overrideDefaultSettings];
         
-        [self lpConfigSetString:[CansLoManager dataFile:@"linphone.db"] forKey:@"uri" inSection:@"storage"];
-        [self lpConfigSetString:[CansLoManager dataFile:@"x3dh.c25519.sqlite3"] forKey:@"x3dh_db_path" inSection:@"lime"];
+        [self lpConfigSetString:[LinphoneManager dataFile:@"linphone.db"] forKey:@"uri" inSection:@"storage"];
+        [self lpConfigSetString:[LinphoneManager dataFile:@"x3dh.c25519.sqlite3"] forKey:@"x3dh_db_path" inSection:@"lime"];
         // set default values for first boot
         if ([self lpConfigStringForKey:@"debugenable_preference"] == nil) {
 #ifdef DEBUG
@@ -88,17 +88,17 @@ extern void libmscodec2_init(MSFactory *factory);
     [NSNotificationCenter.defaultCenter removeObserver:self];
 }
 
-+ (CansLoManager *)instance {
++ (LinphoneManager *)instance {
     @synchronized(self) {
         if (theLinphoneManager == nil) {
-            theLinphoneManager = [[CansLoManager alloc] init];
+            theLinphoneManager = [[LinphoneManager alloc] init];
         }
     }
     return theLinphoneManager;
 }
 
 - (void)overrideDefaultSettings {
-    NSString *factory = [CansLoManager bundleFile:@"linphonerc-factory"];
+    NSString *factory = [LinphoneManager bundleFile:@"linphonerc-factory"];
     
     _configDb = linphone_config_new_for_shared_core(kLinphoneMsgNotificationAppGroupId.UTF8String, @"linphonerc".UTF8String, factory.UTF8String);
     linphone_config_clean_entry(_configDb, "misc", "max_calls");
@@ -113,20 +113,20 @@ extern void libmscodec2_init(MSFactory *factory);
 
     // Set audio assets
     NSString *ring =
-        ([CansLoManager bundleFile:[self lpConfigStringForKey:@"local_ring" inSection:@"sound"].lastPathComponent]
-         ?: [CansLoManager bundleFile:@"notes_of_the_optimistic.caf"])
+        ([LinphoneManager bundleFile:[self lpConfigStringForKey:@"local_ring" inSection:@"sound"].lastPathComponent]
+         ?: [LinphoneManager bundleFile:@"notes_of_the_optimistic.caf"])
         .lastPathComponent;
     NSString *ringback =
-        ([CansLoManager bundleFile:[self lpConfigStringForKey:@"remote_ring" inSection:@"sound"].lastPathComponent]
-         ?: [CansLoManager bundleFile:@"ringback.wav"])
+        ([LinphoneManager bundleFile:[self lpConfigStringForKey:@"remote_ring" inSection:@"sound"].lastPathComponent]
+         ?: [LinphoneManager bundleFile:@"ringback.wav"])
         .lastPathComponent;
     NSString *hold =
-        ([CansLoManager bundleFile:[self lpConfigStringForKey:@"hold_music" inSection:@"sound"].lastPathComponent]
-         ?: [CansLoManager bundleFile:@"hold.mkv"])
+        ([LinphoneManager bundleFile:[self lpConfigStringForKey:@"hold_music" inSection:@"sound"].lastPathComponent]
+         ?: [LinphoneManager bundleFile:@"hold.mkv"])
         .lastPathComponent;
-    [self lpConfigSetString:[CansLoManager bundleFile:ring] forKey:@"local_ring" inSection:@"sound"];
-    [self lpConfigSetString:[CansLoManager bundleFile:ringback] forKey:@"remote_ring" inSection:@"sound"];
-    [self lpConfigSetString:[CansLoManager bundleFile:hold] forKey:@"hold_music" inSection:@"sound"];
+    [self lpConfigSetString:[LinphoneManager bundleFile:ring] forKey:@"local_ring" inSection:@"sound"];
+    [self lpConfigSetString:[LinphoneManager bundleFile:ringback] forKey:@"remote_ring" inSection:@"sound"];
+    [self lpConfigSetString:[LinphoneManager bundleFile:hold] forKey:@"hold_music" inSection:@"sound"];
     
     LinphoneFactory *factory = linphone_factory_get();
     LinphoneCoreCbs *cbs = linphone_factory_create_core_cbs(factory);
@@ -170,7 +170,7 @@ extern void libmscodec2_init(MSFactory *factory);
     [self migrationAllPost];
 
     /* Use the rootca from framework, which is already set*/
-    linphone_core_set_user_certificates_path(theLinphoneCore, [CansLoManager cacheDirectory].UTF8String);
+    linphone_core_set_user_certificates_path(theLinphoneCore, [LinphoneManager cacheDirectory].UTF8String);
 
     /* The core will call the linphone_iphone_configuring_status_changed callback when the remote provisioning is loaded
        (or skipped).
@@ -238,9 +238,9 @@ extern void libmscodec2_init(MSFactory *factory);
 }
 
 - (void)copyDefaultSettings {
-    NSString *src = [CansLoManager bundleFile:@"linphonerc"];
-    NSString *dst = [CansLoManager preferenceFile:@"linphonerc"];
-    [CansLoManager copyFile:src destination:dst override:FALSE ignore:FALSE];
+    NSString *src = [LinphoneManager bundleFile:@"linphonerc"];
+    NSString *dst = [LinphoneManager preferenceFile:@"linphonerc"];
+    [LinphoneManager copyFile:src destination:dst override:FALSE ignore:FALSE];
 }
 
 // scheduling loop
@@ -334,7 +334,7 @@ static int check_should_migrate_images(void *data, int argc, char **argv, char *
             const char *addr = linphone_proxy_config_get_addr(proxy);
             // we want to enable AVPF for the proxies
             if (addr &&
-                strstr(addr, [CansLoManager.instance lpConfigStringForKey:@"domain_name"
+                strstr(addr, [LinphoneManager.instance lpConfigStringForKey:@"domain_name"
                       inSection:@"app"
                       withDefault:@"voxxycloud.com"]
                    .UTF8String) != 0) {
@@ -353,7 +353,7 @@ static int check_should_migrate_images(void *data, int argc, char **argv, char *
             const char *addr = linphone_proxy_config_get_addr(proxy);
             // we want to enable quality reporting for the proxies that are on linphone.org
             if (addr &&
-                strstr(addr, [CansLoManager.instance lpConfigStringForKey:@"domain_name"
+                strstr(addr, [LinphoneManager.instance lpConfigStringForKey:@"domain_name"
                       inSection:@"app"
                       withDefault:@"voxxycloud.com"]
                    .UTF8String) != 0) {
@@ -406,7 +406,7 @@ static int check_should_migrate_images(void *data, int argc, char **argv, char *
 
 - (void)migrationPerAccount {
     const bctbx_list_t * proxies = linphone_core_get_proxy_config_list(LC);
-    NSString *appDomain  = [CansLoManager.instance lpConfigStringForKey:@"domain_name"
+    NSString *appDomain  = [LinphoneManager.instance lpConfigStringForKey:@"domain_name"
                 inSection:@"app"
                 withDefault:@"voxxycloud.com"];
     while (proxies) {
@@ -434,7 +434,7 @@ static int check_should_migrate_images(void *data, int argc, char **argv, char *
 }
 
 static void migrateWizardToAssistant(const char *entry, void *user_data) {
-    CansLoManager *thiz = (__bridge CansLoManager *)(user_data);
+    LinphoneManager *thiz = (__bridge LinphoneManager *)(user_data);
     NSString *key = [NSString stringWithUTF8String:entry];
     [thiz lpConfigSetString:[thiz lpConfigStringForKey:key inSection:@"wizard"] forKey:key inSection:@"assistant"];
 }
@@ -463,7 +463,7 @@ static void linphone_iphone_call_log_updated(LinphoneCore *lc, LinphoneCallLog *
 
 static void linphone_iphone_call_encryption_changed(LinphoneCore *lc, LinphoneCall *call, bool_t on,
                             const char *authentication_token) {
-    [(__bridge CansLoManager *)linphone_core_cbs_get_user_data(linphone_core_get_current_callbacks(lc)) onCallEncryptionChanged:lc call:call on:on token:authentication_token];
+    [(__bridge LinphoneManager *)linphone_core_cbs_get_user_data(linphone_core_get_current_callbacks(lc)) onCallEncryptionChanged:lc call:call on:on token:authentication_token];
 }
 
 - (void)onCallEncryptionChanged:(LinphoneCore *)lc
@@ -483,7 +483,7 @@ token:(const char *)authentication_token {
 static void linphone_iphone_notify_presence_received_for_uri_or_tel(LinphoneCore *lc, LinphoneFriend *lf,
                                     const char *uri_or_tel,
                                     const LinphonePresenceModel *presence_model) {
-    [(__bridge CansLoManager *)linphone_core_cbs_get_user_data(linphone_core_get_current_callbacks(lc)) onNotifyPresenceReceivedForUriOrTel:lc friend:lf uri:uri_or_tel presenceModel:presence_model];
+    [(__bridge LinphoneManager *)linphone_core_cbs_get_user_data(linphone_core_get_current_callbacks(lc)) onNotifyPresenceReceivedForUriOrTel:lc friend:lf uri:uri_or_tel presenceModel:presence_model];
 }
 
 - (void)onNotifyPresenceReceivedForUriOrTel:(LinphoneCore *)lc friend:(LinphoneFriend *)lf uri:(const char *)uri presenceModel:(const LinphonePresenceModel *)model {
@@ -510,7 +510,7 @@ static void linphone_iphone_notify_presence_received_for_uri_or_tel(LinphoneCore
 
 static void linphone_iphone_notify_received(LinphoneCore *lc, LinphoneEvent *lev, const char *notified_event,
                         const LinphoneContent *body) {
-    [(__bridge CansLoManager *)linphone_core_cbs_get_user_data(linphone_core_get_current_callbacks(lc)) onNotifyReceived:lc event:lev notifyEvent:notified_event content:body];
+    [(__bridge LinphoneManager *)linphone_core_cbs_get_user_data(linphone_core_get_current_callbacks(lc)) onNotifyReceived:lc event:lev notifyEvent:notified_event content:body];
 }
 
 
@@ -574,14 +574,14 @@ static void linphone_iphone_popup_password_request(LinphoneCore *lc, LinphoneAut
 }
 
 static void linphone_iphone_is_composing_received(LinphoneCore *lc, LinphoneChatRoom *room) {
-    [(__bridge CansLoManager *)linphone_core_cbs_get_user_data(linphone_core_get_current_callbacks(lc)) onMessageComposeReceived:lc forRoom:room];
+    [(__bridge LinphoneManager *)linphone_core_cbs_get_user_data(linphone_core_get_current_callbacks(lc)) onMessageComposeReceived:lc forRoom:room];
 }
 
 // MARK: - Registration State Functions
 
 static void linphone_iphone_registration_state(LinphoneCore *lc, LinphoneProxyConfig *cfg,
                            LinphoneRegistrationState state, const char *message) {
-    [(__bridge CansLoManager *)linphone_core_cbs_get_user_data(linphone_core_get_current_callbacks(lc)) onRegister:lc cfg:cfg state:state message:message];
+    [(__bridge LinphoneManager *)linphone_core_cbs_get_user_data(linphone_core_get_current_callbacks(lc)) onRegister:lc cfg:cfg state:state message:message];
 }
 
 - (void)onRegister:(LinphoneCore *)lc cfg:(LinphoneProxyConfig *)cfg state:(LinphoneRegistrationState)state message:(const char *)cmessage {
@@ -655,7 +655,7 @@ static void linphone_iphone_registration_state(LinphoneCore *lc, LinphoneProxyCo
 
 static void linphone_iphone_configuring_status_changed(LinphoneCore *lc, LinphoneConfiguringState status,
                                const char *message) {
-    [(__bridge CansLoManager *)linphone_core_cbs_get_user_data(linphone_core_get_current_callbacks(lc)) onConfiguringStatusChanged:status withMessage:message];
+    [(__bridge LinphoneManager *)linphone_core_cbs_get_user_data(linphone_core_get_current_callbacks(lc)) onConfiguringStatusChanged:status withMessage:message];
 }
 
 - (void)onConfiguringStatusChanged:(LinphoneConfiguringState)status withMessage:(const char *)message {
@@ -687,7 +687,7 @@ static void linphone_iphone_configuring_status_changed(LinphoneCore *lc, Linphon
 // MARK: - Global state change
 
 static void linphone_iphone_global_state_changed(LinphoneCore *lc, LinphoneGlobalState gstate, const char *message) {
-    [(__bridge CansLoManager *)linphone_core_cbs_get_user_data(linphone_core_get_current_callbacks(lc)) onGlobalStateChanged:gstate withMessage:message];
+    [(__bridge LinphoneManager *)linphone_core_cbs_get_user_data(linphone_core_get_current_callbacks(lc)) onGlobalStateChanged:gstate withMessage:message];
 }
 
 - (void)onGlobalStateChanged:(LinphoneGlobalState)state withMessage:(const char *)message {

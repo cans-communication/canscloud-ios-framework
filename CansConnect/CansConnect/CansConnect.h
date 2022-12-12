@@ -18,7 +18,7 @@ FOUNDATION_EXPORT const unsigned char CansConnectVersionString[];
 
 #import "Alex.h"
 
-#import "CansLoManager.h"
+#import "LinphoneManager.h"
 #import "Contact.h"
 
 #import "FastAddressBook.h"

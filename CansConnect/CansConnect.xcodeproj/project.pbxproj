@@ -25,8 +25,8 @@
 		52919134292F5B1300D87DF9 /* ProviderDelegate.swift in Sources */ = {isa = PBXBuildFile; fileRef = 5291912E292F5B1300D87DF9 /* ProviderDelegate.swift */; };
 		52919135292F5B1300D87DF9 /* CallManager.swift in Sources */ = {isa = PBXBuildFile; fileRef = 5291912F292F5B1300D87DF9 /* CallManager.swift */; };
 		52919136292F5B1300D87DF9 /* CoreManager.swift in Sources */ = {isa = PBXBuildFile; fileRef = 52919130292F5B1300D87DF9 /* CoreManager.swift */; };
-		52E3A3092939C2630033834A /* CansLoManager.h in Headers */ = {isa = PBXBuildFile; fileRef = 52E3A3072939C2620033834A /* CansLoManager.h */; settings = {ATTRIBUTES = (Public, ); }; };
-		52E3A30A2939C2630033834A /* CansLoManager.m in Sources */ = {isa = PBXBuildFile; fileRef = 52E3A3082939C2630033834A /* CansLoManager.m */; };
+		52E3A3092939C2630033834A /* LinphoneManager.h in Headers */ = {isa = PBXBuildFile; fileRef = 52E3A3072939C2620033834A /* LinphoneManager.h */; settings = {ATTRIBUTES = (Public, ); }; };
+		52E3A30A2939C2630033834A /* LinphoneManager.m in Sources */ = {isa = PBXBuildFile; fileRef = 52E3A3082939C2630033834A /* LinphoneManager.m */; };
 		52E3A3C22939C2C10033834A /* deploy.sh in Resources */ = {isa = PBXBuildFile; fileRef = 52E3A30E2939C2C00033834A /* deploy.sh */; };
 		52E3A3C32939C2C10033834A /* nowebcamVGA.jpg in Resources */ = {isa = PBXBuildFile; fileRef = 52E3A3122939C2C00033834A /* nowebcamVGA.jpg */; };
 		52E3A3C42939C2C10033834A /* nowebcamCIF.jpg in Resources */ = {isa = PBXBuildFile; fileRef = 52E3A3132939C2C00033834A /* nowebcamCIF.jpg */; };
@@ -262,8 +262,8 @@
 		5291912E292F5B1300D87DF9 /* ProviderDelegate.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = ProviderDelegate.swift; sourceTree = "<group>"; };
 		5291912F292F5B1300D87DF9 /* CallManager.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = CallManager.swift; sourceTree = "<group>"; };
 		52919130292F5B1300D87DF9 /* CoreManager.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = CoreManager.swift; sourceTree = "<group>"; };
-		52E3A3072939C2620033834A /* CansLoManager.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = CansLoManager.h; sourceTree = "<group>"; };
-		52E3A3082939C2630033834A /* CansLoManager.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = CansLoManager.m; sourceTree = "<group>"; };
+		52E3A3072939C2620033834A /* LinphoneManager.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = LinphoneManager.h; sourceTree = "<group>"; };
+		52E3A3082939C2630033834A /* LinphoneManager.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = LinphoneManager.m; sourceTree = "<group>"; };
 		52E3A30E2939C2C00033834A /* deploy.sh */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text.script.sh; path = deploy.sh; sourceTree = "<group>"; };
 		52E3A3122939C2C00033834A /* nowebcamVGA.jpg */ = {isa = PBXFileReference; lastKnownFileType = image.jpeg; path = nowebcamVGA.jpg; sourceTree = "<group>"; };
 		52E3A3132939C2C00033834A /* nowebcamCIF.jpg */ = {isa = PBXFileReference; lastKnownFileType = image.jpeg; path = nowebcamCIF.jpg; sourceTree = "<group>"; };
@@ -872,7 +872,7 @@
 			isa = PBXGroup;
 			children = (
 				52E3A4912939E5950033834A /* Alex */,
-				52E3A4922939E5A00033834A /* CansLoManager */,
+				52E3A4922939E5A00033834A /* LinphoneManager */,
 				5278016129433E1F00360D88 /* Contact */,
 				5278016629438DAF00360D88 /* FastAddressBook */,
 				52344D1D293F240000662E20 /* Log */,
@@ -889,13 +889,13 @@
 			path = Alex;
 			sourceTree = "<group>";
 		};
-		52E3A4922939E5A00033834A /* CansLoManager */ = {
+		52E3A4922939E5A00033834A /* LinphoneManager */ = {
 			isa = PBXGroup;
 			children = (
-				52E3A3072939C2620033834A /* CansLoManager.h */,
-				52E3A3082939C2630033834A /* CansLoManager.m */,
+				52E3A3072939C2620033834A /* LinphoneManager.h */,
+				52E3A3082939C2630033834A /* LinphoneManager.m */,
 			);
-			path = CansLoManager;
+			path = LinphoneManager;
 			sourceTree = "<group>";
 		};
 /* End PBXGroup section */
@@ -910,7 +910,7 @@
 				52344D21293F240000662E20 /* Log.h in Headers */,
 				5278016529433E1F00360D88 /* Contact.h in Headers */,
 				52670839292C79CD002CDDAE /* CansConnect.h in Headers */,
-				52E3A3092939C2630033834A /* CansLoManager.h in Headers */,
+				52E3A3092939C2630033834A /* LinphoneManager.h in Headers */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -1137,7 +1137,7 @@
 				5291911E292F513F00D87DF9 /* CansBase.swift in Sources */,
 				52919135292F5B1300D87DF9 /* CallManager.swift in Sources */,
 				52E3A48D2939C4320033834A /* Alex.m in Sources */,
-				52E3A30A2939C2630033834A /* CansLoManager.m in Sources */,
+				52E3A30A2939C2630033834A /* LinphoneManager.m in Sources */,
 				52344D20293F240000662E20 /* Log.m in Sources */,
 				52344D3329405F2900662E20 /* LinphoneManager.swift in Sources */,
 				52919134292F5B1300D87DF9 /* ProviderDelegate.swift in Sources */,

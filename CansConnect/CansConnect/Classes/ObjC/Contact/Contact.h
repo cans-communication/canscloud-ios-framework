@@ -22,7 +22,7 @@
 #import <Foundation/Foundation.h>
 #import <UIKit/UIKit.h>
 
-#import "CansLoManager.h"
+#import "LinphoneManager.h"
 
 @import linphone;
 

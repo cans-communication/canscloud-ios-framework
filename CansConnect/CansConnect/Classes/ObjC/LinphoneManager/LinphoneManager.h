@@ -15,7 +15,7 @@
 @import linphone;
 
 
-#define LC ([CansLoManager getLc])
+#define LC ([LinphoneManager getLc])
 
 
 extern NSString *const kLinphoneCoreUpdate;
@@ -43,11 +43,11 @@ extern NSString *const kLinphoneMsgNotificationAppGroupId;
 extern const int kLinphoneAudioVbrCodecDefaultBitrate;
 
 
-@interface CansLoManager : NSObject {
+@interface LinphoneManager : NSObject {
     
 }
 
-+ (CansLoManager*)instance;
++ (LinphoneManager*)instance;
 + (LinphoneCore*) getLc;
 + (NSString *)cacheDirectory;
 + (NSString *)bundleFile:(NSString *)file;

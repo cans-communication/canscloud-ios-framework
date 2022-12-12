@@ -13,7 +13,7 @@ var answerCall: Bool = false
 struct theLinphone {
     static var lc: OpaquePointer?
     static var lct: LinphoneCoreVTable?
-    static var manager: LinphoneManager?
+    static var manager: SwiftLinphoneManager?
 }
 
 let registrationStateChanged: LinphoneCoreRegistrationStateChangedCb  = {
@@ -61,7 +61,7 @@ let callStateChanged: LinphoneCoreCallStateChangedCb = {
 }
 
 
-class LinphoneManager {
+class SwiftLinphoneManager {
     static var iterateTimer: Timer?
     
     init() {

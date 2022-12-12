@@ -21,7 +21,7 @@
 #import <Contacts/Contacts.h>
 #endif
 #import "FastAddressBook.h"
-#import "CansLoManager.h"
+#import "LinphoneManager.h"
 //#import "ContactsListView.h"
 //#import "Utils.h"
 
@@ -30,7 +30,7 @@
 }
 
 + (UIImage *)imageForContact:(Contact *)contact {
-    //    @synchronized(CansLoManager.instance.fastAddressBook.addressBookMap) {
+    //    @synchronized(LinphoneManager.instance.fastAddressBook.addressBookMap) {
             UIImage *retImage = [contact avatar];
     //        if (retImage == nil) {
     //            retImage = [UIImage imageNamed:@"avatar.png"];
@@ -43,7 +43,7 @@
 }
 
 + (UIImage *)imageForAddress:(const LinphoneAddress *)addr {
-    //    if ([CansLoManager isMyself:addr] && [LinphoneUtils hasSelfAvatar]) {
+    //    if ([LinphoneManager isMyself:addr] && [LinphoneUtils hasSelfAvatar]) {
     //        return [LinphoneUtils selfAvatar];
     //    }
         return [FastAddressBook imageForContact:[FastAddressBook getContactWithAddress:addr]];
@@ -122,7 +122,7 @@
         return [FastAddressBook isSipURI:username];
     
     // use caseInsensitiveCompare, because ios13 saves "SIP" by "Sip"
-//    if ([service caseInsensitiveCompare:CansLoManager.instance.contactSipField] == NSOrderedSame)
+//    if ([service caseInsensitiveCompare:LinphoneManager.instance.contactSipField] == NSOrderedSame)
 //        return TRUE;
     
     return FALSE;
@@ -178,7 +178,7 @@
     CNEntityType entityType = CNEntityTypeContacts;
     [store requestAccessForEntityType:entityType completionHandler:^(BOOL granted, NSError *_Nullable error) {
         dispatch_async(dispatch_get_main_queue(), ^{
-//            [CansLoManager.instance setupFastAdreesBook];
+//            [LinphoneManager.instance setupFastAdreesBook];
         });
         BOOL success = FALSE;
         if(granted){
@@ -275,7 +275,7 @@
         return NO;
     
     // Check if one of the contact' sip URI matches the expected SIP filter
-//    NSString *domain = CansLoManager.instance.contactFilter;
+//    NSString *domain = LinphoneManager.instance.contactFilter;
 //
 //    for (NSString *sip in contact.sipAddresses) {
 //        // check domain
@@ -297,7 +297,7 @@
 }
 
 + (BOOL) isSipURIValid:(NSString*)addr {
-//    NSString *domain = CansLoManager.instance.contactFilter;
+//    NSString *domain = LinphoneManager.instance.contactFilter;
 //    LinphoneAddress* address = linphone_core_interpret_url(LC, addr.UTF8String);
 //    if (address) {
 //        const char *dom = linphone_address_get_domain(address);
@@ -477,7 +477,7 @@
         }
     }
     
-//    BOOL enabled = [CansLoManager.instance lpConfigBoolForKey:@"use_rls_presence"];
+//    BOOL enabled = [LinphoneManager.instance lpConfigBoolForKey:@"use_rls_presence"];
 //    const MSList *lists = linphone_core_get_friends_lists(LC);
 //    while (lists) {
 //        linphone_friend_list_enable_subscriptions(lists->data, FALSE);
@@ -488,7 +488,7 @@
 }
 
 -(void)removeFriend:(Contact*) contact{
-//    BOOL enabled = [CansLoManager.instance lpConfigBoolForKey:@"use_rls_presence"];
+//    BOOL enabled = [LinphoneManager.instance lpConfigBoolForKey:@"use_rls_presence"];
 //    const MSList *lists = linphone_core_get_friends_lists(LC);
 //    while (lists) {
 //        linphone_friend_list_remove_friend(lists->data, contact.friend);

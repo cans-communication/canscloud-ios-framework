@@ -82,6 +82,8 @@ extern const int kLinphoneAudioVbrCodecDefaultBitrate;
 
 + (BOOL)copyFile:(NSString*)src destination:(NSString*)dst override:(BOOL)override ignore:(BOOL)ignore;
 
+@property(nonatomic, strong) NSData *pushKitToken;
+@property(nonatomic, strong) NSData *remoteNotificationToken;
 @property (readonly) BOOL wasRemoteProvisioned;
 @property (readonly) LpConfig *configDb;
 @property UIImage *avatar;

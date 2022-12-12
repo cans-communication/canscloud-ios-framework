@@ -27,7 +27,7 @@ enum RawImageAsset: String, CaseIterable {
 //    case keypadCallDefault = "keypad_call_default"
 //    case keypadCallDisabled = "keypad_call_disabled"
     case callkitLogo = "callkit_logo"
-//    case avatar = "avatar"
+    case avatar = "avatar"
 //    case audioRouteDefault = "ongoing_audio_route_default"
 //    case audioRouteOver = "ongoing_audio_route_over"
 //    case routeSpeakerDefault = "ongoing_route_speaker_default"
@@ -56,8 +56,8 @@ struct ImageAsset {
 
 // MARK: - For Obj-C
 
-//@objc class CansImage: UIImage {
-//    @objc static let shared = CansImage()
+@objc public class CansImage: UIImage {
+    @objc public static let shared = CansImage()
 //    
 //    @objc var launchScreenBackground: UIImage {
 //        return ImageAsset.load(asset: .launchScreenBackground)
@@ -65,9 +65,9 @@ struct ImageAsset {
 //    @objc var transferDefault: UIImage {
 //        return ImageAsset.load(asset: .transferDefault)
 //    }
-//    @objc var avatar: UIImage {
-//        return ImageAsset.load(asset: .avatar)
-//    }
+    @objc public var avatar: UIImage {
+        return ImageAsset.load(asset: .avatar)
+    }
 //    @objc var transferDisabled: UIImage {
 //        return ImageAsset.load(asset: .transferDisabled)
 //    }
@@ -113,4 +113,4 @@ struct ImageAsset {
 //    @objc var callStatusOutgoing: UIImage {
 //        return ImageAsset.load(asset: .callStatusOutgoing)
 //    }
-//}
+}

@@ -22,6 +22,8 @@
 		5278016F29447E4F00360D88 /* callkit_logo.png in Resources */ = {isa = PBXBuildFile; fileRef = 5278016E29447E4F00360D88 /* callkit_logo.png */; };
 		5278017A2946E43900360D88 /* Utils.h in Headers */ = {isa = PBXBuildFile; fileRef = 527801782946E43900360D88 /* Utils.h */; settings = {ATTRIBUTES = (Public, ); }; };
 		5278017B2946E43900360D88 /* Utils.m in Sources */ = {isa = PBXBuildFile; fileRef = 527801792946E43900360D88 /* Utils.m */; };
+		5278017E2946F16100360D88 /* avatar.png in Resources */ = {isa = PBXBuildFile; fileRef = 5278017C2946F16000360D88 /* avatar.png */; };
+		5278017F2946F16100360D88 /* avatar@2x.png in Resources */ = {isa = PBXBuildFile; fileRef = 5278017D2946F16100360D88 /* avatar@2x.png */; };
 		5291911E292F513F00D87DF9 /* CansBase.swift in Sources */ = {isa = PBXBuildFile; fileRef = 5291911D292F513F00D87DF9 /* CansBase.swift */; };
 		52919133292F5B1300D87DF9 /* AppManager.swift in Sources */ = {isa = PBXBuildFile; fileRef = 5291912D292F5B1300D87DF9 /* AppManager.swift */; };
 		52919134292F5B1300D87DF9 /* ProviderDelegate.swift in Sources */ = {isa = PBXBuildFile; fileRef = 5291912E292F5B1300D87DF9 /* ProviderDelegate.swift */; };
@@ -261,6 +263,8 @@
 		5278016E29447E4F00360D88 /* callkit_logo.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = callkit_logo.png; sourceTree = "<group>"; };
 		527801782946E43900360D88 /* Utils.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = Utils.h; sourceTree = "<group>"; };
 		527801792946E43900360D88 /* Utils.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = Utils.m; sourceTree = "<group>"; };
+		5278017C2946F16000360D88 /* avatar.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = avatar.png; sourceTree = "<group>"; };
+		5278017D2946F16100360D88 /* avatar@2x.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = "avatar@2x.png"; sourceTree = "<group>"; };
 		5291911D292F513F00D87DF9 /* CansBase.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = CansBase.swift; sourceTree = "<group>"; };
 		5291912D292F5B1300D87DF9 /* AppManager.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = AppManager.swift; sourceTree = "<group>"; };
 		5291912E292F5B1300D87DF9 /* ProviderDelegate.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = ProviderDelegate.swift; sourceTree = "<group>"; };
@@ -520,6 +524,8 @@
 		5278016D29447E4100360D88 /* Images */ = {
 			isa = PBXGroup;
 			children = (
+				5278017C2946F16000360D88 /* avatar.png */,
+				5278017D2946F16100360D88 /* avatar@2x.png */,
 				5278016E29447E4F00360D88 /* callkit_logo.png */,
 			);
 			path = Images;
@@ -1011,6 +1017,7 @@
 				52E3A41E2939C2C10033834A /* pauline_sips_rc in Resources */,
 				52E3A3C32939C2C10033834A /* nowebcamVGA.jpg in Resources */,
 				52E3A3DE2939C2C10033834A /* user1_key.pem in Resources */,
+				5278017F2946F16100360D88 /* avatar@2x.png in Resources */,
 				52E3A4022939C2C10033834A /* empty_rc in Resources */,
 				52E3A3EC2939C2C10033834A /* ringback.wav in Resources */,
 				52E3A42F2939C2C10033834A /* invalid_friends_rc in Resources */,
@@ -1106,6 +1113,7 @@
 				52E3A4172939C2C10033834A /* pauline_os_defined_rtp_ports_rc in Resources */,
 				52E3A3DA2939C2C10033834A /* key3.pem in Resources */,
 				52E3A4482939C2C10033834A /* pauline_h264_rc in Resources */,
+				5278017E2946F16100360D88 /* avatar.png in Resources */,
 				52E3A3DC2939C2C10033834A /* cert.pem in Resources */,
 				52E3A3C72939C2C10033834A /* linphone.svg in Resources */,
 				52E3A3E62939C2C10033834A /* ahbahouaismaisbon.wav in Resources */,

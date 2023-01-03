@@ -63,8 +63,8 @@ import linphone
     }
     
     @objc public func configure() {
-//        linphoneManager.createLinphoneCore()
-//        linphoneManager.registerSip()
+        linphoneManager.createLinphoneCore()
+        linphoneManager.registerSip()
     }
 
 }

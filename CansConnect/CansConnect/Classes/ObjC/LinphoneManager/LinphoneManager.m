@@ -145,12 +145,12 @@ extern void libmscodec2_init(MSFactory *factory);
     
     theLinphoneCore = linphone_factory_create_shared_core_with_config(factory, _configDb, NULL, [kLinphoneMsgNotificationAppGroupId UTF8String], true);
     linphone_core_add_callbacks(theLinphoneCore, cbs);
-    
+
     [CallManager.instance setCoreWithCore:theLinphoneCore];
     [CoreManager.instance setCoreWithCore:theLinphoneCore];
     [ConfigManager.instance setDbWithDb:_configDb];
 
-    linphone_core_start(theLinphoneCore);
+//    linphone_core_start(theLinphoneCore);
 
     // Let the core handle cbs
     linphone_core_cbs_unref(cbs);

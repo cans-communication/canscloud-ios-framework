@@ -23,6 +23,3 @@ FOUNDATION_EXPORT const unsigned char CansConnectVersionString[];
 #import "FastAddressBook.h"
 #import "Log.h"
 #import "Utils.h"
-
-
-

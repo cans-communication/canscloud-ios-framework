@@ -20,8 +20,6 @@
 		5278016A29438DAF00360D88 /* FastAddressBook.h in Headers */ = {isa = PBXBuildFile; fileRef = 5278016829438DAF00360D88 /* FastAddressBook.h */; settings = {ATTRIBUTES = (Public, ); }; };
 		5278016C29447DEB00360D88 /* CansImage.swift in Sources */ = {isa = PBXBuildFile; fileRef = 5278016B29447DEA00360D88 /* CansImage.swift */; };
 		5278016F29447E4F00360D88 /* callkit_logo.png in Resources */ = {isa = PBXBuildFile; fileRef = 5278016E29447E4F00360D88 /* callkit_logo.png */; };
-		5278017A2946E43900360D88 /* Utils.h in Headers */ = {isa = PBXBuildFile; fileRef = 527801782946E43900360D88 /* Utils.h */; settings = {ATTRIBUTES = (Public, ); }; };
-		5278017B2946E43900360D88 /* Utils.m in Sources */ = {isa = PBXBuildFile; fileRef = 527801792946E43900360D88 /* Utils.m */; };
 		5278017E2946F16100360D88 /* avatar.png in Resources */ = {isa = PBXBuildFile; fileRef = 5278017C2946F16000360D88 /* avatar.png */; };
 		5278017F2946F16100360D88 /* avatar@2x.png in Resources */ = {isa = PBXBuildFile; fileRef = 5278017D2946F16100360D88 /* avatar@2x.png */; };
 		5291911E292F513F00D87DF9 /* CansBase.swift in Sources */ = {isa = PBXBuildFile; fileRef = 5291911D292F513F00D87DF9 /* CansBase.swift */; };
@@ -29,6 +27,8 @@
 		52919134292F5B1300D87DF9 /* ProviderDelegate.swift in Sources */ = {isa = PBXBuildFile; fileRef = 5291912E292F5B1300D87DF9 /* ProviderDelegate.swift */; };
 		52919135292F5B1300D87DF9 /* CallManager.swift in Sources */ = {isa = PBXBuildFile; fileRef = 5291912F292F5B1300D87DF9 /* CallManager.swift */; };
 		52919136292F5B1300D87DF9 /* CoreManager.swift in Sources */ = {isa = PBXBuildFile; fileRef = 52919130292F5B1300D87DF9 /* CoreManager.swift */; };
+		52E0ACE029642B4D00847137 /* Utils.h in Headers */ = {isa = PBXBuildFile; fileRef = 52E0ACDE29642B4D00847137 /* Utils.h */; settings = {ATTRIBUTES = (Public, ); }; };
+		52E0ACE129642B4D00847137 /* Utils.m in Sources */ = {isa = PBXBuildFile; fileRef = 52E0ACDF29642B4D00847137 /* Utils.m */; };
 		52E3A3092939C2630033834A /* LinphoneManager.h in Headers */ = {isa = PBXBuildFile; fileRef = 52E3A3072939C2620033834A /* LinphoneManager.h */; settings = {ATTRIBUTES = (Public, ); }; };
 		52E3A30A2939C2630033834A /* LinphoneManager.m in Sources */ = {isa = PBXBuildFile; fileRef = 52E3A3082939C2630033834A /* LinphoneManager.m */; };
 		52E3A3C22939C2C10033834A /* deploy.sh in Resources */ = {isa = PBXBuildFile; fileRef = 52E3A30E2939C2C00033834A /* deploy.sh */; };
@@ -261,8 +261,6 @@
 		5278016829438DAF00360D88 /* FastAddressBook.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = FastAddressBook.h; sourceTree = "<group>"; };
 		5278016B29447DEA00360D88 /* CansImage.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = CansImage.swift; sourceTree = "<group>"; };
 		5278016E29447E4F00360D88 /* callkit_logo.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = callkit_logo.png; sourceTree = "<group>"; };
-		527801782946E43900360D88 /* Utils.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = Utils.h; sourceTree = "<group>"; };
-		527801792946E43900360D88 /* Utils.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = Utils.m; sourceTree = "<group>"; };
 		5278017C2946F16000360D88 /* avatar.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = avatar.png; sourceTree = "<group>"; };
 		5278017D2946F16100360D88 /* avatar@2x.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = "avatar@2x.png"; sourceTree = "<group>"; };
 		5291911D292F513F00D87DF9 /* CansBase.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = CansBase.swift; sourceTree = "<group>"; };
@@ -270,6 +268,8 @@
 		5291912E292F5B1300D87DF9 /* ProviderDelegate.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = ProviderDelegate.swift; sourceTree = "<group>"; };
 		5291912F292F5B1300D87DF9 /* CallManager.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = CallManager.swift; sourceTree = "<group>"; };
 		52919130292F5B1300D87DF9 /* CoreManager.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = CoreManager.swift; sourceTree = "<group>"; };
+		52E0ACDE29642B4D00847137 /* Utils.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = Utils.h; sourceTree = "<group>"; };
+		52E0ACDF29642B4D00847137 /* Utils.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = Utils.m; sourceTree = "<group>"; };
 		52E3A3072939C2620033834A /* LinphoneManager.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = LinphoneManager.h; sourceTree = "<group>"; };
 		52E3A3082939C2630033834A /* LinphoneManager.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = LinphoneManager.m; sourceTree = "<group>"; };
 		52E3A30E2939C2C00033834A /* deploy.sh */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text.script.sh; path = deploy.sh; sourceTree = "<group>"; };
@@ -549,14 +549,13 @@
 			path = Classes;
 			sourceTree = "<group>";
 		};
-		527801772946E43900360D88 /* Utils */ = {
+		52E0ACE229642B5100847137 /* Utils */ = {
 			isa = PBXGroup;
 			children = (
-				527801782946E43900360D88 /* Utils.h */,
-				527801792946E43900360D88 /* Utils.m */,
+				52E0ACDE29642B4D00847137 /* Utils.h */,
+				52E0ACDF29642B4D00847137 /* Utils.m */,
 			);
-			name = Utils;
-			path = ../../../../../../../../Downloads/Utils;
+			path = Utils;
 			sourceTree = "<group>";
 		};
 		52E3A30B2939C2C00033834A /* linphone-sdk */ = {
@@ -896,7 +895,7 @@
 				5278016629438DAF00360D88 /* FastAddressBook */,
 				52E3A4922939E5A00033834A /* LinphoneManager */,
 				52344D1D293F240000662E20 /* Log */,
-				527801772946E43900360D88 /* Utils */,
+				52E0ACE229642B5100847137 /* Utils */,
 			);
 			path = ObjC;
 			sourceTree = "<group>";
@@ -930,7 +929,7 @@
 				52E3A48C2939C4320033834A /* Alex.h in Headers */,
 				52344D21293F240000662E20 /* Log.h in Headers */,
 				5278016529433E1F00360D88 /* Contact.h in Headers */,
-				5278017A2946E43900360D88 /* Utils.h in Headers */,
+				52E0ACE029642B4D00847137 /* Utils.h in Headers */,
 				52670839292C79CD002CDDAE /* CansConnect.h in Headers */,
 				52E3A3092939C2630033834A /* LinphoneManager.h in Headers */,
 			);
@@ -1168,7 +1167,7 @@
 				5278016929438DAF00360D88 /* FastAddressBook.m in Sources */,
 				52E3A4652939C2C30033834A /* LinphoneWrapper.swift in Sources */,
 				52670838292C79CD002CDDAE /* CansConnect.docc in Sources */,
-				5278017B2946E43900360D88 /* Utils.m in Sources */,
+				52E0ACE129642B4D00847137 /* Utils.m in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};

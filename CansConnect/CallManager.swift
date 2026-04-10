@@ -18,7 +18,7 @@
 */
 
 import Foundation
-//import linphonesw
+import linphonesw
 import UserNotifications
 import os
 import CallKit
@@ -202,7 +202,7 @@ import AVFoundation
 
 			//We set the record file name here because we can't do it after the call is started.
 			let address = call.callLog?.fromAddress
-			let writablePath = AppManager.recordingFilePathFromCall(address: address?.username ?? "")
+            let writablePath = AppManager.recordingFilePathFromCall(address: address?.username ?? "")
 //			Log.directLog(BCTBX_LOG_MESSAGE, text: "Record file path: \(String(describing: writablePath))")
 			callParams.recordFile = writablePath
 
@@ -263,7 +263,7 @@ import AVFoundation
 			CallManager.instance().nextCallIsTransfer = false
 		} else {
 			//We set the record file name here because we can't do it after the call is started.
-			let writablePath = AppManager.recordingFilePathFromCall(address: addr.username )
+			let writablePath = AppManager.recordingFilePathFromCall(address: addr.username ?? "")
 //			Log.directLog(BCTBX_LOG_DEBUG, text: "record file path: \(writablePath)")
 			lcallParams.recordFile = writablePath
 			if (isSas) {
@@ -436,7 +436,7 @@ import AVFoundation
     
     public func onAudioDevicesListUpdated(core: Core) {
         let bluetoothAvailable = isBluetoothAvailable();
-        var dict = Dictionary<String, Bool>()
+        var dict = [String: Bool]()
         dict["available"] = bluetoothAvailable
         NotificationCenter.default.post(name: Notification.Name("LinphoneBluetoothAvailabilityUpdate"), object: self, userInfo: dict)
     }
@@ -632,12 +632,12 @@ import AVFoundation
     }
     
     @objc func changeRouteToSpeaker() {
-        lc?.outputAudioDevice = lc?.audioDevices.first { $0.type == AudioDeviceType.Speaker }
+        // lc?.outputAudioDevice = lc?.audioDevices.first { $0.type == AudioDeviceType.Speaker }
 //        UIDevice.current.isProximityMonitoringEnabled = false
     }
     
     @objc public func changeRouteToBluetooth() {
-        lc?.outputAudioDevice = lc?.audioDevices.first { $0.type == AudioDeviceType.BluetoothA2DP || $0.type == AudioDeviceType.Bluetooth }
+        // lc?.outputAudioDevice = lc?.audioDevices.first { $0.type == AudioDeviceType.BluetoothA2DP || $0.type == AudioDeviceType.Bluetooth }
 //        UIDevice.current.isProximityMonitoringEnabled = (lc!.callsNb > 0)
     }
     
@@ -646,32 +646,32 @@ import AVFoundation
     }
     
     @objc func isBluetoothAvailable() -> Bool {
-        for device in lc!.audioDevices {
-            if (device.type == AudioDeviceType.Bluetooth || device.type == AudioDeviceType.BluetoothA2DP) {
-                return true;
-            }
-        }
+        // for device in lc!.audioDevices {
+        //     if (device.type == AudioDeviceType.Bluetooth || device.type == AudioDeviceType.BluetoothA2DP) {
+        //         return true;
+        //     }
+        // }
         return false;
     }
     
     @objc func isSpeakerEnabled() -> Bool {
-        if let outputDevice = lc!.outputAudioDevice {
-            return outputDevice.type == AudioDeviceType.Speaker
-        }
+        // if let outputDevice = lc!.outputAudioDevice {
+        //     return outputDevice.type == AudioDeviceType.Speaker
+        // }
         return false
     }
     
     @objc public func isBluetoothEnabled() -> Bool {
-        if let outputDevice = lc!.outputAudioDevice {
-            return (outputDevice.type == AudioDeviceType.Bluetooth || outputDevice.type == AudioDeviceType.BluetoothA2DP)
-        }
+        // if let outputDevice = lc!.outputAudioDevice {
+        //     return (outputDevice.type == AudioDeviceType.Bluetooth || outputDevice.type == AudioDeviceType.BluetoothA2DP)
+        // }
         return false
     }
     
     @objc func isReceiverEnabled() -> Bool {
-        if let outputDevice = lc!.outputAudioDevice {
-            return outputDevice.type == AudioDeviceType.Microphone
-        }
+        // if let outputDevice = lc!.outputAudioDevice {
+        //     return outputDevice.type == AudioDeviceType.Microphone
+        // }
         return false
     }
 

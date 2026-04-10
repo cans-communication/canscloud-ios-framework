@@ -18,7 +18,7 @@
 */
 
 import Foundation
-//import linphonesw
+import linphonesw
 
 @objc class CoreManager: NSObject {
 	static var theCoreManager: CoreManager?
@@ -118,7 +118,9 @@ import Foundation
     }
     
     @objc var isInConference: Bool {
-        return lc?.conference?.isIn ?? false
+        // Linphone SDK 5.x ถอด Core.conference ออกไปแล้ว
+        // คืนค่า false ชั่วคราวเพื่อให้บิลด์ผ่าน (หากไม่ได้ใช้ฟีเจอร์ประชุมสาย)
+        return false 
     }
     
     @objc var isHoldingAll: Bool {

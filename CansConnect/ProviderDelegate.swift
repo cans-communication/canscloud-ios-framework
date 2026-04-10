@@ -20,7 +20,7 @@
 import Foundation
 import CallKit
 import UIKit
-//import linphonesw
+import linphonesw
 import AVFoundation
 import os
 
@@ -311,13 +311,13 @@ extension ProviderDelegate: CXProviderDelegate {
 
     public func provider(_ provider: CXProvider, didActivate audioSession: AVAudioSession) {
 //        Log.directLog(BCTBX_LOG_MESSAGE, text: "CallKit: audio session activated.")
-        CallManager.instance().lc?.activateAudioSession(actived: true)
+        // CallManager.instance().lc?.activateAudioSession(isActive: true)
         CallManager.instance().callkitAudioSessionActivated = true
     }
 
     public func provider(_ provider: CXProvider, didDeactivate audioSession: AVAudioSession) {
 //        Log.directLog(BCTBX_LOG_MESSAGE, text: "CallKit: audio session deactivated.")
-        CallManager.instance().lc?.activateAudioSession(actived: false)
+        // CallManager.instance().lc?.activateAudioSession(isActive: false)
         CallManager.instance().callkitAudioSessionActivated = nil
     }
 }

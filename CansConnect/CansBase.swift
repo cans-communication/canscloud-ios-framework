@@ -1,15 +1,14 @@
 //
-//  CdrHistoryWorker.swift
+//  CansBase.swift
 //  cansconnect
 //
 //  Created by Siraphop Chaisirikul on 16/2/2565 BE.
 //
 
 import Foundation
+import linphonesw
 
 @objc public class CansBase: NSObject, URLSessionDelegate {
-    
-//    private let linphoneManager = LinphoneManager()
     
     public override init() {
         
@@ -109,6 +108,8 @@ import Foundation
     }
     
     public func configureSwift() {
+        // 🛑 ปิดใช้งานชั่วคราวเพื่อ Bypass ปัญหา App Group จาก Apple Developer
+        /*
         let filename = "linphonerc-factory"
         guard
             let path = Bundle.main.path(forResource: filename.fileName(), ofType: filename.fileExtension())
@@ -131,6 +132,8 @@ import Foundation
         } catch {
             print(error)
         }
+        */
+        print("[CansBase] configureSwift bypassed due to App Group limitations.")
     }
     
     @objc public func setCore(core: OpaquePointer) {
@@ -139,14 +142,10 @@ import Foundation
     }
     
     @objc public func configure() {
-//        linphoneManager.createLinphoneCore()
-//        setCore(core: LinphoneManager.getLc())
     }
     
     @objc public func registerWithObjC() {
-//        linphoneManager.registerSip()
     }
-
 }
 
 extension String {

@@ -451,18 +451,39 @@ static void linphone_iphone_popup_password_request(LinphoneCore *lc,
 // ==========================================
 
 - (void)startCall:(NSString *)phoneNumber {
-  if (!theLinphoneCore)
+  NSLog(@"[LinphoneManager] 📞 กำลังเตรียมโทรหา: %@", phoneNumber);
+
+  if (!theLinphoneCore) {
+    NSLog(@"[LinphoneManager] ❌ theLinphoneCore is NULL! (โทรไม่ได้)");
     return;
+  }
+
   LinphoneAddress *address =
       linphone_core_interpret_url(theLinphoneCore, [phoneNumber UTF8String]);
-  if (!address)
+  if (!address) {
+    NSLog(
+        @"[LinphoneManager] ❌ FATAL: แปลงเบอร์/URL ไม่สำเร็จ! เบอร์อาจจะผิดฟอร์แมต");
     return;
+  }
+
+  char *addrStr = linphone_address_as_string(address);
+  NSLog(@"[LinphoneManager] ✅ SIP Address ที่จะได้โทรออกคือ: %s", addrStr);
+  ms_free(addrStr);
 
   LinphoneCallParams *params =
       linphone_core_create_call_params(theLinphoneCore, NULL);
   linphone_call_params_enable_video(params, FALSE);
 
-  linphone_core_invite_address_with_params(theLinphoneCore, address, params);
+  LinphoneCall *call = linphone_core_invite_address_with_params(
+      theLinphoneCore, address, params);
+
+  if (call) {
+    NSLog(@"[LinphoneManager] 🚀 สร้าง Call Object สำเร็จ! ส่ง INVITE แล้ว");
+  } else {
+    NSLog(@"[LinphoneManager] ❌ FATAL: "
+          @"linphone_core_invite_address_with_params ล้มเหลว!");
+  }
+
   linphone_address_unref(address);
   linphone_call_params_unref(params);
 }
@@ -473,52 +494,38 @@ static void linphone_iphone_popup_password_request(LinphoneCore *lc,
   return bctbx_list_size(linphone_core_get_calls(theLinphoneCore));
 }
 
-- (int)convertCallStateToInt:(LinphoneCallState)state {
+- (NSString *)convertCallStateToString:(LinphoneCallState)state {
   switch (state) {
   case LinphoneCallIdle:
-    return 0;
+    return @"Idle";
   case LinphoneCallIncomingReceived:
-    return 1;
+    return @"IncomingCall";
   case LinphoneCallOutgoingInit:
-    return 2;
+    return @"CallOutgoing";
   case LinphoneCallOutgoingProgress:
-    return 3;
+    return @"StartCall";
   case LinphoneCallOutgoingRinging:
-    return 4;
+    return @"StartCall";
   case LinphoneCallOutgoingEarlyMedia:
-    return 5;
+    return @"StartCall";
   case LinphoneCallConnected:
-    return 6;
+    return @"Connected";
   case LinphoneCallStreamsRunning:
-    return 7;
+    return @"StreamsRunning";
   case LinphoneCallPausing:
-    return 8;
+    return @"Pause";
   case LinphoneCallPaused:
-    return 9;
+    return @"Pause";
   case LinphoneCallResuming:
-    return 10;
-  case LinphoneCallRefered:
-    return 11; // 💡 แก้ไข: Linphone SDK สะกดด้วย r ตัวเดียว (Refered)
+    return @"Resuming";
   case LinphoneCallError:
-    return 12;
+    return @"Error";
   case LinphoneCallEnd:
-    return 13;
-  case LinphoneCallPausedByRemote:
-    return 14;
-  case LinphoneCallUpdatedByRemote:
-    return 15;
-  case LinphoneCallIncomingEarlyMedia:
-    return 16;
-  case LinphoneCallUpdating:
-    return 17;
+    return @"CallEnd";
   case LinphoneCallReleased:
-    return 18;
-  case LinphoneCallEarlyUpdatedByRemote:
-    return 19;
-  case LinphoneCallEarlyUpdating:
-    return 20;
+    return @"CallEnd";
   default:
-    return 0;
+    return @"Unknown";
   }
 }
 
@@ -546,7 +553,7 @@ static void linphone_iphone_popup_password_request(LinphoneCore *lc,
     BOOL isPaused =
         (state == LinphoneCallPaused || state == LinphoneCallPausing ||
          state == LinphoneCallPausedByRemote);
-    int jsState = [self convertCallStateToInt:state];
+    NSString *jsState = [self convertCallStateToString:state];
 
     [logs addObject:@{
       @"callID" : phone,
@@ -554,7 +561,7 @@ static void linphone_iphone_popup_password_request(LinphoneCore *lc,
       @"name" : name,
       @"isPaused" : isPaused ? @YES : @NO,
       @"duration" : [@(duration) stringValue],
-      @"status" : @(jsState)
+      @"status" : jsState ? jsState : @"Unknown"
     }];
   }
   NSData *jsonData = [NSJSONSerialization dataWithJSONObject:logs
@@ -705,14 +712,11 @@ static void linphone_iphone_popup_password_request(LinphoneCore *lc,
 static void linphone_iphone_call_state(LinphoneCore *lc, LinphoneCall *call,
                                        LinphoneCallState state,
                                        const char *message) {
-  int stateInt = [[LinphoneManager sharedInstance] convertCallStateToInt:state];
+  NSString *stateStr =
+      [[LinphoneManager sharedInstance] convertCallStateToString:state];
   NSString *msgStr = message ? [NSString stringWithUTF8String:message] : @"";
 
-  NSDictionary *dict = @{
-    @"stateInt" : @(stateInt),
-    @"stateString" : msgStr,
-    @"message" : msgStr
-  };
+  NSDictionary *dict = @{@"stateString" : stateStr, @"message" : msgStr};
 
   [[NSNotificationCenter defaultCenter]
       postNotificationName:kLinphoneCallStateUpdate

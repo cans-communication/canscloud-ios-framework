@@ -50,6 +50,6 @@ extern NSString *const kLinphoneCallStateUpdate;
 - (BOOL)isBluetoothState;
 
 // Helper Convert
-- (int)convertCallStateToInt:(LinphoneCallState)state;
+- (NSString *)convertCallStateToString:(LinphoneCallState)state;
 
 @end

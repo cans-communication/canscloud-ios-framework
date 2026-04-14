@@ -9,6 +9,7 @@
 
 extern NSString *const kLinphoneRegistrationUpdate;
 extern NSString *const kLinphoneCallStateUpdate;
+extern NSString *const kCansCustomRegistrationEvent;
 
 @interface LinphoneManager : NSObject
 
@@ -51,5 +52,9 @@ extern NSString *const kLinphoneCallStateUpdate;
 
 // Helper Convert
 - (NSString *)convertCallStateToString:(LinphoneCallState)state;
+- (void)registerCansAccountWithUsername:(NSString *)username
+                               password:(NSString *)password
+                                 domain:(NSString *)domain
+                                 apiURL:(NSString *)apiURL;
 
 @end

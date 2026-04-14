@@ -9,6 +9,7 @@
 static LinphoneCore *theLinphoneCore = nil;
 NSString *const kLinphoneRegistrationUpdate = @"LinphoneRegistrationUpdate";
 NSString *const kLinphoneCallStateUpdate = @"LinphoneCallStateUpdate";
+NSString *const kCansCustomRegistrationEvent = @"CansCustomRegistrationEvent";
 
 // Prototypes for C callbacks
 static void linphone_iphone_registration_state(LinphoneCore *lc,
@@ -722,6 +723,227 @@ static void linphone_iphone_call_state(LinphoneCore *lc, LinphoneCall *call,
       postNotificationName:kLinphoneCallStateUpdate
                     object:nil
                   userInfo:dict];
+}
+
+// 1. ฟังก์ชันช่วยทำ MD5 Hash
+- (NSString *)md5Hash:(NSString *)input {
+  const char *cStr = [input UTF8String];
+  unsigned char digest[CC_MD5_DIGEST_LENGTH];
+  CC_MD5(cStr, (CC_LONG)strlen(cStr), digest);
+  NSMutableString *output =
+      [NSMutableString stringWithCapacity:CC_MD5_DIGEST_LENGTH * 2];
+  for (int i = 0; i < CC_MD5_DIGEST_LENGTH; i++) {
+    [output appendFormat:@"%02x", digest[i]];
+  }
+  return output;
+}
+
+// 2. ฟังก์ชันช่วยแปลง NSDictionary เป็น JSON String (เหมือนที่ Android ใช้
+// Gson().toJson)
+- (NSString *)jsonStringFromDictionary:(NSDictionary *)dict {
+  NSError *error;
+  NSData *jsonData = [NSJSONSerialization dataWithJSONObject:dict
+                                                     options:0
+                                                       error:&error];
+  if (!jsonData)
+    return @"{}";
+  return [[NSString alloc] initWithData:jsonData encoding:NSUTF8StringEncoding];
+}
+
+// 3. ฟังก์ชันช่วยส่ง Event กลับไปยัง NativeModuleiOS
+- (void)postCansEventWithState:(NSString *)state
+             payloadDictionary:(NSDictionary *)dict {
+  NSString *jsonString = [self jsonStringFromDictionary:dict];
+  dispatch_async(dispatch_get_main_queue(), ^{
+    [[NSNotificationCenter defaultCenter]
+        postNotificationName:kCansCustomRegistrationEvent
+                      object:nil
+                    userInfo:@{@"state" : state, @"message" : jsonString}];
+  });
+}
+
+// 4. ฟังก์ชันหลักสำหรับ CANS Account Login
+- (void)registerCansAccountWithUsername:(NSString *)username
+                               password:(NSString *)password
+                                 domain:(NSString *)domain
+                                 apiURL:(NSString *)apiURL {
+
+  NSString *md5Password = [self md5Hash:password];
+  NSString *fullUsername =
+      [NSString stringWithFormat:@"%@@%@", username, domain];
+
+  NSString *loginUrlString =
+      [NSString stringWithFormat:@"%@api/v3/sign-in/cc", apiURL];
+  NSURL *loginUrl = [NSURL URLWithString:loginUrlString];
+  NSMutableURLRequest *loginRequest =
+      [NSMutableURLRequest requestWithURL:loginUrl];
+  loginRequest.HTTPMethod = @"POST";
+  [loginRequest setValue:@"application/json"
+      forHTTPHeaderField:@"Content-Type"];
+
+  NSDictionary *loginBody =
+      @{@"username" : fullUsername, @"password" : md5Password};
+  loginRequest.HTTPBody = [NSJSONSerialization dataWithJSONObject:loginBody
+                                                          options:0
+                                                            error:nil];
+
+  NSURLSession *session = [NSURLSession sharedSession];
+  [[session
+      dataTaskWithRequest:loginRequest
+        completionHandler:^(NSData *data, NSURLResponse *response,
+                            NSError *error) {
+          if (error || !data) {
+            NSLog(@"[CansConnect] Login V3 Error: %@", error);
+            [self postCansEventWithState:@"FAIL" payloadDictionary:@{}];
+            return;
+          }
+
+          NSDictionary *json = [NSJSONSerialization JSONObjectWithData:data
+                                                               options:0
+                                                                 error:nil];
+          NSDictionary *responseData = json[@"data"];
+
+          if (!responseData || [responseData isKindOfClass:[NSNull class]]) {
+            NSLog(@"[CansConnect] Login V3 Failed: %@", json[@"message"]);
+            [self postCansEventWithState:@"FAIL" payloadDictionary:@{}];
+            return;
+          }
+
+          NSDictionary *user = responseData[@"user"];
+          BOOL passwordResetRequired =
+              [user[@"password_reset_required"] boolValue];
+          NSString *token = responseData[@"token"];
+          NSString *domainId = user[@"domain_id"];
+
+          // 🚨 ดักจับกรณีต้องบังคับเปลี่ยนรหัสผ่าน
+          if (passwordResetRequired) {
+            NSDictionary *payload = @{
+              @"action" : @"PASSWORD_RESET_REQUIRED",
+              @"token" : token ?: @"",
+              @"userId" : user[@"user_id"] ?: @"",
+              @"domainId" : domainId ?: @""
+            };
+            [self postCansEventWithState:@"PASSWORD_RESET_REQUIRED"
+                       payloadDictionary:payload];
+            return;
+          }
+
+          // ยิง API ที่ 2 (Get SIP Credentials)
+          NSString *sipCredsUrlString =
+              [NSString stringWithFormat:@"%@api/v3/%@/sip-credentials", apiURL,
+                                         domainId];
+          NSURL *sipCredsUrl = [NSURL URLWithString:sipCredsUrlString];
+          NSMutableURLRequest *sipRequest =
+              [NSMutableURLRequest requestWithURL:sipCredsUrl];
+          sipRequest.HTTPMethod = @"GET";
+          [sipRequest setValue:[NSString stringWithFormat:@"Bearer %@", token]
+              forHTTPHeaderField:@"Authorization"];
+
+          [[session
+              dataTaskWithRequest:sipRequest
+                completionHandler:^(NSData *sipData, NSURLResponse *sipResponse,
+                                    NSError *sipError) {
+                  if (sipError || !sipData) {
+                    [self postCansEventWithState:@"FAIL" payloadDictionary:@{}];
+                    return;
+                  }
+
+                  NSDictionary *sipJson =
+                      [NSJSONSerialization JSONObjectWithData:sipData
+                                                      options:0
+                                                        error:nil];
+                  NSDictionary *credsData = sipJson[@"data"];
+
+                  // 🚨 ดักจับกรณีไม่มีบัญชี SIP ผูกอยู่
+                  if (!credsData || [credsData isKindOfClass:[NSNull class]]) {
+                    NSDictionary *payload = @{
+                      @"action" : @"SIP_NOT_LINKED",
+                      @"message" : @"SIP Account not linked"
+                    };
+                    [self postCansEventWithState:@"SIP_NOT_LINKED"
+                               payloadDictionary:payload];
+                    return;
+                  }
+
+                  NSString *extension = credsData[@"extension"] ?: username;
+                  NSString *domainName = credsData[@"domain_name"] ?: domain;
+                  NSString *sipCredsHA1 = credsData[@"sip_creds"];
+
+                  // นำข้อมูลไป Register SIP บน Main Thread
+                  dispatch_async(dispatch_get_main_queue(), ^{
+                    [self setupLinphoneWithExtension:extension
+                                                 ha1:sipCredsHA1
+                                              domain:domainName
+                                                port:@"8446"
+                                           transport:@"tcp"];
+                  });
+                }] resume];
+        }] resume];
+}
+
+// 5. นำ HA1 มาเซ็ตค่าให้กับ Linphone
+// 5. นำ HA1 มาเซ็ตค่าให้กับ Linphone
+- (void)setupLinphoneWithExtension:(NSString *)extension
+                               ha1:(NSString *)ha1
+                            domain:(NSString *)domainName
+                              port:(NSString *)port
+                         transport:(NSString *)transportType {
+
+  NSString *realm = [[domainName componentsSeparatedByString:@":"] firstObject];
+
+  // 💡 1. ใช้ Modern API สร้าง Auth Info (แบบเดียวกับที่ใช้ใน registerSipWithUsername)
+  LinphoneAuthInfo *authInfo =
+      linphone_auth_info_new(extension.UTF8String, NULL, NULL,
+                             ha1.UTF8String, // ใส่ HA1 แทนรหัสผ่าน
+                             realm.UTF8String, realm.UTF8String);
+
+  if (authInfo) {
+    linphone_core_add_auth_info(theLinphoneCore, authInfo);
+    linphone_auth_info_unref(authInfo);
+  }
+
+  // 💡 2. ใช้ Modern API สร้าง Account Params
+  LinphoneAccountParams *params =
+      linphone_core_create_account_params(theLinphoneCore);
+
+  // 💡 3. เซ็ต Identity
+  NSString *identityStr =
+      [NSString stringWithFormat:@"sip:%@@%@", extension, realm];
+  LinphoneAddress *identity = linphone_address_new(identityStr.UTF8String);
+  if (identity) {
+    linphone_account_params_set_identity_address(params, identity);
+  }
+
+  // 💡 4. เซ็ต Server
+  NSString *serverAddr = [NSString
+      stringWithFormat:@"sip:%@:%@;transport=%@", realm, port, transportType];
+  LinphoneAddress *server = linphone_address_new(serverAddr.UTF8String);
+  if (server) {
+    linphone_account_params_set_server_address(params, server);
+  }
+
+  // 💡 5. เปิดโหมด Register และแนบ Tag
+  linphone_account_params_enable_register(params, TRUE);
+  linphone_account_params_set_contact_uri_parameters(params,
+                                                     "app-login-type=cans");
+
+  // 💡 6. สร้าง Account และเพิ่มเข้า Core
+  LinphoneAccount *account =
+      linphone_core_create_account(theLinphoneCore, params);
+  if (account) {
+    linphone_core_add_account(theLinphoneCore, account);
+    linphone_core_set_default_account(theLinphoneCore, account);
+  }
+
+  // 💡 7. Cleanup
+  if (identity)
+    linphone_address_unref(identity);
+  if (server)
+    linphone_address_unref(server);
+  if (params)
+    linphone_account_params_unref(params);
+
+  linphone_core_refresh_registers(theLinphoneCore);
 }
 
 @end

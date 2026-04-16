@@ -187,6 +187,23 @@ static void linphone_iphone_call_state(LinphoneCore *lc, LinphoneCall *call,
       NSLog(@"[LinphoneManager] Core created successfully at: %p",
             theLinphoneCore);
 
+      // ==========================================================
+      // ✅ เปิดใช้งาน Video Capture (กล้อง) และ Video Display (หน้าจอ) ตรงนี้!
+      // ==========================================================
+      linphone_core_enable_video_capture(theLinphoneCore, TRUE);
+      linphone_core_enable_video_display(theLinphoneCore, TRUE);
+
+      // ตั้งค่า Video Activation Policy ให้อนุญาตการส่ง/รับวิดีโออัตโนมัติ
+      LinphoneVideoActivationPolicy *videoPolicy =
+          linphone_factory_create_video_activation_policy(factory);
+      linphone_video_activation_policy_set_automatically_initiate(videoPolicy,
+                                                                  TRUE);
+      linphone_video_activation_policy_set_automatically_accept(videoPolicy,
+                                                                TRUE);
+      linphone_core_set_video_activation_policy(theLinphoneCore, videoPolicy);
+      linphone_video_activation_policy_unref(videoPolicy);
+      // ==========================================================
+
       // Keep alive is essential for background stability
       linphone_core_enable_keep_alive(theLinphoneCore, true);
 
@@ -568,7 +585,6 @@ static void linphone_iphone_popup_password_request(LinphoneCore *lc,
   NSData *jsonData = [NSJSONSerialization dataWithJSONObject:logs
                                                      options:0
                                                        error:nil];
-  // 💡 แก้ไข: เปลี่ยน NSUTF8String เป็น NSUTF8StringEncoding
   return jsonData ? [[NSString alloc] initWithData:jsonData
                                           encoding:NSUTF8StringEncoding]
                   : @"[]";
@@ -738,8 +754,7 @@ static void linphone_iphone_call_state(LinphoneCore *lc, LinphoneCall *call,
   return output;
 }
 
-// 2. ฟังก์ชันช่วยแปลง NSDictionary เป็น JSON String (เหมือนที่ Android ใช้
-// Gson().toJson)
+// 2. ฟังก์ชันช่วยแปลง NSDictionary เป็น JSON String
 - (NSString *)jsonStringFromDictionary:(NSDictionary *)dict {
   NSError *error;
   NSData *jsonData = [NSJSONSerialization dataWithJSONObject:dict
@@ -767,11 +782,9 @@ static void linphone_iphone_call_state(LinphoneCore *lc, LinphoneCall *call,
                                password:(NSString *)password
                                  domain:(NSString *)domain
                                  apiURL:(NSString *)apiURL {
-
   NSString *md5Password = [self md5Hash:password];
   NSString *fullUsername =
       [NSString stringWithFormat:@"%@@%@", username, domain];
-
   NSString *loginUrlString =
       [NSString stringWithFormat:@"%@api/v3/sign-in/cc", apiURL];
   NSURL *loginUrl = [NSURL URLWithString:loginUrlString];
@@ -815,7 +828,6 @@ static void linphone_iphone_call_state(LinphoneCore *lc, LinphoneCall *call,
           NSString *token = responseData[@"token"];
           NSString *domainId = user[@"domain_id"];
 
-          // 🚨 ดักจับกรณีต้องบังคับเปลี่ยนรหัสผ่าน
           if (passwordResetRequired) {
             NSDictionary *payload = @{
               @"action" : @"PASSWORD_RESET_REQUIRED",
@@ -828,7 +840,6 @@ static void linphone_iphone_call_state(LinphoneCore *lc, LinphoneCall *call,
             return;
           }
 
-          // ยิง API ที่ 2 (Get SIP Credentials)
           NSString *sipCredsUrlString =
               [NSString stringWithFormat:@"%@api/v3/%@/sip-credentials", apiURL,
                                          domainId];
@@ -854,7 +865,6 @@ static void linphone_iphone_call_state(LinphoneCore *lc, LinphoneCall *call,
                                                         error:nil];
                   NSDictionary *credsData = sipJson[@"data"];
 
-                  // 🚨 ดักจับกรณีไม่มีบัญชี SIP ผูกอยู่
                   if (!credsData || [credsData isKindOfClass:[NSNull class]]) {
                     NSDictionary *payload = @{
                       @"action" : @"SIP_NOT_LINKED",
@@ -869,7 +879,6 @@ static void linphone_iphone_call_state(LinphoneCore *lc, LinphoneCall *call,
                   NSString *domainName = credsData[@"domain_name"] ?: domain;
                   NSString *sipCredsHA1 = credsData[@"sip_creds"];
 
-                  // นำข้อมูลไป Register SIP บน Main Thread
                   dispatch_async(dispatch_get_main_queue(), ^{
                     [self setupLinphoneWithExtension:extension
                                                  ha1:sipCredsHA1
@@ -882,31 +891,23 @@ static void linphone_iphone_call_state(LinphoneCore *lc, LinphoneCall *call,
 }
 
 // 5. นำ HA1 มาเซ็ตค่าให้กับ Linphone
-// 5. นำ HA1 มาเซ็ตค่าให้กับ Linphone
 - (void)setupLinphoneWithExtension:(NSString *)extension
                                ha1:(NSString *)ha1
                             domain:(NSString *)domainName
                               port:(NSString *)port
                          transport:(NSString *)transportType {
-
   NSString *realm = [[domainName componentsSeparatedByString:@":"] firstObject];
 
-  // 💡 1. ใช้ Modern API สร้าง Auth Info (แบบเดียวกับที่ใช้ใน registerSipWithUsername)
   LinphoneAuthInfo *authInfo =
-      linphone_auth_info_new(extension.UTF8String, NULL, NULL,
-                             ha1.UTF8String, // ใส่ HA1 แทนรหัสผ่าน
+      linphone_auth_info_new(extension.UTF8String, NULL, NULL, ha1.UTF8String,
                              realm.UTF8String, realm.UTF8String);
-
   if (authInfo) {
     linphone_core_add_auth_info(theLinphoneCore, authInfo);
     linphone_auth_info_unref(authInfo);
   }
 
-  // 💡 2. ใช้ Modern API สร้าง Account Params
   LinphoneAccountParams *params =
       linphone_core_create_account_params(theLinphoneCore);
-
-  // 💡 3. เซ็ต Identity
   NSString *identityStr =
       [NSString stringWithFormat:@"sip:%@@%@", extension, realm];
   LinphoneAddress *identity = linphone_address_new(identityStr.UTF8String);
@@ -914,7 +915,6 @@ static void linphone_iphone_call_state(LinphoneCore *lc, LinphoneCall *call,
     linphone_account_params_set_identity_address(params, identity);
   }
 
-  // 💡 4. เซ็ต Server
   NSString *serverAddr = [NSString
       stringWithFormat:@"sip:%@:%@;transport=%@", realm, port, transportType];
   LinphoneAddress *server = linphone_address_new(serverAddr.UTF8String);
@@ -922,12 +922,10 @@ static void linphone_iphone_call_state(LinphoneCore *lc, LinphoneCall *call,
     linphone_account_params_set_server_address(params, server);
   }
 
-  // 💡 5. เปิดโหมด Register และแนบ Tag
   linphone_account_params_enable_register(params, TRUE);
   linphone_account_params_set_contact_uri_parameters(params,
                                                      "app-login-type=cans");
 
-  // 💡 6. สร้าง Account และเพิ่มเข้า Core
   LinphoneAccount *account =
       linphone_core_create_account(theLinphoneCore, params);
   if (account) {
@@ -935,7 +933,6 @@ static void linphone_iphone_call_state(LinphoneCore *lc, LinphoneCall *call,
     linphone_core_set_default_account(theLinphoneCore, account);
   }
 
-  // 💡 7. Cleanup
   if (identity)
     linphone_address_unref(identity);
   if (server)
@@ -944,6 +941,147 @@ static void linphone_iphone_call_state(LinphoneCore *lc, LinphoneCall *call,
     linphone_account_params_unref(params);
 
   linphone_core_refresh_registers(theLinphoneCore);
+}
+
+// --- ชุดฟังก์ชันจัดการ Video Call ---
+
+- (BOOL)isVideoCall {
+  if (!theLinphoneCore)
+    return NO;
+
+  LinphoneCall *currentCall = linphone_core_get_current_call(theLinphoneCore);
+  if (!currentCall) {
+    const bctbx_list_t *calls = linphone_core_get_calls(theLinphoneCore);
+    if (calls != NULL) {
+      currentCall = (LinphoneCall *)calls->data;
+    }
+  }
+
+  if (currentCall) {
+    const LinphoneCallParams *remoteParams =
+        linphone_call_get_remote_params(currentCall);
+    if (remoteParams) {
+      bool isVideoEnabled = linphone_call_params_video_enabled(remoteParams);
+      LinphoneMediaDirection videoDirection =
+          linphone_call_params_get_video_direction(remoteParams);
+
+      if (isVideoEnabled && videoDirection != LinphoneMediaDirectionInactive) {
+        return YES;
+      }
+    }
+  }
+  return NO;
+}
+
+- (void)switchCamera {
+  if (!theLinphoneCore)
+    return;
+
+  const char *currentDevice = linphone_core_get_video_device(theLinphoneCore);
+  if (!currentDevice)
+    return;
+
+  NSString *currentStr = [NSString stringWithUTF8String:currentDevice];
+  NSString *newDeviceStr = nil;
+
+  const char **cameras = linphone_core_get_video_devices(theLinphoneCore);
+  if (!cameras)
+    return;
+
+  if ([currentStr containsString:@"front"]) {
+    for (int i = 0; cameras[i] != NULL; i++) {
+      if (strstr(cameras[i], "back") != NULL) {
+        newDeviceStr = [NSString stringWithUTF8String:cameras[i]];
+        break;
+      }
+    }
+  } else {
+    for (int i = 0; cameras[i] != NULL; i++) {
+      if (strstr(cameras[i], "front") != NULL) {
+        newDeviceStr = [NSString stringWithUTF8String:cameras[i]];
+        break;
+      }
+    }
+  }
+
+  if (!newDeviceStr) {
+    for (int i = 0; cameras[i] != NULL; i++) {
+      if (strcmp(cameras[i], currentDevice) != 0 &&
+          strstr(cameras[i], "StaticImage") == NULL) {
+        newDeviceStr = [NSString stringWithUTF8String:cameras[i]];
+        break;
+      }
+    }
+  }
+
+  if (newDeviceStr) {
+    linphone_core_set_video_device(theLinphoneCore, [newDeviceStr UTF8String]);
+
+    LinphoneCall *call = linphone_core_get_current_call(theLinphoneCore);
+    if (call) {
+      LinphoneCallParams *params =
+          linphone_core_create_call_params(theLinphoneCore, call);
+      linphone_call_update(call, params);
+      linphone_call_params_unref(params);
+    }
+  }
+}
+
+- (void)makeVideoCall:(NSString *)phoneNumber {
+  if (!theLinphoneCore || !phoneNumber)
+    return;
+
+  LinphoneAddress *addr =
+      linphone_core_interpret_url(theLinphoneCore, [phoneNumber UTF8String]);
+  if (!addr)
+    return;
+
+  LinphoneCallParams *params =
+      linphone_core_create_call_params(theLinphoneCore, NULL);
+  linphone_call_params_enable_video(params, TRUE);
+  linphone_call_params_enable_audio(params, TRUE);
+
+  linphone_core_invite_address_with_params(theLinphoneCore, addr, params);
+
+  linphone_address_unref(addr);
+  linphone_call_params_unref(params);
+}
+
+- (void)acceptVideoCall {
+  if (!theLinphoneCore)
+    return;
+
+  LinphoneCall *currentCall = linphone_core_get_current_call(theLinphoneCore);
+  if (!currentCall) {
+    const bctbx_list_t *calls = linphone_core_get_calls(theLinphoneCore);
+    if (calls != NULL) {
+      currentCall = (LinphoneCall *)calls->data;
+    }
+  }
+
+  if (currentCall) {
+    LinphoneCallParams *params =
+        linphone_core_create_call_params(theLinphoneCore, currentCall);
+    linphone_call_params_enable_video(params, TRUE);
+    linphone_call_accept_with_params(currentCall, params);
+    linphone_call_params_unref(params);
+  }
+}
+
+- (void)setVideoWindowsWithRemoteView:(UIView *)remoteView
+                            localView:(UIView *)localView {
+  if (!theLinphoneCore)
+    return;
+
+  if (remoteView) {
+    linphone_core_set_native_video_window_id(theLinphoneCore,
+                                             (__bridge void *)remoteView);
+  }
+
+  if (localView) {
+    linphone_core_set_native_preview_window_id(theLinphoneCore,
+                                               (__bridge void *)localView);
+  }
 }
 
 @end

@@ -5,6 +5,7 @@
 
 #import <AVFoundation/AVFoundation.h>
 #import <Foundation/Foundation.h>
+#import <UIKit/UIKit.h>
 #import <linphone/linphonecore.h>
 
 extern NSString *const kLinphoneRegistrationUpdate;
@@ -57,4 +58,11 @@ extern NSString *const kCansCustomRegistrationEvent;
                                  domain:(NSString *)domain
                                  apiURL:(NSString *)apiURL;
 
+// Video Call Methods
+- (BOOL)isVideoCall;
+- (void)switchCamera;
+- (void)makeVideoCall:(NSString *)phoneNumber;
+- (void)acceptVideoCall;
+- (void)setVideoWindowsWithRemoteView:(UIView *)remoteView
+                            localView:(UIView *)localView;
 @end

@@ -1084,4 +1084,31 @@ static void linphone_iphone_call_state(LinphoneCore *lc, LinphoneCall *call,
   }
 }
 
+// รับสายแบบ Audio ปกติ
+- (void)acceptCall {
+  if (!theLinphoneCore)
+    return;
+
+  // หา Call ปัจจุบัน
+  LinphoneCall *currentCall = linphone_core_get_current_call(theLinphoneCore);
+  if (!currentCall) {
+    const bctbx_list_t *calls = linphone_core_get_calls(theLinphoneCore);
+    if (calls != NULL) {
+      currentCall = (LinphoneCall *)calls->data;
+    }
+  }
+
+  // ถ้าเจอสาย ให้กดรับ
+  if (currentCall) {
+    LinphoneCallParams *params =
+        linphone_core_create_call_params(theLinphoneCore, currentCall);
+
+    // ⭐ รับสายเป็น Audio อย่างเดียว ปิดวิดีโอ
+    linphone_call_params_enable_video(params, FALSE);
+    linphone_call_accept_with_params(currentCall, params);
+
+    linphone_call_params_unref(params);
+  }
+}
+
 @end

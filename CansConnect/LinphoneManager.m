@@ -9,6 +9,8 @@
 static LinphoneCore *theLinphoneCore = nil;
 NSString *const kLinphoneRegistrationUpdate = @"LinphoneRegistrationUpdate";
 NSString *const kLinphoneCallStateUpdate = @"LinphoneCallStateUpdate";
+NSString *const kLinphoneAudioDeviceUpdate = @"LinphoneAudioDeviceUpdate";
+NSString *const kLinphoneRemoteVideoStateUpdate = @"LinphoneRemoteVideoStateUpdate";
 NSString *const kCansCustomRegistrationEvent = @"CansCustomRegistrationEvent";
 
 // Prototypes for C callbacks
@@ -26,8 +28,17 @@ static void linphone_iphone_popup_password_request(LinphoneCore *lc,
                                                    LinphoneAuthMethod method);
 
 static void linphone_iphone_call_state(LinphoneCore *lc, LinphoneCall *call,
-                                       LinphoneCallState state,
-                                       const char *message);
+                                        LinphoneCallState state,
+                                        const char *message);
+
+static void linphone_iphone_audio_device_changed(LinphoneCore *lc,
+                                                 LinphoneAudioDevice *device);
+
+static void linphone_iphone_audio_devices_list_updated(LinphoneCore *lc);
+
+static void linphone_iphone_message_received(LinphoneCore *lc, LinphoneChatRoom *room, LinphoneChatMessage *message);
+
+static void linphone_iphone_chat_message_state_changed(LinphoneCore *lc, LinphoneChatRoom *room, LinphoneChatMessage *message, LinphoneChatMessageState state);
 
 @interface LinphoneManager () {
   NSTimer *iterateTimer;
@@ -97,7 +108,8 @@ static void linphone_iphone_call_state(LinphoneCore *lc, LinphoneCall *call,
 - (void)createLinphoneCore {
   dispatch_async(dispatch_get_main_queue(), ^{
     if (theLinphoneCore) {
-      NSLog(@"[LinphoneManager] createLinphoneCore: Core already exists.");
+      NSLog(@"[LinphoneManager] createLinphoneCore: Core already exists. (Timer status: %@)", iterateTimer ? @"Running" : @"Stopped");
+      if (!iterateTimer) [self startIterateTimer];
       return;
     }
     NSLog(@"[LinphoneManager] createLinphoneCore: Started on Main Thread");
@@ -168,13 +180,11 @@ static void linphone_iphone_call_state(LinphoneCore *lc, LinphoneCall *call,
                      forKey:@"x3dh_db_path"
                   inSection:@"lime"];
 
-    // 🛡️ 0x138 Crash Fix: Disable specs and features that might trigger internal
-    // friend list notifications early
-    NSLog(
-        @"[LinphoneManager] Overriding config to disable LIME and Presence...");
     linphone_config_set_string(config, "sip", "linphone_specs", "groupchat");
     linphone_config_set_int(config, "app", "publish_presence", 0);
     linphone_config_set_int(config, "sip", "publish_presence", 0);
+    linphone_config_set_string(config, "sip", "save_headers", "To, Diversion, Contact, X-Voicemail");
+
 
     // 🛡️ API Fix: linphone_factory_create_core_with_config_3 is the correct
     // modern API.
@@ -216,6 +226,12 @@ static void linphone_iphone_call_state(LinphoneCore *lc, LinphoneCall *call,
           cbs, linphone_iphone_popup_password_request);
       linphone_core_cbs_set_user_data(cbs, (__bridge void *)(self));
       linphone_core_cbs_set_call_state_changed(cbs, linphone_iphone_call_state);
+      linphone_core_cbs_set_audio_device_changed(cbs, linphone_iphone_audio_device_changed);
+      linphone_core_cbs_set_audio_devices_list_updated(cbs, linphone_iphone_audio_devices_list_updated);
+      linphone_core_cbs_set_message_received(cbs, linphone_iphone_message_received);
+      // Note: linphone_core_cbs_set_chat_message_state_changed does not exist on CoreCbs.
+      // Message state changes are typically set on individual LinphoneChatMessage objects.
+      // linphone_core_cbs_set_chat_message_state_changed(cbs, linphone_iphone_chat_message_state_changed);
 
       linphone_core_add_callbacks(theLinphoneCore, cbs);
 
@@ -345,8 +361,9 @@ static void linphone_iphone_popup_password_request(LinphoneCore *lc,
 
   dispatch_async(dispatch_get_main_queue(), ^{
     if (!theLinphoneCore) {
-      NSLog(@"[LinphoneManager] CRITICAL: Cannot register, theLinphoneCore is "
-            @"NULL");
+      NSLog(@"[LinphoneManager] CRITICAL: Cannot register, theLinphoneCore is NULL. Attempting to initialize...");
+      [self createLinphoneCore];
+      // We can't proceed immediately because createLinphoneCore is async on main queue
       return;
     }
 
@@ -459,10 +476,7 @@ static void linphone_iphone_popup_password_request(LinphoneCore *lc,
   }
 }
 
-// ฟังก์ชันเดิมสำหรับการตั้งค่าแชท
-- (void)configureChatSettings:(NSString *)username {
-  NSLog(@"[LinphoneManager] Configure chat settings for %@", username);
-}
+
 
 // ==========================================
 // MARK: - Call Management & History
@@ -587,7 +601,59 @@ static void linphone_iphone_popup_password_request(LinphoneCore *lc,
                                                        error:nil];
   return jsonData ? [[NSString alloc] initWithData:jsonData
                                           encoding:NSUTF8StringEncoding]
-                  : @"[]";
+                   : @"[]";
+}
+
+- (NSString *)getHistoryCallLogsJSON {
+    if (!theLinphoneCore) return @"[]";
+    NSMutableArray *logs = [NSMutableArray array];
+    const bctbx_list_t *history = linphone_core_get_call_logs(theLinphoneCore);
+    
+    for (const bctbx_list_t *it = history; it != NULL; it = it->next) {
+        LinphoneCallLog *log = (LinphoneCallLog *)it->data;
+        const LinphoneAddress *addr = linphone_call_log_get_remote_address(log);
+        NSString *phone = addr ? [NSString stringWithUTF8String:linphone_address_get_username(addr) ?: ""] : @"";
+        NSString *name = addr ? [NSString stringWithUTF8String:linphone_address_get_display_name(addr) ?: ""] : @"";
+        
+        [logs addObject:@{
+            @"callID": linphone_call_log_get_call_id(log) ? [NSString stringWithUTF8String:linphone_call_log_get_call_id(log)] : @"",
+            @"phoneNumber": phone,
+            @"name": name,
+            @"duration": [@(linphone_call_log_get_duration(log)) stringValue],
+            @"status": [self convertCallStateToString:linphone_call_log_get_status(log)] ?: @"Unknown",
+            @"timestamp": @(linphone_call_log_get_start_date(log))
+        }];
+    }
+    
+    NSData *jsonData = [NSJSONSerialization dataWithJSONObject:logs options:0 error:nil];
+    return jsonData ? [[NSString alloc] initWithData:jsonData encoding:NSUTF8StringEncoding] : @"[]";
+}
+
+- (NSString *)getMissedCallLogsJSON {
+    if (!theLinphoneCore) return @"[]";
+    NSMutableArray *logs = [NSMutableArray array];
+    const bctbx_list_t *history = linphone_core_get_call_logs(theLinphoneCore);
+    
+    for (const bctbx_list_t *it = history; it != NULL; it = it->next) {
+        LinphoneCallLog *log = (LinphoneCallLog *)it->data;
+        if (linphone_call_log_get_status(log) == LinphoneCallMissed) {
+            const LinphoneAddress *addr = linphone_call_log_get_remote_address(log);
+            NSString *phone = addr ? [NSString stringWithUTF8String:linphone_address_get_username(addr) ?: ""] : @"";
+            NSString *name = addr ? [NSString stringWithUTF8String:linphone_address_get_display_name(addr) ?: ""] : @"";
+            
+            [logs addObject:@{
+                @"callID": linphone_call_log_get_call_id(log) ? [NSString stringWithUTF8String:linphone_call_log_get_call_id(log)] : @"",
+                @"phoneNumber": phone,
+                @"name": name,
+                @"duration": [@(linphone_call_log_get_duration(log)) stringValue],
+                @"status": @"MissCall",
+                @"timestamp": @(linphone_call_log_get_start_date(log))
+            }];
+        }
+    }
+    
+    NSData *jsonData = [NSJSONSerialization dataWithJSONObject:logs options:0 error:nil];
+    return jsonData ? [[NSString alloc] initWithData:jsonData encoding:NSUTF8StringEncoding] : @"[]";
 }
 
 - (void)hangUp {
@@ -597,7 +663,12 @@ static void linphone_iphone_popup_password_request(LinphoneCore *lc,
 }
 
 - (void)hangUpAll {
+  if (!theLinphoneCore) return;
   linphone_core_terminate_all_calls(theLinphoneCore);
+}
+
+- (void)terminateAllCalls {
+    [self hangUpAll];
 }
 
 - (void)terminateCallAtIndex:(NSInteger)index phoneNumber:(NSString *)phone {
@@ -649,6 +720,13 @@ static void linphone_iphone_popup_password_request(LinphoneCore *lc,
 
 - (BOOL)isInConference {
   return linphone_core_get_conference(theLinphoneCore) != NULL;
+}
+
+- (void)pauseCallAtIndex:(NSInteger)index phoneNumber:(NSString *)phone {
+  if (!theLinphoneCore) return;
+  const bctbx_list_t *calls = linphone_core_get_calls(theLinphoneCore);
+  LinphoneCall *call = (LinphoneCall *)bctbx_list_nth_data(calls, (int)index);
+  if (call) linphone_call_pause(call);
 }
 
 - (void)startConference {
@@ -716,10 +794,123 @@ static void linphone_iphone_popup_password_request(LinphoneCore *lc,
 }
 
 - (BOOL)isBluetoothAudioRouteAvailable {
+  if (!theLinphoneCore) return NO;
+  const bctbx_list_t *devices = linphone_core_get_audio_devices(theLinphoneCore);
+  for (const bctbx_list_t *it = devices; it != NULL; it = it->next) {
+    LinphoneAudioDevice *dev = (LinphoneAudioDevice *)it->data;
+    if (linphone_audio_device_get_type(dev) == LinphoneAudioDeviceTypeBluetooth) {
+      return YES;
+    }
+  }
   return NO;
 }
+
 - (BOOL)isBluetoothState {
+  if (!theLinphoneCore) return NO;
+  LinphoneCall *call = linphone_core_get_current_call(theLinphoneCore);
+  if (!call) return NO;
+  LinphoneAudioDevice *dev = linphone_call_get_output_audio_device(call);
+  if (dev && linphone_audio_device_get_type(dev) == LinphoneAudioDeviceTypeBluetooth) {
+    return YES;
+  }
   return NO;
+}
+
+- (void)routeAudioToSpeaker {
+  if (!theLinphoneCore) return;
+  LinphoneAudioDevice *speaker = NULL;
+  const bctbx_list_t *devices = linphone_core_get_audio_devices(theLinphoneCore);
+  for (const bctbx_list_t *it = devices; it != NULL; it = it->next) {
+    LinphoneAudioDevice *dev = (LinphoneAudioDevice *)it->data;
+    if (linphone_audio_device_get_type(dev) == LinphoneAudioDeviceTypeSpeaker) {
+      speaker = dev;
+      break;
+    }
+  }
+  if (speaker) {
+    LinphoneCall *call = linphone_core_get_current_call(theLinphoneCore);
+    if (call) {
+      linphone_call_set_output_audio_device(call, speaker);
+    } else {
+      linphone_core_set_output_audio_device(theLinphoneCore, speaker);
+    }
+  }
+}
+
+- (void)routeAudioToEarpiece {
+  if (!theLinphoneCore) return;
+  LinphoneAudioDevice *earpiece = NULL;
+  const bctbx_list_t *devices = linphone_core_get_audio_devices(theLinphoneCore);
+  for (const bctbx_list_t *it = devices; it != NULL; it = it->next) {
+    LinphoneAudioDevice *dev = (LinphoneAudioDevice *)it->data;
+    if (linphone_audio_device_get_type(dev) == LinphoneAudioDeviceTypeEarpiece) {
+      earpiece = dev;
+      break;
+    }
+  }
+  if (earpiece) {
+    LinphoneCall *call = linphone_core_get_current_call(theLinphoneCore);
+    if (call) {
+      linphone_call_set_output_audio_device(call, earpiece);
+    } else {
+      linphone_core_set_output_audio_device(theLinphoneCore, earpiece);
+    }
+  }
+}
+
+- (void)routeAudioToBluetooth {
+  if (!theLinphoneCore) return;
+  LinphoneAudioDevice *bluetooth = NULL;
+  const bctbx_list_t *devices = linphone_core_get_audio_devices(theLinphoneCore);
+  for (const bctbx_list_t *it = devices; it != NULL; it = it->next) {
+    LinphoneAudioDevice *dev = (LinphoneAudioDevice *)it->data;
+    if (linphone_audio_device_get_type(dev) == LinphoneAudioDeviceTypeBluetooth) {
+      bluetooth = dev;
+      break;
+    }
+  }
+  if (bluetooth) {
+    LinphoneCall *call = linphone_core_get_current_call(theLinphoneCore);
+    if (call) {
+      linphone_call_set_output_audio_device(call, bluetooth);
+    } else {
+      linphone_core_set_output_audio_device(theLinphoneCore, bluetooth);
+    }
+  }
+}
+
+- (void)pauseCall {
+  if (!theLinphoneCore) return;
+  LinphoneCall *call = linphone_core_get_current_call(theLinphoneCore);
+  if (call) linphone_call_pause(call);
+}
+
+- (NSString *)destinationUsername {
+  if (!theLinphoneCore) return @"";
+  LinphoneCall *call = linphone_core_get_current_call(theLinphoneCore);
+  if (!call) return @"";
+  const LinphoneAddress *addr = linphone_call_get_remote_address(call);
+  if (!addr) return @"";
+  const char *username = linphone_address_get_username(addr);
+  return username ? [NSString stringWithUTF8String:username] : @"";
+}
+
+- (int)missedCallsCount {
+  if (!theLinphoneCore) return 0;
+  return linphone_core_get_missed_calls_count(theLinphoneCore);
+}
+
+- (void)transferCallNow:(NSString *)phoneNumber {
+    if (!theLinphoneCore) return;
+    LinphoneCall *call = linphone_core_get_current_call(theLinphoneCore);
+    if (call) {
+        linphone_call_transfer(call, [phoneNumber UTF8String]);
+    }
+}
+
+- (void)transferCallAskFirst:(NSString *)phoneNumber {
+    // Basic implementation to match Android's logic if possible
+    [self transferCallNow:phoneNumber];
 }
 
 // ==========================================
@@ -727,11 +918,64 @@ static void linphone_iphone_popup_password_request(LinphoneCore *lc,
 // ==========================================
 
 static void linphone_iphone_call_state(LinphoneCore *lc, LinphoneCall *call,
-                                       LinphoneCallState state,
-                                       const char *message) {
-  NSString *stateStr =
-      [[LinphoneManager sharedInstance] convertCallStateToString:state];
+                                        LinphoneCallState state,
+                                        const char *message) {
+  LinphoneManager *manager = [LinphoneManager sharedInstance];
+  NSString *stateStr = [manager convertCallStateToString:state];
   NSString *msgStr = message ? [NSString stringWithUTF8String:message] : @"";
+
+  // Voicemail Detection via SIP Headers (Logic from Android)
+  if (state == LinphoneCallOutgoingEarlyMedia || state == LinphoneCallOutgoingProgress || 
+      state == LinphoneCallConnected || state == LinphoneCallStreamsRunning) {
+      
+      const LinphoneCallParams *params = linphone_call_get_params(call);
+      if (linphone_call_get_dir(call) == LinphoneCallOutgoing && 
+          linphone_call_params_video_enabled(params)) {
+          
+          const LinphoneCallParams *remoteParams = linphone_call_get_remote_params(call);
+          if (remoteParams) {
+              const char *diversion = linphone_call_params_get_custom_header(remoteParams, "Diversion");
+              const char *contact = linphone_call_params_get_custom_header(remoteParams, "Contact");
+              const char *xVoicemail = linphone_call_params_get_custom_header(remoteParams, "X-Voicemail");
+              
+              BOOL isVoicemail = NO;
+              if (diversion && (strcasestr(diversion, "voicemail") || strcasestr(diversion, "vmail"))) isVoicemail = YES;
+              if (contact && (strcasestr(contact, "voicemail") || strcasestr(contact, "vmail"))) isVoicemail = YES;
+              if (xVoicemail && strcasecmp(xVoicemail, "yes") == 0) isVoicemail = YES;
+              
+              if (isVoicemail) {
+                  NSLog(@"[LinphoneManager] Voicemail detected via SIP headers. Terminating call.");
+                  linphone_call_terminate(call);
+                  
+                  // Emit as MissCall to match Android behavior
+                  NSDictionary *dict = @{@"stateString": @"MissCall", @"message": @"Voicemail detected"};
+                  [[NSNotificationCenter defaultCenter] postNotificationName:kLinphoneCallStateUpdate object:nil userInfo:dict];
+                  return;
+              }
+          }
+      }
+  }
+  
+  // Remote Video State Monitoring
+  if (state == LinphoneCallStreamsRunning || state == LinphoneCallUpdatedByRemote) {
+      const LinphoneCallParams *remoteParams = linphone_call_get_remote_params(call);
+      if (remoteParams) {
+          BOOL isRemoteVideoEnabled = linphone_call_params_video_enabled(remoteParams);
+          LinphoneMediaDirection dir = linphone_call_params_get_video_direction(remoteParams);
+          BOOL isSendingVideo = isRemoteVideoEnabled && (dir == LinphoneMediaDirectionSendOnly || dir == LinphoneMediaDirectionSendRecv);
+          
+          [[NSNotificationCenter defaultCenter] postNotificationName:kLinphoneRemoteVideoStateUpdate 
+                                                              object:nil 
+                                                            userInfo:@{@"enabled": @(isSendingVideo)}];
+      }
+  }
+
+  // Bluetooth Auto-Routing (Logic from Android)
+  if (state == LinphoneCallStreamsRunning || state == LinphoneCallConnected) {
+      if ([manager isBluetoothAudioRouteAvailable]) {
+          [manager routeAudioToBluetooth];
+      }
+  }
 
   NSDictionary *dict = @{@"stateString" : stateStr, @"message" : msgStr};
 
@@ -739,6 +983,14 @@ static void linphone_iphone_call_state(LinphoneCore *lc, LinphoneCall *call,
       postNotificationName:kLinphoneCallStateUpdate
                     object:nil
                   userInfo:dict];
+}
+
+static void linphone_iphone_audio_device_changed(LinphoneCore *lc, LinphoneAudioDevice *device) {
+    [[NSNotificationCenter defaultCenter] postNotificationName:kLinphoneAudioDeviceUpdate object:nil userInfo:@{@"action": @"onAudioDeviceChanged"}];
+}
+
+static void linphone_iphone_audio_devices_list_updated(LinphoneCore *lc) {
+    [[NSNotificationCenter defaultCenter] postNotificationName:kLinphoneAudioDeviceUpdate object:nil userInfo:@{@"action": @"onAudioDevicesListUpdated"}];
 }
 
 // 1. ฟังก์ชันช่วยทำ MD5 Hash
@@ -1109,6 +1361,156 @@ static void linphone_iphone_call_state(LinphoneCore *lc, LinphoneCall *call,
 
     linphone_call_params_unref(params);
   }
+}
+
+- (void)setVideoEnabled:(BOOL)enabled {
+    if (!theLinphoneCore) return;
+    LinphoneCall *call = linphone_core_get_current_call(theLinphoneCore);
+    if (!call) return;
+    
+    LinphoneCallParams *params = linphone_core_create_call_params(theLinphoneCore, call);
+    linphone_call_params_enable_video(params, TRUE);
+    linphone_call_params_set_video_direction(params, enabled ? LinphoneMediaDirectionSendRecv : LinphoneMediaDirectionRecvOnly);
+    linphone_call_update(call, params);
+    linphone_call_params_unref(params);
+}
+
+- (void)sendTextMessage:(NSString *)peerUri text:(NSString *)text requestId:(NSString *)requestId {
+    if (!theLinphoneCore) return;
+    LinphoneAddress *addr = linphone_core_interpret_url(theLinphoneCore, peerUri.UTF8String);
+    if (!addr) return;
+    
+    LinphoneChatRoom *room = linphone_core_get_chat_room(theLinphoneCore, addr);
+    if (room) {
+        LinphoneChatMessage *msg = linphone_chat_room_create_message(room, text.UTF8String);
+        if (requestId) {
+            linphone_chat_message_add_custom_header(msg, "X-Request-ID", requestId.UTF8String);
+        }
+        linphone_chat_message_send(msg);
+    }
+    linphone_address_unref(addr);
+}
+
+- (void)sendImageMessage:(NSString *)peerUri filePath:(NSString *)filePath requestId:(NSString *)requestId {
+    if (!theLinphoneCore) return;
+    LinphoneAddress *addr = linphone_core_interpret_url(theLinphoneCore, peerUri.UTF8String);
+    if (!addr) return;
+    
+    LinphoneChatRoom *room = linphone_core_get_chat_room(theLinphoneCore, addr);
+    if (room) {
+        LinphoneChatMessage *msg = linphone_chat_room_create_empty_message(room);
+        LinphoneContent *content = linphone_factory_create_content(linphone_factory_get());
+        linphone_content_set_type(content, "image");
+        linphone_content_set_file_path(content, filePath.UTF8String);
+        linphone_chat_message_add_file_content(msg, content);
+        if (requestId) {
+            linphone_chat_message_add_custom_header(msg, "X-Request-ID", requestId.UTF8String);
+        }
+        linphone_chat_message_send(msg);
+        linphone_content_unref(content);
+    }
+    linphone_address_unref(addr);
+}
+
+- (NSString *)getChatRoomsJSON {
+    if (!theLinphoneCore) return @"[]";
+    const bctbx_list_t *rooms = linphone_core_get_chat_rooms(theLinphoneCore);
+    NSMutableArray *roomsArray = [NSMutableArray array];
+    
+    for (const bctbx_list_t *it = rooms; it != NULL; it = it->next) {
+        LinphoneChatRoom *room = (LinphoneChatRoom *)it->data;
+        const LinphoneAddress *peer = linphone_chat_room_get_peer_address(room);
+        LinphoneChatMessage *lastMsg = linphone_chat_room_get_last_message_in_history(room);
+        
+        NSMutableDictionary *roomDict = [NSMutableDictionary dictionary];
+        roomDict[@"phoneNumber"] = [NSString stringWithUTF8String:linphone_address_get_username(peer) ?: ""];
+        roomDict[@"peerUri"] = [NSString stringWithUTF8String:linphone_address_as_string_uri_only(peer) ?: ""];
+        roomDict[@"unreadCount"] = @(linphone_chat_room_get_unread_messages_count(room));
+        
+        if (lastMsg) {
+            roomDict[@"lastMessage"] = [NSString stringWithUTF8String:linphone_chat_message_get_text_content(lastMsg) ?: ""];
+            roomDict[@"timestamp"] = @(linphone_chat_message_get_time(lastMsg) * 1000.0);
+        }
+        
+        [roomsArray addObject:roomDict];
+    }
+    
+    NSData *data = [NSJSONSerialization dataWithJSONObject:roomsArray options:0 error:nil];
+    return [[NSString alloc] initWithData:data encoding:NSUTF8StringEncoding];
+}
+
+- (NSString *)getChatHistoryJSON:(NSString *)peerUri {
+    if (!theLinphoneCore) return @"[]";
+    LinphoneAddress *addr = linphone_core_interpret_url(theLinphoneCore, peerUri.UTF8String);
+    if (!addr) return @"[]";
+    
+    LinphoneChatRoom *room = linphone_core_get_chat_room(theLinphoneCore, addr);
+    NSMutableArray *messagesArray = [NSMutableArray array];
+    
+    if (room) {
+        const bctbx_list_t *history = linphone_chat_room_get_history(room, 0);
+        for (const bctbx_list_t *it = history; it != NULL; it = it->next) {
+            LinphoneChatMessage *msg = (LinphoneChatMessage *)it->data;
+            NSMutableDictionary *msgDict = [NSMutableDictionary dictionary];
+            msgDict[@"id"] = [NSString stringWithUTF8String:linphone_chat_message_get_custom_header(msg, "X-Request-ID") ?: ""];
+            msgDict[@"text"] = [NSString stringWithUTF8String:linphone_chat_message_get_text_content(msg) ?: ""];
+            msgDict[@"timestamp"] = @(linphone_chat_message_get_time(msg) * 1000.0);
+            msgDict[@"sender"] = linphone_chat_message_is_outgoing(msg) ? @"me" : @"other";
+            [messagesArray addObject:msgDict];
+        }
+    }
+    
+    linphone_address_unref(addr);
+    NSData *data = [NSJSONSerialization dataWithJSONObject:messagesArray options:0 error:nil];
+    return [[NSString alloc] initWithData:data encoding:NSUTF8StringEncoding];
+}
+
+- (void)deleteMessage:(NSString *)peerUri msgId:(NSString *)msgId {
+    // Basic implementation: find message in history and delete
+}
+
+- (void)markAsRead:(NSString *)peerUri {
+    if (!theLinphoneCore) return;
+    LinphoneAddress *addr = linphone_core_interpret_url(theLinphoneCore, peerUri.UTF8String);
+    if (!addr) return;
+    LinphoneChatRoom *room = linphone_core_get_chat_room(theLinphoneCore, addr);
+    if (room) linphone_chat_room_mark_as_read(room);
+    linphone_address_unref(addr);
+}
+
+- (void)configureChatSettings:(NSString *)username {
+    // Setup listeners or internal state for chat
+}
+
+- (void)removeAccountAll {
+    if (!theLinphoneCore) return;
+    linphone_core_clear_accounts(theLinphoneCore);
+}
+
+#pragma mark - Chat Callbacks
+
+static void linphone_iphone_message_received(LinphoneCore *lc, LinphoneChatRoom *room, LinphoneChatMessage *message) {
+    LinphoneManager *manager = (__bridge LinphoneManager *)linphone_core_cbs_get_user_data(linphone_core_get_current_callbacks(lc));
+    const LinphoneAddress *from = linphone_chat_message_get_from_address(message);
+    NSString *fromUser = [NSString stringWithUTF8String:linphone_address_get_username(from) ?: ""];
+    NSString *text = [NSString stringWithUTF8String:linphone_chat_message_get_text_content(message) ?: ""];
+    
+    NSDictionary *dict = @{
+        @"id": [NSString stringWithUTF8String:linphone_chat_message_get_custom_header(message, "X-Request-ID") ?: ""],
+        @"sender": fromUser,
+        @"text": text,
+        @"timestamp": @(linphone_chat_message_get_time(message) * 1000.0)
+    };
+    
+    [[NSNotificationCenter defaultCenter] postNotificationName:@"LinphoneMessageReceived" object:nil userInfo:dict];
+}
+
+static void linphone_iphone_chat_message_state_changed(LinphoneCore *lc, LinphoneChatRoom *room, LinphoneChatMessage *message, LinphoneChatMessageState state) {
+    NSDictionary *dict = @{
+        @"id": [NSString stringWithUTF8String:linphone_chat_message_get_custom_header(message, "X-Request-ID") ?: ""],
+        @"state": @(state)
+    };
+    [[NSNotificationCenter defaultCenter] postNotificationName:@"LinphoneMessageStateChanged" object:nil userInfo:dict];
 }
 
 @end

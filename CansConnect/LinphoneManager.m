@@ -200,13 +200,9 @@ static void linphone_iphone_info_received(LinphoneCore *lc, LinphoneCall *call, 
       NSLog(@"[LinphoneManager] Core created successfully at: %p",
             theLinphoneCore);
 
-      // ==========================================================
-      // ✅ เปิดใช้งาน Video Capture (กล้อง) และ Video Display (หน้าจอ) ตรงนี้!
-      // ==========================================================
       linphone_core_enable_video_capture(theLinphoneCore, TRUE);
       linphone_core_enable_video_display(theLinphoneCore, TRUE);
 
-      // ตั้งค่า Video Activation Policy ให้อนุญาตการส่ง/รับวิดีโออัตโนมัติ
       LinphoneVideoActivationPolicy *videoPolicy =
           linphone_factory_create_video_activation_policy(factory);
       linphone_video_activation_policy_set_automatically_initiate(videoPolicy,
@@ -354,7 +350,6 @@ static void linphone_iphone_popup_password_request(LinphoneCore *lc,
   return output;
 }
 
-// 🚀 ฟังก์ชัน Login เข้าระบบ SIP
 - (void)registerSipWithUsername:(NSString *)username
                        password:(NSString *)password
                          domain:(NSString *)domain

@@ -18,8 +18,10 @@
 // SDK installed in CansConnect/linphone-sdk or via CocoaPods.
 #if __has_include(<LinphoneSDK/linphonecore.h>)
 #import <LinphoneSDK/linphonecore.h>
+#import <LinphoneSDK/core_utils.h>
 #else
 #import <linphone/linphonecore.h>
+#import <linphone/core_utils.h>
 #endif
 
 extern NSString *const kLinphoneRegistrationUpdate;
@@ -65,6 +67,57 @@ extern NSString *const kCansCustomRegistrationEvent;
 - (void)dtmfKeypad:(NSString *)numberDtmf key:(NSString *)key;
 - (void)applySmartPlaybackGain:(BOOL)isExtension;
 - (void)setPlaybackGain:(NSString *)gain;
+
+// Audio Settings
+- (BOOL)getEchoCancellation;
+- (void)setEchoCancellationEnabled:(BOOL)enabled;
+- (BOOL)getAdaptiveRateControl;
+- (void)setAdaptiveRateControlEnabled:(BOOL)enabled;
+- (float)getMicrophoneGainDb;
+- (void)setMicrophoneGainDb:(float)gain;
+- (float)getPlaybackGainDb;
+- (int)getCodecBitrateKbps;
+- (void)setCodecBitrateKbps:(int)kbps;
+- (NSString *)getCodecsListJSON;
+
+// Ringtone / Vibrate
+- (BOOL)getDeviceRingtone;
+- (void)setDeviceRingtone:(BOOL)useDevice;
+- (BOOL)getVibrateOnIncomingCall;
+- (void)setVibrateOnIncomingCallEnabled:(BOOL)enabled;
+
+// Encryption
+- (NSString *)getMediaEncryptionName;
+- (BOOL)getEncryptionMandatory;
+- (void)setEncryptionMandatory:(BOOL)mandatory;
+
+// DTMF
+- (BOOL)getSipInfoDtmf;
+- (void)setSipInfoDtmf:(BOOL)enabled;
+- (BOOL)getUseRfc2833ForDtmf;
+- (void)setUseRfc2833ForDtmf:(BOOL)enabled;
+
+// Call Behaviour
+- (int)getIncomingTimeout;
+- (void)setIncomingTimeout:(int)seconds;
+
+// Network
+- (BOOL)getWifiOnly;
+- (void)setWifiOnly:(BOOL)enabled;
+- (BOOL)getAllowIpv6;
+- (void)setAllowIpv6:(BOOL)enabled;
+- (BOOL)getRandomPorts;
+- (void)setRandomPorts:(BOOL)random;
+- (int)getJitterBuffer;
+- (void)setJitterBuffer:(int)ms;
+
+// Logging
+- (NSString *)getLogsUploadServerURL;
+- (void)setLogsUploadServerURL:(NSString *)url;
+
+// Echo Calibration / Tester
+- (void)startEchoCancellerCalibration;
+- (void)toggleEchoTester;
 
 // Audio Routing
 - (BOOL)isSpeakerEnabled;

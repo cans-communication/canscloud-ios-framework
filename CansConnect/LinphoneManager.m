@@ -44,6 +44,7 @@ static void linphone_iphone_info_received(LinphoneCore *lc, LinphoneCall *call, 
 
 @interface LinphoneManager () {
   NSTimer *iterateTimer;
+  BOOL _echoTesterRunning;
 }
 @end
 
@@ -773,6 +774,225 @@ static void linphone_iphone_popup_password_request(LinphoneCore *lc,
 
 - (void)setPlaybackGain:(NSString *)gain {
   linphone_core_set_playback_gain_db(theLinphoneCore, [gain floatValue]);
+}
+
+- (BOOL)getEchoCancellation {
+  return theLinphoneCore ? linphone_core_echo_cancellation_enabled(theLinphoneCore) : NO;
+}
+
+- (void)setEchoCancellationEnabled:(BOOL)enabled {
+  if (theLinphoneCore) linphone_core_enable_echo_cancellation(theLinphoneCore, enabled);
+}
+
+- (BOOL)getAdaptiveRateControl {
+  return theLinphoneCore ? linphone_core_adaptive_rate_control_enabled(theLinphoneCore) : NO;
+}
+
+- (void)setAdaptiveRateControlEnabled:(BOOL)enabled {
+  if (theLinphoneCore) linphone_core_enable_adaptive_rate_control(theLinphoneCore, enabled);
+}
+
+- (float)getMicrophoneGainDb {
+  return theLinphoneCore ? linphone_core_get_mic_gain_db(theLinphoneCore) : 0.0f;
+}
+
+- (void)setMicrophoneGainDb:(float)gain {
+  if (theLinphoneCore) linphone_core_set_mic_gain_db(theLinphoneCore, gain);
+}
+
+- (float)getPlaybackGainDb {
+  return theLinphoneCore ? linphone_core_get_playback_gain_db(theLinphoneCore) : 0.0f;
+}
+
+- (int)getCodecBitrateKbps {
+  if (!theLinphoneCore) return 0;
+  static const int kAllowedBitrates[] = {10, 15, 20, 36, 64, 128};
+  static const int kCount = 6;
+  const bctbx_list_t *it = linphone_core_get_audio_payload_types(theLinphoneCore);
+  for (; it != NULL; it = it->next) {
+    LinphonePayloadType *pt = (LinphonePayloadType *)it->data;
+    if (!linphone_payload_type_is_vbr(pt)) continue;
+    int br = linphone_payload_type_get_normal_bitrate(pt);
+    for (int i = 0; i < kCount; i++) {
+      if (kAllowedBitrates[i] == br) return br;
+    }
+  }
+  return 0;
+}
+
+- (void)setCodecBitrateKbps:(int)kbps {
+  if (!theLinphoneCore) return;
+  const bctbx_list_t *it = linphone_core_get_audio_payload_types(theLinphoneCore);
+  for (; it != NULL; it = it->next) {
+    LinphonePayloadType *pt = (LinphonePayloadType *)it->data;
+    if (linphone_payload_type_is_vbr(pt)) {
+      linphone_payload_type_set_normal_bitrate(pt, kbps);
+    }
+  }
+}
+
+- (NSString *)getCodecsListJSON {
+  if (!theLinphoneCore) return @"[]";
+  NSMutableArray *list = [NSMutableArray array];
+  const bctbx_list_t *it = linphone_core_get_audio_payload_types(theLinphoneCore);
+  for (; it != NULL; it = it->next) {
+    LinphonePayloadType *pt = (LinphonePayloadType *)it->data;
+    const char *mime = linphone_payload_type_get_mime_type(pt);
+    int clock = linphone_payload_type_get_clock_rate(pt);
+    BOOL enabled = linphone_payload_type_enabled(pt);
+    [list addObject:@{
+      @"mimeType": mime ? @(mime) : @"",
+      @"clockRate": [@(clock) stringValue],
+      @"value": @(enabled)
+    }];
+  }
+  NSData *data = [NSJSONSerialization dataWithJSONObject:list options:0 error:nil];
+  return data ? [[NSString alloc] initWithData:data encoding:NSUTF8StringEncoding] : @"[]";
+}
+
+// ── Ringtone / Vibrate ────────────────────────────────────────────────────
+
+- (BOOL)getDeviceRingtone {
+  return theLinphoneCore ? linphone_core_get_ring(theLinphoneCore) == NULL : NO;
+}
+
+- (void)setDeviceRingtone:(BOOL)useDevice {
+  if (!theLinphoneCore) return;
+  linphone_core_set_ring(theLinphoneCore, useDevice ? NULL : "");
+}
+
+- (BOOL)getVibrateOnIncomingCall {
+  return theLinphoneCore ? linphone_core_is_vibration_on_incoming_call_enabled(theLinphoneCore) : NO;
+}
+
+- (void)setVibrateOnIncomingCallEnabled:(BOOL)enabled {
+  if (theLinphoneCore) linphone_core_enable_vibration_on_incoming_call(theLinphoneCore, enabled);
+}
+
+// ── Encryption ────────────────────────────────────────────────────────────
+
+- (NSString *)getMediaEncryptionName {
+  if (!theLinphoneCore) return @"None";
+  switch (linphone_core_get_media_encryption(theLinphoneCore)) {
+    case LinphoneMediaEncryptionSRTP: return @"SRTP";
+    case LinphoneMediaEncryptionZRTP: return @"ZRTP";
+    case LinphoneMediaEncryptionDTLS: return @"DTLS";
+    default: return @"None";
+  }
+}
+
+- (BOOL)getEncryptionMandatory {
+  return theLinphoneCore ? linphone_core_is_media_encryption_mandatory(theLinphoneCore) : NO;
+}
+
+- (void)setEncryptionMandatory:(BOOL)mandatory {
+  if (theLinphoneCore) linphone_core_set_media_encryption_mandatory(theLinphoneCore, mandatory);
+}
+
+// ── DTMF ──────────────────────────────────────────────────────────────────
+
+- (BOOL)getSipInfoDtmf {
+  return theLinphoneCore ? linphone_core_get_use_info_for_dtmf(theLinphoneCore) : NO;
+}
+
+- (void)setSipInfoDtmf:(BOOL)enabled {
+  if (theLinphoneCore) linphone_core_set_use_info_for_dtmf(theLinphoneCore, enabled);
+}
+
+- (BOOL)getUseRfc2833ForDtmf {
+  return theLinphoneCore ? linphone_core_get_use_rfc2833_for_dtmf(theLinphoneCore) : YES;
+}
+
+- (void)setUseRfc2833ForDtmf:(BOOL)enabled {
+  if (theLinphoneCore) linphone_core_set_use_rfc2833_for_dtmf(theLinphoneCore, enabled);
+}
+
+// ── Call Behaviour ────────────────────────────────────────────────────────
+
+- (int)getIncomingTimeout {
+  return theLinphoneCore ? linphone_core_get_inc_timeout(theLinphoneCore) : 30;
+}
+
+- (void)setIncomingTimeout:(int)seconds {
+  if (theLinphoneCore) linphone_core_set_inc_timeout(theLinphoneCore, seconds);
+}
+
+// ── Network ───────────────────────────────────────────────────────────────
+
+- (BOOL)getWifiOnly {
+  return theLinphoneCore ? linphone_core_wifi_only_enabled(theLinphoneCore) : NO;
+}
+
+- (void)setWifiOnly:(BOOL)enabled {
+  if (theLinphoneCore) linphone_core_enable_wifi_only(theLinphoneCore, enabled);
+}
+
+- (BOOL)getAllowIpv6 {
+  return theLinphoneCore ? linphone_core_ipv6_enabled(theLinphoneCore) : NO;
+}
+
+- (void)setAllowIpv6:(BOOL)enabled {
+  if (theLinphoneCore) linphone_core_enable_ipv6(theLinphoneCore, enabled);
+}
+
+- (BOOL)getRandomPorts {
+  if (!theLinphoneCore) return NO;
+  const LinphoneTransports *t = linphone_core_get_transports(theLinphoneCore);
+  int udp = linphone_transports_get_udp_port(t);
+  int tcp = linphone_transports_get_tcp_port(t);
+  return udp == -1 || (udp == 0 && tcp == -1);
+}
+
+- (void)setRandomPorts:(BOOL)random {
+  if (!theLinphoneCore) return;
+  int port = random ? -1 : 5060;
+  LinphoneTransports *t = linphone_factory_create_transports(linphone_factory_get());
+  linphone_transports_set_udp_port(t, port);
+  linphone_transports_set_tcp_port(t, port);
+  linphone_transports_set_tls_port(t, -1);
+  linphone_core_set_transports(theLinphoneCore, t);
+  linphone_transports_unref(t);
+}
+
+- (int)getJitterBuffer {
+  return theLinphoneCore ? linphone_core_get_audio_jittcomp(theLinphoneCore) : 0;
+}
+
+- (void)setJitterBuffer:(int)ms {
+  if (!theLinphoneCore) return;
+  linphone_core_set_audio_jittcomp(theLinphoneCore, ms);
+  linphone_core_enable_audio_adaptive_jittcomp(theLinphoneCore, ms == 999);
+}
+
+// ── Logging ───────────────────────────────────────────────────────────────
+
+- (NSString *)getLogsUploadServerURL {
+  if (!theLinphoneCore) return @"";
+  const char *url = linphone_core_get_log_collection_upload_server_url(theLinphoneCore);
+  return url ? @(url) : @"";
+}
+
+- (void)setLogsUploadServerURL:(NSString *)url {
+  if (theLinphoneCore) {
+    linphone_core_set_log_collection_upload_server_url(theLinphoneCore, [url UTF8String]);
+  }
+}
+
+// ── Echo Calibration / Tester ─────────────────────────────────────────────
+
+- (void)startEchoCancellerCalibration {
+  if (theLinphoneCore) linphone_core_start_echo_canceller_calibration(theLinphoneCore);
+}
+
+- (void)toggleEchoTester {
+  if (!theLinphoneCore) return;
+  if (_echoTesterRunning) {
+    linphone_core_stop_echo_tester(theLinphoneCore);
+    _echoTesterRunning = NO;
+  } else {
+    linphone_core_start_echo_tester(theLinphoneCore, 0);
+    _echoTesterRunning = YES;
+  }
 }
 
 // ==========================================

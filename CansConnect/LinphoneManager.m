@@ -40,6 +40,8 @@ static void linphone_iphone_message_received(LinphoneCore *lc, LinphoneChatRoom 
 
 static void linphone_iphone_chat_message_state_changed(LinphoneCore *lc, LinphoneChatRoom *room, LinphoneChatMessage *message, LinphoneChatMessageState state);
 
+static void linphone_iphone_info_received(LinphoneCore *lc, LinphoneCall *call, const LinphoneInfoMessage *msg);
+
 @interface LinphoneManager () {
   NSTimer *iterateTimer;
 }
@@ -229,6 +231,7 @@ static void linphone_iphone_chat_message_state_changed(LinphoneCore *lc, Linphon
       linphone_core_cbs_set_audio_device_changed(cbs, linphone_iphone_audio_device_changed);
       linphone_core_cbs_set_audio_devices_list_updated(cbs, linphone_iphone_audio_devices_list_updated);
       linphone_core_cbs_set_message_received(cbs, linphone_iphone_message_received);
+      linphone_core_cbs_set_info_received(cbs, linphone_iphone_info_received);
       // Note: linphone_core_cbs_set_chat_message_state_changed does not exist on CoreCbs.
       // Message state changes are typically set on individual LinphoneChatMessage objects.
       // linphone_core_cbs_set_chat_message_state_changed(cbs, linphone_iphone_chat_message_state_changed);
@@ -479,6 +482,24 @@ static void linphone_iphone_popup_password_request(LinphoneCore *lc,
 
 
 // ==========================================
+- (void)setDefaultAccount:(NSInteger)index phoneNumber:(NSString *)phoneNumber {
+    if (!theLinphoneCore) return;
+    dispatch_async(dispatch_get_main_queue(), ^{
+        const bctbx_list_t *accounts = linphone_core_get_account_list(theLinphoneCore);
+        LinphoneAccount *acc = (LinphoneAccount *)bctbx_list_nth_data(accounts, (int)index);
+        if (acc) {
+            const LinphoneAddress *addr = linphone_account_params_get_identity_address(linphone_account_get_params(acc));
+            if (addr) {
+                NSString *username = [NSString stringWithUTF8String:linphone_address_get_username(addr)];
+                if ([username isEqualToString:phoneNumber]) {
+                    linphone_core_set_default_account(theLinphoneCore, acc);
+                    NSLog(@"[LinphoneManager] setDefaultAccount: %@", phoneNumber);
+                }
+            }
+        }
+    });
+}
+
 // MARK: - Call Management & History
 // ==========================================
 
@@ -1366,13 +1387,30 @@ static void linphone_iphone_audio_devices_list_updated(LinphoneCore *lc) {
 - (void)setVideoEnabled:(BOOL)enabled {
     if (!theLinphoneCore) return;
     LinphoneCall *call = linphone_core_get_current_call(theLinphoneCore);
-    if (!call) return;
-    
-    LinphoneCallParams *params = linphone_core_create_call_params(theLinphoneCore, call);
-    linphone_call_params_enable_video(params, TRUE);
-    linphone_call_params_set_video_direction(params, enabled ? LinphoneMediaDirectionSendRecv : LinphoneMediaDirectionRecvOnly);
-    linphone_call_update(call, params);
-    linphone_call_params_unref(params);
+    if (!call) {
+        const bctbx_list_t *calls = linphone_core_get_calls(theLinphoneCore);
+        if (calls != NULL) call = (LinphoneCall *)calls->data;
+    }
+    if (!call) {
+        NSLog(@"[LinphoneManager] setVideoEnabled: no active call, enabled=%d", enabled);
+        return;
+    }
+
+    // Toggle local capture — no SDP renegotiation, avoids TextureView flicker
+    linphone_core_enable_video_capture(theLinphoneCore, enabled);
+
+    // Notify remote peer via SIP INFO so it knows our camera state
+    LinphoneContent *content = linphone_factory_create_content(linphone_factory_get());
+    linphone_content_set_type(content, "application");
+    linphone_content_set_subtype(content, "cans-video-state");
+    linphone_content_set_utf8_text(content, enabled ? "video=on" : "video=off");
+
+    LinphoneInfoMessage *info = linphone_core_create_info_message(theLinphoneCore);
+    linphone_info_message_set_content(info, content);
+    linphone_call_send_info_message(call, info);
+
+    linphone_content_unref(content);
+    NSLog(@"[LinphoneManager] setVideoEnabled: %d, sent SIP INFO cans-video-state", enabled);
 }
 
 - (void)sendTextMessage:(NSString *)peerUri text:(NSString *)text requestId:(NSString *)requestId {
@@ -1466,7 +1504,24 @@ static void linphone_iphone_audio_devices_list_updated(LinphoneCore *lc) {
 }
 
 - (void)deleteMessage:(NSString *)peerUri msgId:(NSString *)msgId {
-    // Basic implementation: find message in history and delete
+    if (!theLinphoneCore || !peerUri || !msgId) return;
+    LinphoneAddress *addr = linphone_core_interpret_url(theLinphoneCore, peerUri.UTF8String);
+    if (!addr) return;
+
+    LinphoneChatRoom *room = linphone_core_get_chat_room(theLinphoneCore, addr);
+    if (room) {
+        const bctbx_list_t *history = linphone_chat_room_get_history(room, 0);
+        for (const bctbx_list_t *it = history; it != NULL; it = it->next) {
+            LinphoneChatMessage *msg = (LinphoneChatMessage *)it->data;
+            const char *header = linphone_chat_message_get_custom_header(msg, "X-Request-ID");
+            if (header && [[NSString stringWithUTF8String:header] isEqualToString:msgId]) {
+                linphone_chat_room_delete_message(room, msg);
+                NSLog(@"[LinphoneManager] deleteMessage: deleted msgId=%@", msgId);
+                break;
+            }
+        }
+    }
+    linphone_address_unref(addr);
 }
 
 - (void)markAsRead:(NSString *)peerUri {
@@ -1511,6 +1566,31 @@ static void linphone_iphone_chat_message_state_changed(LinphoneCore *lc, Linphon
         @"state": @(state)
     };
     [[NSNotificationCenter defaultCenter] postNotificationName:@"LinphoneMessageStateChanged" object:nil userInfo:dict];
+}
+
+static void linphone_iphone_info_received(LinphoneCore *lc, LinphoneCall *call, const LinphoneInfoMessage *msg) {
+    const LinphoneContent *content = linphone_info_message_get_content(msg);
+    if (!content) return;
+
+    const char *type = linphone_content_get_type(content);
+    const char *subtype = linphone_content_get_subtype(content);
+
+    if (type && subtype &&
+        strcmp(type, "application") == 0 &&
+        strcmp(subtype, "cans-video-state") == 0) {
+
+        const char *body = linphone_content_get_utf8_text(content);
+        BOOL enabled = body && strcmp(body, "video=on") == 0;
+
+        NSLog(@"[LinphoneManager] SIP INFO cans-video-state received: %s", body ?: "(null)");
+
+        dispatch_async(dispatch_get_main_queue(), ^{
+            [[NSNotificationCenter defaultCenter]
+                postNotificationName:kLinphoneRemoteVideoStateUpdate
+                              object:nil
+                            userInfo:@{@"enabled": @(enabled)}];
+        });
+    }
 }
 
 @end

@@ -109,5 +109,6 @@ extern NSString *const kCansCustomRegistrationEvent;
                requestId:(NSString *)requestId;
 - (void)deleteMessage:(NSString *)peerUri msgId:(NSString *)msgId;
 - (void)markAsRead:(NSString *)peerUri;
+- (void)setDefaultAccount:(NSInteger)index phoneNumber:(NSString *)phoneNumber;
 
 @end

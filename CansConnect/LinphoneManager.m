@@ -7,6 +7,7 @@
 #import <CommonCrypto/CommonDigest.h>
 
 static LinphoneCore *theLinphoneCore = nil;
+static NSString *const kCANSApiLoginURL = @"com.canscloud.apiLoginURL";
 NSString *const kLinphoneRegistrationUpdate = @"LinphoneRegistrationUpdate";
 NSString *const kLinphoneCallStateUpdate = @"LinphoneCallStateUpdate";
 NSString *const kLinphoneAudioDeviceUpdate = @"LinphoneAudioDeviceUpdate";
@@ -45,6 +46,9 @@ static void linphone_iphone_info_received(LinphoneCore *lc, LinphoneCall *call, 
 @interface LinphoneManager () {
   NSTimer *iterateTimer;
   BOOL _echoTesterRunning;
+  // Tracks last-known remote camera state to suppress duplicate/spurious events
+  // (mirrors Android's lastRemoteCameraOnState). Reset to -1 (unknown) on End/Error/Released.
+  int _lastRemoteCameraOnState; // -1=unknown, 0=off, 1=on
 }
 @end
 
@@ -440,9 +444,19 @@ static void linphone_iphone_popup_password_request(LinphoneCore *lc,
   });
 }
 
-// ฟังก์ชันเดิมสำหรับดึงข้อมูลบัญชี
 - (NSString *)accountList {
-  return @"[]"; // หรือใส่ logic ดึง account ตามที่เคยเขียนไว้
+  if (!theLinphoneCore) return @"[]";
+  NSMutableArray *usernames = [NSMutableArray array];
+  const bctbx_list_t *accounts = linphone_core_get_account_list(theLinphoneCore);
+  for (const bctbx_list_t *it = accounts; it != NULL; it = it->next) {
+    LinphoneAccount *acc = (LinphoneAccount *)it->data;
+    const LinphoneAddress *addr = linphone_account_params_get_identity_address(
+        linphone_account_get_params(acc));
+    const char *user = addr ? linphone_address_get_username(addr) : NULL;
+    [usernames addObject:user ? [NSString stringWithUTF8String:user] : @""];
+  }
+  NSData *data = [NSJSONSerialization dataWithJSONObject:usernames options:0 error:nil];
+  return data ? [[NSString alloc] initWithData:data encoding:NSUTF8StringEncoding] : @"[]";
 }
 
 // ฟังก์ชันเดิมสำหรับลบบัญชี
@@ -478,22 +492,52 @@ static void linphone_iphone_popup_password_request(LinphoneCore *lc,
 
 
 // ==========================================
+- (void)setDefaultAccountSync:(NSInteger)index phoneNumber:(NSString *)phoneNumber {
+    const bctbx_list_t *accounts = linphone_core_get_account_list(theLinphoneCore);
+    LinphoneAccount *acc = (LinphoneAccount *)bctbx_list_nth_data(accounts, (int)index);
+    if (acc) {
+        const LinphoneAddress *addr = linphone_account_params_get_identity_address(linphone_account_get_params(acc));
+        if (addr) {
+            NSString *username = [NSString stringWithUTF8String:linphone_address_get_username(addr)];
+            if ([username isEqualToString:phoneNumber]) {
+                linphone_core_set_default_account(theLinphoneCore, acc);
+                NSLog(@"[LinphoneManager] setDefaultAccountSync: %@", phoneNumber);
+            }
+        }
+    }
+}
+
 - (void)setDefaultAccount:(NSInteger)index phoneNumber:(NSString *)phoneNumber {
     if (!theLinphoneCore) return;
     dispatch_async(dispatch_get_main_queue(), ^{
-        const bctbx_list_t *accounts = linphone_core_get_account_list(theLinphoneCore);
-        LinphoneAccount *acc = (LinphoneAccount *)bctbx_list_nth_data(accounts, (int)index);
-        if (acc) {
-            const LinphoneAddress *addr = linphone_account_params_get_identity_address(linphone_account_get_params(acc));
-            if (addr) {
-                NSString *username = [NSString stringWithUTF8String:linphone_address_get_username(addr)];
-                if ([username isEqualToString:phoneNumber]) {
-                    linphone_core_set_default_account(theLinphoneCore, acc);
-                    NSLog(@"[LinphoneManager] setDefaultAccount: %@", phoneNumber);
-                }
-            }
-        }
+        [self setDefaultAccountSync:index phoneNumber:phoneNumber];
     });
+}
+- (NSString *)updateCurrentLoginTypeFromAccount {
+  if (!theLinphoneCore) return @"";
+  
+  LinphoneAccount *defaultAccount = linphone_core_get_default_account(theLinphoneCore);
+  if (defaultAccount) {
+    LinphoneAccountParams *params = (LinphoneAccountParams *)linphone_account_get_params(defaultAccount);
+    const char *contactParams = linphone_account_params_get_contact_uri_parameters(params);
+    
+    NSString *type = @"";
+    if (contactParams) {
+      NSString *paramsStr = [NSString stringWithUTF8String:contactParams];
+      NSArray *parts = [paramsStr componentsSeparatedByString:@";"];
+      for (NSString *part in parts) {
+        NSString *trimmed = [part stringByTrimmingCharactersInSet:[NSCharacterSet whitespaceCharacterSet]];
+        if ([trimmed hasPrefix:@"app-login-type="]) {
+          type = [[trimmed componentsSeparatedByString:@"="] lastObject];
+          break;
+        }
+      }
+    }
+    
+    NSLog(@"[LinphoneManager] updateCurrentLoginTypeFromAccount: type=%@", type);
+    return type;
+  }
+  return @"";
 }
 
 // MARK: - Call Management & History
@@ -548,6 +592,7 @@ static void linphone_iphone_popup_password_request(LinphoneCore *lc,
   case LinphoneCallIdle:
     return @"Idle";
   case LinphoneCallIncomingReceived:
+  case LinphoneCallIncomingEarlyMedia:
     return @"IncomingCall";
   case LinphoneCallOutgoingInit:
     return @"CallOutgoing";
@@ -1005,15 +1050,12 @@ static void linphone_iphone_popup_password_request(LinphoneCore *lc,
 }
 
 - (void)toggleSpeaker {
-  AVAudioSession *session = [AVAudioSession sharedInstance];
-  BOOL isSpeaker = [self isSpeakerEnabled];
-  NSError *error = nil;
-  if (isSpeaker) {
-    [session overrideOutputAudioPort:AVAudioSessionPortOverrideNone
-                               error:&error];
+  // Use the Linphone audio device API exclusively — AVAudioSession overrides conflict
+  // with linphone_call_set_output_audio_device used in routeAudioTo* methods.
+  if ([self isSpeakerEnabled]) {
+    [self routeAudioToEarpiece];
   } else {
-    [session overrideOutputAudioPort:AVAudioSessionPortOverrideSpeaker
-                               error:&error];
+    [self routeAudioToSpeaker];
   }
   [[NSNotificationCenter defaultCenter] postNotificationName:@"dataFromAudio"
                                                       object:nil];
@@ -1192,21 +1234,48 @@ static void linphone_iphone_call_state(LinphoneCore *lc, LinphoneCall *call,
       }
   }
   
-  // Remote Video State Monitoring
+  // Remote Video State Monitoring — mirrors Android's lastRemoteCameraOnState dedup.
+  // Skip during LinphoneCallUpdating: remote params reflect mid-negotiation SDP which
+  // may temporarily show a stale direction, causing a spurious isRemoteCameraOn=NO event
+  // that hides the remote view (black flash). LinphoneCallUpdatedByRemote fires after
+  // negotiation is complete, so that state is safe to read.
   if (state == LinphoneCallStreamsRunning || state == LinphoneCallUpdatedByRemote) {
       const LinphoneCallParams *remoteParams = linphone_call_get_remote_params(call);
       if (remoteParams) {
           BOOL isRemoteVideoEnabled = linphone_call_params_video_enabled(remoteParams);
           LinphoneMediaDirection dir = linphone_call_params_get_video_direction(remoteParams);
-          BOOL isSendingVideo = isRemoteVideoEnabled && (dir == LinphoneMediaDirectionSendOnly || dir == LinphoneMediaDirectionSendRecv);
-          
-          [[NSNotificationCenter defaultCenter] postNotificationName:kLinphoneRemoteVideoStateUpdate 
-                                                              object:nil 
-                                                            userInfo:@{@"enabled": @(isSendingVideo)}];
+          BOOL isSendingVideo = isRemoteVideoEnabled &&
+              (dir == LinphoneMediaDirectionSendOnly || dir == LinphoneMediaDirectionSendRecv);
+          int newState = isSendingVideo ? 1 : 0;
+
+          // Only fire when value changed — prevents toggling display:none on the remote view
+          // during re-INVITEs where the remote camera state is actually unchanged.
+          if (newState != manager->_lastRemoteCameraOnState) {
+              NSLog(@"[LinphoneManager] onRemoteVideoStateChanged: %d (was %d, state=%d)",
+                    isSendingVideo, manager->_lastRemoteCameraOnState, state);
+              manager->_lastRemoteCameraOnState = newState;
+              [[NSNotificationCenter defaultCenter] postNotificationName:kLinphoneRemoteVideoStateUpdate
+                                                                  object:nil
+                                                                userInfo:@{@"enabled": @(isSendingVideo)}];
+          }
       }
   }
 
-  // Bluetooth Auto-Routing (Logic from Android)
+  // Reset remote camera tracking on call tear-down (End, Error, Released).
+  // Matches Android: lastRemoteCameraOnState = null on End + Released + Error.
+  if (state == LinphoneCallEnd || state == LinphoneCallError || state == LinphoneCallReleased) {
+      manager->_lastRemoteCameraOnState = -1;
+  }
+
+  // Re-enable mic if the last call ended while muted — mirrors Android onLastCallEnded.
+  if (state == LinphoneCallReleased && linphone_core_get_calls_nb(lc) == 0) {
+      if (!linphone_core_mic_enabled(lc)) {
+          NSLog(@"[LinphoneManager] Mic was muted, re-enabling for next call");
+          linphone_core_enable_mic(lc, TRUE);
+      }
+  }
+
+  // Bluetooth Auto-Routing on StreamsRunning/Connected
   if (state == LinphoneCallStreamsRunning || state == LinphoneCallConnected) {
       if ([manager isBluetoothAudioRouteAvailable]) {
           [manager routeAudioToBluetooth];
@@ -1258,6 +1327,13 @@ static void linphone_iphone_audio_devices_list_updated(LinphoneCore *lc) {
              payloadDictionary:(NSDictionary *)dict {
   NSString *jsonString = [self jsonStringFromDictionary:dict];
   dispatch_async(dispatch_get_main_queue(), ^{
+    // kLinphoneRegistrationUpdate with "stateStr" key — NativeModuleiOS forwards this
+    // on the "register" event channel that SignInCANSAccoutScreen listens to.
+    [[NSNotificationCenter defaultCenter]
+        postNotificationName:kLinphoneRegistrationUpdate
+                      object:nil
+                    userInfo:@{@"stateStr" : state, @"payload" : jsonString}];
+    // kCansCustomRegistrationEvent — keeps "registerAccountSetting" listeners working.
     [[NSNotificationCenter defaultCenter]
         postNotificationName:kCansCustomRegistrationEvent
                       object:nil
@@ -1270,112 +1346,144 @@ static void linphone_iphone_audio_devices_list_updated(LinphoneCore *lc) {
                                password:(NSString *)password
                                  domain:(NSString *)domain
                                  apiURL:(NSString *)apiURL {
-  NSString *md5Password = [self md5Hash:password];
-  NSString *fullUsername =
-      [NSString stringWithFormat:@"%@@%@", username, domain];
-  NSString *loginUrlString =
-      [NSString stringWithFormat:@"%@api/v3/sign-in/cc", apiURL];
-  NSURL *loginUrl = [NSURL URLWithString:loginUrlString];
-  NSMutableURLRequest *loginRequest =
-      [NSMutableURLRequest requestWithURL:loginUrl];
-  loginRequest.HTTPMethod = @"POST";
-  [loginRequest setValue:@"application/json"
-      forHTTPHeaderField:@"Content-Type"];
+  username = [username stringByTrimmingCharactersInSet:[NSCharacterSet whitespaceAndNewlineCharacterSet]];
+  password = [password stringByTrimmingCharactersInSet:[NSCharacterSet whitespaceAndNewlineCharacterSet]];
+  domain = [domain stringByTrimmingCharactersInSet:[NSCharacterSet whitespaceAndNewlineCharacterSet]];
+  apiURL = [apiURL stringByTrimmingCharactersInSet:[NSCharacterSet whitespaceAndNewlineCharacterSet]];
 
-  NSDictionary *loginBody =
-      @{@"username" : fullUsername, @"password" : md5Password};
-  loginRequest.HTTPBody = [NSJSONSerialization dataWithJSONObject:loginBody
-                                                          options:0
-                                                            error:nil];
+  NSLog(@"[CansConnect] DEBUG: trimmed username=[%@] len=%lu, domain=[%@] len=%lu", username, (unsigned long)username.length, domain, (unsigned long)domain.length);
+  
+  if (!username.length || !password.length || !domain.length) {
+    NSLog(@"[CansConnect] registerCansAccountWithUsername: empty inputs");
+    [self postCansEventWithState:@"FAIL" payloadDictionary:@{}];
+    return;
+  }
+
+  if (apiURL.length > 0 && ![apiURL hasSuffix:@"/"]) {
+    apiURL = [apiURL stringByAppendingString:@"/"];
+  }
+
+  [[NSUserDefaults standardUserDefaults] setObject:apiURL forKey:kCANSApiLoginURL];
+
+  NSString *md5Password = [self md5Hash:password];
+  // Build fullUsername without stringWithFormat to avoid any weirdness
+  NSString *fullUsername = [username stringByAppendingString:@"@"];
+  fullUsername = [fullUsername stringByAppendingString:domain];
+  
+  NSData *fullUserBytes = [fullUsername dataUsingEncoding:NSUTF8StringEncoding];
+  NSLog(@"[CansConnect] fullUsername: %@ (bytes: %@)", fullUsername, fullUserBytes);
+  NSString *loginUrlString = [NSString stringWithFormat:@"%@api/v3/sign-in/cc", apiURL];
+  NSURL *loginUrl = [NSURL URLWithString:loginUrlString];
+  NSMutableURLRequest *loginRequest = [NSMutableURLRequest requestWithURL:loginUrl];
+  loginRequest.HTTPMethod = @"POST";
+  [loginRequest setValue:@"application/json" forHTTPHeaderField:@"Content-Type"];
+  [loginRequest setValue:@"application/json, text/plain, */*" forHTTPHeaderField:@"Accept"];
+  [loginRequest setValue:@"en-US,en;q=0.9,th-TH;q=0.8,th;q=0.7" forHTTPHeaderField:@"Accept-Language"];
+  [loginRequest setValue:@"no-cache" forHTTPHeaderField:@"Cache-Control"];
+  [loginRequest setValue:@"okhttp/4.9.1" forHTTPHeaderField:@"User-Agent"];
+
+  NSDictionary *loginBody = @{@"username" : fullUsername, @"password" : md5Password};
+  NSError *jsonError;
+  NSData *jsonData = [NSJSONSerialization dataWithJSONObject:loginBody options:0 error:&jsonError];
+  loginRequest.HTTPBody = jsonData;
+  
+  NSLog(@"[CansConnect] V3 Login Request: URL=%@ Body=%@", loginUrlString, [[NSString alloc] initWithData:jsonData encoding:NSUTF8StringEncoding]);
 
   NSURLSession *session = [NSURLSession sharedSession];
-  [[session
-      dataTaskWithRequest:loginRequest
-        completionHandler:^(NSData *data, NSURLResponse *response,
-                            NSError *error) {
-          if (error || !data) {
-            NSLog(@"[CansConnect] Login V3 Error: %@", error);
-            [self postCansEventWithState:@"FAIL" payloadDictionary:@{}];
-            return;
-          }
+  [[session dataTaskWithRequest:loginRequest
+      completionHandler:^(NSData *data, NSURLResponse *response, NSError *error) {
+        if (error || !data) {
+          NSLog(@"[CansConnect] Login V3 network error: %@", error);
+          [self postCansEventWithState:@"FAIL" payloadDictionary:@{}];
+          return;
+        }
 
-          NSDictionary *json = [NSJSONSerialization JSONObjectWithData:data
-                                                               options:0
-                                                                 error:nil];
-          NSDictionary *responseData = json[@"data"];
+        NSHTTPURLResponse *httpResp = (NSHTTPURLResponse *)response;
+        NSDictionary *json = [NSJSONSerialization JSONObjectWithData:data options:0 error:nil];
+        NSDictionary *responseData = json[@"data"];
 
-          if (!responseData || [responseData isKindOfClass:[NSNull class]]) {
-            NSLog(@"[CansConnect] Login V3 Failed: %@", json[@"message"]);
-            [self postCansEventWithState:@"FAIL" payloadDictionary:@{}];
-            return;
-          }
+        if (httpResp.statusCode != 200 || !responseData || [responseData isKindOfClass:[NSNull class]]) {
+          NSLog(@"[CansConnect] Login V3 failed: code=%ld message=%@", (long)httpResp.statusCode, json[@"message"]);
+          [self postCansEventWithState:@"FAIL" payloadDictionary:@{}];
+          return;
+        }
 
-          NSDictionary *user = responseData[@"user"];
-          BOOL passwordResetRequired =
-              [user[@"password_reset_required"] boolValue];
-          NSString *token = responseData[@"token"];
-          NSString *domainId = user[@"domain_id"];
+        NSDictionary *user = responseData[@"user"];
+        BOOL passwordResetRequired = [user[@"password_reset_required"] boolValue];
+        NSString *token = responseData[@"token"];
+        NSString *domainId = user[@"domain_id"];
 
-          if (passwordResetRequired) {
-            NSDictionary *payload = @{
-              @"action" : @"PASSWORD_RESET_REQUIRED",
-              @"token" : token ?: @"",
-              @"userId" : user[@"user_id"] ?: @"",
-              @"domainId" : domainId ?: @""
-            };
-            [self postCansEventWithState:@"PASSWORD_RESET_REQUIRED"
-                       payloadDictionary:payload];
-            return;
-          }
+        if (passwordResetRequired) {
+          NSDictionary *payload = @{
+            @"action" : @"PASSWORD_RESET_REQUIRED",
+            @"token" : token ?: @"",
+            @"userId" : user[@"user_id"] ?: @"",
+            @"domainId" : domainId ?: @""
+          };
+          [self postCansEventWithState:@"PASSWORD_RESET_REQUIRED" payloadDictionary:payload];
+          return;
+        }
 
-          NSString *sipCredsUrlString =
-              [NSString stringWithFormat:@"%@api/v3/%@/sip-credentials", apiURL,
-                                         domainId];
-          NSURL *sipCredsUrl = [NSURL URLWithString:sipCredsUrlString];
-          NSMutableURLRequest *sipRequest =
-              [NSMutableURLRequest requestWithURL:sipCredsUrl];
-          sipRequest.HTTPMethod = @"GET";
-          [sipRequest setValue:[NSString stringWithFormat:@"Bearer %@", token]
-              forHTTPHeaderField:@"Authorization"];
+        NSString *sipCredsUrlString = [NSString stringWithFormat:@"%@api/v3/%@/sip-credentials", apiURL, domainId];
+        NSURL *sipCredsUrl = [NSURL URLWithString:sipCredsUrlString];
+        NSMutableURLRequest *sipRequest = [NSMutableURLRequest requestWithURL:sipCredsUrl];
+        sipRequest.HTTPMethod = @"GET";
+        [sipRequest setValue:[NSString stringWithFormat:@"Bearer %@", token] forHTTPHeaderField:@"Authorization"];
+        [sipRequest setValue:@"application/json, text/plain, */*" forHTTPHeaderField:@"Accept"];
+        [sipRequest setValue:@"en-US,en;q=0.9,th-TH;q=0.8,th;q=0.7" forHTTPHeaderField:@"Accept-Language"];
+        [sipRequest setValue:@"no-cache" forHTTPHeaderField:@"Cache-Control"];
 
-          [[session
-              dataTaskWithRequest:sipRequest
-                completionHandler:^(NSData *sipData, NSURLResponse *sipResponse,
-                                    NSError *sipError) {
-                  if (sipError || !sipData) {
-                    [self postCansEventWithState:@"FAIL" payloadDictionary:@{}];
-                    return;
-                  }
+        [[session dataTaskWithRequest:sipRequest
+            completionHandler:^(NSData *sipData, NSURLResponse *sipResponse, NSError *sipError) {
+              if (sipError || !sipData) {
+                NSLog(@"[CansConnect] SIP credentials network error: %@", sipError);
+                [self postCansEventWithState:@"FAIL" payloadDictionary:@{}];
+                return;
+              }
 
-                  NSDictionary *sipJson =
-                      [NSJSONSerialization JSONObjectWithData:sipData
-                                                      options:0
-                                                        error:nil];
-                  NSDictionary *credsData = sipJson[@"data"];
+              NSHTTPURLResponse *sipHttpResp = (NSHTTPURLResponse *)sipResponse;
+              NSInteger sipCode = sipHttpResp.statusCode;
 
-                  if (!credsData || [credsData isKindOfClass:[NSNull class]]) {
-                    NSDictionary *payload = @{
-                      @"action" : @"SIP_NOT_LINKED",
-                      @"message" : @"SIP Account not linked"
-                    };
-                    [self postCansEventWithState:@"SIP_NOT_LINKED"
-                               payloadDictionary:payload];
-                    return;
-                  }
+              // 404 or 424 = SIP account not yet linked to this user
+              if (sipCode == 404 || sipCode == 424) {
+                NSDictionary *payload = @{@"action" : @"SIP_NOT_LINKED", @"message" : @"SIP Account not linked"};
+                [self postCansEventWithState:@"SIP_NOT_LINKED" payloadDictionary:payload];
+                return;
+              }
 
-                  NSString *extension = credsData[@"extension"] ?: username;
-                  NSString *domainName = credsData[@"domain_name"] ?: domain;
-                  NSString *sipCredsHA1 = credsData[@"sip_creds"];
+              if (sipCode < 200 || sipCode >= 300) {
+                NSLog(@"[CansConnect] SIP credentials failed: code=%ld", (long)sipCode);
+                [self postCansEventWithState:@"FAIL" payloadDictionary:@{}];
+                return;
+              }
 
-                  dispatch_async(dispatch_get_main_queue(), ^{
-                    [self setupLinphoneWithExtension:extension
-                                                 ha1:sipCredsHA1
-                                              domain:domainName
-                                                port:@"8446"
-                                           transport:@"tcp"];
-                  });
-                }] resume];
-        }] resume];
+              NSDictionary *sipJson = [NSJSONSerialization JSONObjectWithData:sipData options:0 error:nil];
+              NSDictionary *credsData = sipJson[@"data"];
+
+              if (!credsData || [credsData isKindOfClass:[NSNull class]]) {
+                NSDictionary *payload = @{@"action" : @"SIP_NOT_LINKED", @"message" : @"SIP Account not linked"};
+                [self postCansEventWithState:@"SIP_NOT_LINKED" payloadDictionary:payload];
+                return;
+              }
+
+              NSString *ext = credsData[@"extension"] ?: username;
+              NSString *domainName = credsData[@"domain_name"] ?: domain;
+              NSString *sipCredsHA1 = credsData[@"sip_creds"];
+
+              // Persist token and domainUUID keyed by SIP address — required by forceSetPasswordBcrypt
+              NSString *sipAddress = [NSString stringWithFormat:@"%@@%@", ext, domain];
+              [[NSUserDefaults standardUserDefaults]
+                  setObject:token
+                     forKey:[NSString stringWithFormat:@"com.canscloud.accessToken.%@", sipAddress]];
+              [[NSUserDefaults standardUserDefaults]
+                  setObject:domainId
+                     forKey:[NSString stringWithFormat:@"com.canscloud.domainUUID.%@", sipAddress]];
+
+              dispatch_async(dispatch_get_main_queue(), ^{
+                [self setupLinphoneWithExtension:ext ha1:sipCredsHA1 domain:domainName port:@"8446" transport:@"tcp"];
+              });
+            }] resume];
+      }] resume];
 }
 
 // 5. นำ HA1 มาเซ็ตค่าให้กับ Linphone
@@ -1411,14 +1519,23 @@ static void linphone_iphone_audio_devices_list_updated(LinphoneCore *lc) {
   }
 
   linphone_account_params_enable_register(params, TRUE);
-  linphone_account_params_set_contact_uri_parameters(params,
-                                                     "app-login-type=cans");
+  linphone_account_params_set_contact_uri_parameters(params, "app-login-type=cans");
 
-  LinphoneAccount *account =
-      linphone_core_create_account(theLinphoneCore, params);
+  LinphoneAccount *account = linphone_core_create_account(theLinphoneCore, params);
   if (account) {
     linphone_core_add_account(theLinphoneCore, account);
     linphone_core_set_default_account(theLinphoneCore, account);
+
+    // Set conferenceFactoryUri via the ProxyConfig layer (Account API in SDK 5.4
+    // does not expose this directly; ProxyConfig is the underlying representation).
+    NSString *confFactoryUri = [NSString stringWithFormat:@"sip:conference-factory@%@", realm];
+    const bctbx_list_t *proxies = linphone_core_get_proxy_config_list(theLinphoneCore);
+    const bctbx_list_t *last = bctbx_list_last_elem(proxies);
+    if (last) {
+      LinphoneProxyConfig *pc = (LinphoneProxyConfig *)last->data;
+      linphone_proxy_config_set_conference_factory_uri(pc, confFactoryUri.UTF8String);
+      NSLog(@"[LinphoneManager] conferenceFactoryUri set: %@", confFactoryUri);
+    }
   }
 
   if (identity)
@@ -1749,7 +1866,54 @@ static void linphone_iphone_audio_devices_list_updated(LinphoneCore *lc) {
 }
 
 - (void)configureChatSettings:(NSString *)username {
-    // Setup listeners or internal state for chat
+    if (!theLinphoneCore) {
+        NSLog(@"[LinphoneManager] configureChatSettings: core not ready, skipping");
+        return;
+    }
+
+    NSString *currentUser = (username && username.length > 0) ? username : @"default";
+    NSString *dbName = [NSString stringWithFormat:@"%@-chats.db", currentUser];
+    NSString *dbPath = [LinphoneManager dataFile:dbName];
+
+    NSLog(@"[LinphoneManager] configureChatSettings: user=%@, dbPath=%@", currentUser, dbPath);
+
+    LinphoneConfig *config = linphone_core_get_config(theLinphoneCore);
+    if (!config) return;
+
+    // Update per-user chat DB path (takes effect on next core start if changed mid-session)
+    const char *currentUri = linphone_config_get_string(config, "storage", "uri", "");
+    NSString *currentUriStr = currentUri ? [NSString stringWithUTF8String:currentUri] : @"";
+    if (![currentUriStr isEqualToString:dbPath]) {
+        NSLog(@"[LinphoneManager] configureChatSettings: updating DB path: %@ → %@", currentUriStr, dbPath);
+        linphone_config_set_string(config, "storage", "uri", dbPath.UTF8String);
+        linphone_config_set_string(config, "misc", "chat_database_path", dbPath.UTF8String);
+        linphone_config_set_string(config, "call_logs", "database_path", dbPath.UTF8String);
+    }
+
+    // Chat configuration (mirrors Android CansCenter.configureChatSettings)
+    linphone_config_set_int(config, "misc", "hide_empty_chat_rooms", 0);
+    linphone_config_set_int(config, "misc", "load_chat_rooms_from_db", 1);
+    linphone_config_set_int(config, "misc", "store_chat_logs", 1);
+    linphone_config_set_int(config, "misc", "chat_rooms_enabled", 1);
+    linphone_config_set_int(config, "misc", "hide_chat_rooms_from_removed_proxies", 0);
+    linphone_config_set_int(config, "misc", "group_chat_supported", 0);
+    linphone_config_set_int(config, "sip", "check_incoming_request_uri", 1);
+    linphone_config_set_string(config, "sip", "save_headers", "To, Diversion, Contact, X-Voicemail");
+    linphone_config_set_string(config, "misc", "file_transfer_protocol", "https");
+
+    // Video configuration
+    linphone_config_set_int(config, "video", "enabled", 1);
+    linphone_config_set_int(config, "video", "capture_enabled", 1);
+    linphone_config_set_int(config, "video", "display_enabled", 1);
+    linphone_config_set_int(config, "video", "self_view", 1);
+
+    linphone_config_sync(config);
+
+    // Apply video settings directly to running core
+    linphone_core_enable_video_capture(theLinphoneCore, TRUE);
+    linphone_core_enable_video_display(theLinphoneCore, TRUE);
+
+    NSLog(@"[LinphoneManager] configureChatSettings: done for user=%@", currentUser);
 }
 
 - (void)removeAccountAll {
@@ -1806,6 +1970,225 @@ static void linphone_iphone_info_received(LinphoneCore *lc, LinphoneCall *call, 
                             userInfo:@{@"enabled": @(enabled)}];
         });
     }
+}
+
+
+
+- (BOOL)getPushNotification {
+    if (!theLinphoneCore) return NO;
+    LinphoneAccount *acc = linphone_core_get_default_account(theLinphoneCore);
+    if (acc) {
+        return linphone_account_params_get_push_notification_allowed(linphone_account_get_params(acc));
+    }
+    return NO;
+}
+
+- (int)getExpires {
+    if (!theLinphoneCore) return 3600;
+    LinphoneAccount *acc = linphone_core_get_default_account(theLinphoneCore);
+    if (acc) {
+        return linphone_account_params_get_expires(linphone_account_get_params(acc));
+    }
+    return 3600;
+}
+
+- (void)setExpire:(int)seconds {
+    if (!theLinphoneCore) return;
+    LinphoneAccount *acc = linphone_core_get_default_account(theLinphoneCore);
+    if (!acc) return;
+    LinphoneAccountParams *params = linphone_account_params_clone(linphone_account_get_params(acc));
+    linphone_account_params_set_expires(params, seconds);
+    linphone_account_set_params(acc, params);
+    linphone_account_params_unref(params);
+    NSLog(@"[LinphoneManager] setExpire: %d seconds", seconds);
+}
+
+- (NSString *)getPrefix {
+    if (!theLinphoneCore) return @"";
+    LinphoneAccount *acc = linphone_core_get_default_account(theLinphoneCore);
+    if (acc) {
+        const char *prefix = linphone_account_params_get_international_prefix(linphone_account_get_params(acc));
+        return prefix ? [NSString stringWithUTF8String:prefix] : @"";
+    }
+    return @"";
+}
+
+- (BOOL)getReplaceBy00 {
+    return NO;
+}
+
+- (NSString *)getUsername {
+    if (!theLinphoneCore) return @"";
+    LinphoneAccount *acc = linphone_core_get_default_account(theLinphoneCore);
+    if (acc) {
+        const LinphoneAddress *addr = linphone_account_params_get_identity_address(linphone_account_get_params(acc));
+        const char *user = linphone_address_get_username(addr);
+        return user ? [NSString stringWithUTF8String:user] : @"";
+    }
+    return @"";
+}
+
+- (NSString *)getPassword {
+    if (!theLinphoneCore) return @"";
+    LinphoneAccount *acc = linphone_core_get_default_account(theLinphoneCore);
+    if (acc) {
+        const LinphoneAccountParams *params = linphone_account_get_params(acc);
+        const LinphoneAddress *identity = linphone_account_params_get_identity_address(params);
+        if (identity) {
+            const char *username = linphone_address_get_username(identity);
+            const char *domain = linphone_address_get_domain(identity);
+            const LinphoneAuthInfo *authInfo = linphone_core_find_auth_info(theLinphoneCore, NULL, username, domain);
+            if (authInfo) {
+                const char *pw = linphone_auth_info_get_password(authInfo);
+                return pw ? [NSString stringWithUTF8String:pw] : @"";
+            }
+        }
+    }
+    return @"";
+}
+
+- (NSString *)getDisplayName {
+    if (!theLinphoneCore) return @"";
+    LinphoneAccount *acc = linphone_core_get_default_account(theLinphoneCore);
+    if (acc) {
+        const LinphoneAddress *addr = linphone_account_params_get_identity_address(linphone_account_get_params(acc));
+        const char *display_name = linphone_address_get_display_name(addr);
+        return display_name ? [NSString stringWithUTF8String:display_name] : @"";
+    }
+    return @"";
+}
+
+- (NSString *)getDomain {
+    if (!theLinphoneCore) return @"";
+    LinphoneAccount *acc = linphone_core_get_default_account(theLinphoneCore);
+    if (acc) {
+        const LinphoneAddress *addr = linphone_account_params_get_identity_address(linphone_account_get_params(acc));
+        const char *domain = linphone_address_get_domain(addr);
+        return domain ? [NSString stringWithUTF8String:domain] : @"";
+    }
+    return @"";
+}
+
+- (NSString *)getSipProxy {
+    if (!theLinphoneCore) return @"";
+    LinphoneAccount *acc = linphone_core_get_default_account(theLinphoneCore);
+    if (acc) {
+        const LinphoneAddress *server = linphone_account_params_get_server_address(linphone_account_get_params(acc));
+        char *addr = server ? linphone_address_as_string(server) : NULL;
+        NSString *proxy = addr ? [NSString stringWithUTF8String:addr] : @"";
+        if (addr) ms_free(addr);
+        return proxy;
+    }
+    return @"";
+}
+
+- (BOOL)getOutboundProxy {
+    if (!theLinphoneCore) return NO;
+    LinphoneAccount *acc = linphone_core_get_default_account(theLinphoneCore);
+    if (acc) {
+        return linphone_account_params_outbound_proxy_enabled(linphone_account_get_params(acc));
+    }
+    return NO;
+}
+
+- (NSString *)getStunServer {
+    if (!theLinphoneCore) return @"";
+    LinphoneAccount *acc = linphone_core_get_default_account(theLinphoneCore);
+    if (acc) {
+        LinphoneNatPolicy *policy = linphone_account_params_get_nat_policy(linphone_account_get_params(acc));
+        const char *stun = policy ? linphone_nat_policy_get_stun_server(policy) : NULL;
+        return stun ? [NSString stringWithUTF8String:stun] : @"";
+    }
+    return @"";
+}
+
+- (BOOL)getEnableICE {
+    if (!theLinphoneCore) return NO;
+    LinphoneAccount *acc = linphone_core_get_default_account(theLinphoneCore);
+    if (acc) {
+        LinphoneNatPolicy *policy = linphone_account_params_get_nat_policy(linphone_account_get_params(acc));
+        return policy ? linphone_nat_policy_ice_enabled(policy) : NO;
+    }
+    return NO;
+}
+
+- (int)getAVPF {
+    if (!theLinphoneCore) return 0;
+    LinphoneAccount *acc = linphone_core_get_default_account(theLinphoneCore);
+    if (acc) {
+        return (int)linphone_account_params_get_avpf_mode(linphone_account_get_params(acc));
+    }
+    return 0;
+}
+
+- (int)getAvpfRrInterval {
+    if (!theLinphoneCore) return 5;
+    LinphoneAccount *acc = linphone_core_get_default_account(theLinphoneCore);
+    if (acc) {
+        return (int)linphone_account_params_get_avpf_rr_interval(linphone_account_get_params(acc));
+    }
+    return 5;
+}
+
+- (NSString *)getTransport {
+    if (!theLinphoneCore) return @"udp";
+    LinphoneAccount *acc = linphone_core_get_default_account(theLinphoneCore);
+    if (acc) {
+        LinphoneTransportType t = linphone_account_params_get_transport(linphone_account_get_params(acc));
+        switch (t) {
+            case LinphoneTransportUdp: return @"udp";
+            case LinphoneTransportTcp: return @"tcp";
+            case LinphoneTransportTls: return @"tls";
+            case LinphoneTransportDtls: return @"dtls";
+            default: return @"udp";
+        }
+    }
+    return @"udp";
+}
+
+- (BOOL)checkSessionCansLogin {
+    return NO;
+}
+
+// PATCH {apiURL}api/v3/{domainId}/user/{userId}/password-set
+// Called after a PASSWORD_RESET_REQUIRED flow (CreatePasswordScreen).
+- (void)forceSetPasswordWithDomainId:(NSString *)domainId
+                              userId:(NSString *)userId
+                               token:(NSString *)token
+                         newPassword:(NSString *)newPassword
+                          completion:(void (^)(BOOL success, NSString *error))completion {
+  NSString *apiURL = [[NSUserDefaults standardUserDefaults] stringForKey:kCANSApiLoginURL] ?: @"";
+  if (!apiURL.length) {
+    NSLog(@"[LinphoneManager] forceSetPasswordWithDomainId: apiLoginURL missing");
+    if (completion) completion(NO, @"API URL missing — please login again");
+    return;
+  }
+
+  NSString *urlStr = [NSString stringWithFormat:@"%@api/v3/%@/user/%@/password-set", apiURL, domainId, userId];
+  NSURL *url = [NSURL URLWithString:urlStr];
+  NSMutableURLRequest *req = [NSMutableURLRequest requestWithURL:url];
+  req.HTTPMethod = @"PATCH";
+  [req setValue:@"application/json" forHTTPHeaderField:@"Content-Type"];
+  [req setValue:[NSString stringWithFormat:@"Bearer %@", token] forHTTPHeaderField:@"Authorization"];
+  req.HTTPBody = [NSJSONSerialization dataWithJSONObject:@{@"password" : newPassword} options:0 error:nil];
+
+  [[NSURLSession.sharedSession dataTaskWithRequest:req
+      completionHandler:^(NSData *data, NSURLResponse *response, NSError *error) {
+        if (error) {
+          NSLog(@"[LinphoneManager] forceSetPassword network error: %@", error);
+          if (completion) completion(NO, error.localizedDescription);
+          return;
+        }
+        NSHTTPURLResponse *httpResp = (NSHTTPURLResponse *)response;
+        if (httpResp.statusCode >= 200 && httpResp.statusCode < 300) {
+          NSLog(@"[LinphoneManager] forceSetPassword success: code=%ld", (long)httpResp.statusCode);
+          if (completion) completion(YES, nil);
+        } else {
+          NSString *msg = [NSString stringWithFormat:@"Set password failed: %ld", (long)httpResp.statusCode];
+          NSLog(@"[LinphoneManager] %@", msg);
+          if (completion) completion(NO, msg);
+        }
+      }] resume];
 }
 
 @end

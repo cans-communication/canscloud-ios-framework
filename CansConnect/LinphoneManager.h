@@ -163,5 +163,25 @@ extern NSString *const kCansCustomRegistrationEvent;
 - (void)deleteMessage:(NSString *)peerUri msgId:(NSString *)msgId;
 - (void)markAsRead:(NSString *)peerUri;
 - (void)setDefaultAccount:(NSInteger)index phoneNumber:(NSString *)phoneNumber;
+- (void)setDefaultAccountSync:(NSInteger)index phoneNumber:(NSString *)phoneNumber;
+- (NSString *)updateCurrentLoginTypeFromAccount;
+
+- (void)setExpire:(int)seconds;
+- (BOOL)getPushNotification;
+- (int)getExpires;
+- (NSString *)getPrefix;
+- (BOOL)getReplaceBy00;
+- (NSString *)getUsername;
+- (NSString *)getPassword;
+- (NSString *)getDisplayName;
+- (NSString *)getDomain;
+- (NSString *)getSipProxy;
+- (BOOL)getOutboundProxy;
+- (NSString *)getStunServer;
+- (BOOL)getEnableICE;
+- (int)getAVPF;
+- (int)getAvpfRrInterval;
+- (NSString *)getTransport;
+- (BOOL)checkSessionCansLogin;
 
 @end

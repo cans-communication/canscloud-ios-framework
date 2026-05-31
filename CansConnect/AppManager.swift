@@ -35,7 +35,7 @@ enum NetworkType: Int {
 @objc class AppManager: NSObject {
 	static func network() -> NetworkType {
 		let info = CTTelephonyNetworkInfo()
-		let currentRadio = info.currentRadioAccessTechnology
+		let currentRadio = info.serviceCurrentRadioAccessTechnology?.values.first
 		if (currentRadio == CTRadioAccessTechnologyEdge) {
 			return NetworkType.network_2g
 		} else if (currentRadio == CTRadioAccessTechnologyLTE) {
@@ -57,8 +57,7 @@ enum NetworkType: Int {
 		let paths = NSSearchPathForDirectoriesInDomains(.cachesDirectory, .userDomainMask, true)
 		var writablePath = paths[0]
 		writablePath = writablePath.appending("/\(filePath)")
-		let message:String = "file path is \(writablePath)"
-//		Log.directLog(BCTBX_LOG_MESSAGE, text: message)
+//		Log.directLog(BCTBX_LOG_MESSAGE, text: "file path is \(writablePath)")
 		return writablePath
 		//file name is recording_contact-name_dayName-day-monthName-year-hour-minutes-seconds
 		//The recording prefix is used to identify recordings in the cache directory.

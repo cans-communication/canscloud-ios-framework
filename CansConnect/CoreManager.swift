@@ -131,15 +131,6 @@ import linphonesw
         lc?.refreshRegisters()
     }
     
-    var defaultProxyConfig: ProxyConfig? {
-        get {
-            return lc?.defaultProxyConfig
-        }
-        set {
-            lc?.defaultProxyConfig = newValue
-        }
-    }
-    
     var defaultAccount: Account? {
         get {
             return lc?.defaultAccount
@@ -161,17 +152,12 @@ import linphonesw
         return defaultAccount?.contactAddress?.password ?? ""
     }
     
-    var proxyConfigList: [ProxyConfig] {
-        return lc?.proxyConfigList ?? []
-    }
-    
     @objc var isDefaultProxyConfig: Bool {
-        return defaultProxyConfig != nil ? true : false
+        return defaultAccount != nil
     }
-    
+
     @objc var isProxyConfigList: Bool {
-        let proxyConfigList = lc?.proxyConfigList ?? []
-        return proxyConfigList.count > 0
+        return lc?.accountList.isEmpty == false
     }
     
     @objc var missedCallsCount: Int {

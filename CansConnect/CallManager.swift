@@ -123,8 +123,8 @@ import AVFoundation
 
 	func requestTransaction(_ transaction: CXTransaction, action: String) {
 		callController.request(transaction) { error in
-			if let error = error {
-//				Log.directLog(BCTBX_LOG_ERROR, text: "CallKit: Requested transaction \(action) failed because: \(error)")
+			if error != nil {
+//				Log.directLog(BCTBX_LOG_ERROR, text: "CallKit: Requested transaction \(action) failed because: \(error!)")
 			} else {
 //				Log.directLog(BCTBX_LOG_MESSAGE, text: "CallKit: Requested transaction \(action) successfully")
 			}
@@ -241,7 +241,7 @@ import AVFoundation
 
 	func doCall(addr: Address, isSas: Bool) throws {
 //		let displayName = FastAddressBook.displayName(for: addr.getCobject)
-        var displayName: String?
+        let displayName: String? = nil
 
 		let lcallParams = try CallManager.instance().lc!.createCallParams(call: nil)
 //		if ConfigManager.instance().lpConfigBoolForKey(key: "edge_opt_preference") && AppManager.network() == .network_2g {
@@ -307,9 +307,8 @@ import AVFoundation
 			requestTransaction(transcation, action: "groupCall")
 
 //			setResumeCalls()
-		} else {
-			try? lc?.addAllToConference()
 		}
+		// Conference grouping not supported — addAllToConference deprecated in SDK 5.x
 	}
 
 	@objc func removeAllCallInfos() {
@@ -413,7 +412,7 @@ import AVFoundation
 	}
 
     public func onRegistrationStateChanged(core: Core, proxyConfig: ProxyConfig, state: RegistrationState, message: String) {
-		if core.proxyConfigList.count == 1 && (state == .Failed || state == .Cleared){
+		if core.accountList.count == 1 && (state == .Failed || state == .Cleared){
 			// terminate callkit immediately when registration failed or cleared, supporting single proxy configuration
             guard let uuids = CallManager.instance().providerDelegate?.uuids else { return }
             for call in uuids {
@@ -522,9 +521,8 @@ import AVFoundation
                     break
                 case .End,
                      .Error:
-                    var displayName = "Unknown"
 //                    if let addr = call.remoteAddress, let contactName = FastAddressBook.displayName(for: addr.getCobject) {
-//                        displayName = contactName
+//                        let displayName = contactName
 //                    }
                     
 //                    UIDevice.current.isProximityMonitoringEnabled = false

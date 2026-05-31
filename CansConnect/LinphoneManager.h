@@ -24,6 +24,8 @@
 #import <linphone/core_utils.h>
 #endif
 
+NS_ASSUME_NONNULL_BEGIN
+
 extern NSString *const kLinphoneRegistrationUpdate;
 extern NSString *const kLinphoneCallStateUpdate;
 extern NSString *const kLinphoneAudioDeviceUpdate;
@@ -44,7 +46,6 @@ extern NSString *const kCansCustomRegistrationEvent;
 - (NSString *)accountList;
 - (void)removeAccountAtIndex:(NSInteger)index;
 - (void)removeAccountAll;
-- (void)configureChatSettings:(NSString *)username;
 - (void)startCall:(NSString *)phoneNumber;
 - (NSInteger)callsCount;
 // Method สำหรับ Call Management และ Audio
@@ -52,6 +53,7 @@ extern NSString *const kCansCustomRegistrationEvent;
 - (NSString *)getCallingLogsJSON;
 - (NSString *)getHistoryCallLogsJSON;
 - (NSString *)getMissedCallLogsJSON;
+- (NSString *)lastOutgoingCallLog;
 - (int)getDurationTime;
 - (int)getDurationByAddress:(NSString *)address;
 - (BOOL)isInConference;
@@ -166,6 +168,13 @@ extern NSString *const kCansCustomRegistrationEvent;
 - (void)setDefaultAccountSync:(NSInteger)index phoneNumber:(NSString *)phoneNumber;
 - (NSString *)updateCurrentLoginTypeFromAccount;
 
+// FCM Push Notification (replaces built-in Linphone push)
+- (void)injectFCMToken:(NSString *)fcmToken
+            forAccount:(nullable LinphoneAccount *)account
+     completionHandler:(nullable void (^)(BOOL success))completion;
+- (void)removeFCMTokenForAccount:(nullable LinphoneAccount *)account;
+- (void)processPushNotification:(NSString *)callId;
+
 - (void)setExpire:(int)seconds;
 - (BOOL)getPushNotification;
 - (int)getExpires;
@@ -185,3 +194,5 @@ extern NSString *const kCansCustomRegistrationEvent;
 - (BOOL)checkSessionCansLogin;
 
 @end
+
+NS_ASSUME_NONNULL_END

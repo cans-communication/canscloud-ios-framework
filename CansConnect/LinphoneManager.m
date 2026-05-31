@@ -44,6 +44,7 @@ static void linphone_iphone_chat_message_state_changed(LinphoneCore *lc, Linphon
 // Per-message callbacks (Linphone 5.x — set on each outgoing LinphoneChatMessage object)
 static void lm_chat_msg_state_changed(LinphoneChatMessage *msg, LinphoneChatMessageState state);
 static void lm_img_msg_state_changed(LinphoneChatMessage *msg, LinphoneChatMessageState state);
+static void lm_incoming_img_state_changed(LinphoneChatMessage *msg, LinphoneChatMessageState state);
 static void lm_img_progress(LinphoneChatMessage *msg, LinphoneContent *content, size_t offset, size_t total);
 
 static void linphone_iphone_info_received(LinphoneCore *lc, LinphoneCall *call, const LinphoneInfoMessage *msg);
@@ -118,10 +119,11 @@ static void linphone_iphone_info_received(LinphoneCore *lc, LinphoneCall *call, 
 // 🚀 สร้าง Core บน Main Thread และใช้ Core ธรรมดาเพื่อ Bypass ปัญหา Apple Developer
 // 🚀 สร้าง Core บน Main Thread และแก้บั๊ก Config เก่าพัง
 - (void)createLinphoneCore {
+  __weak typeof(self) weakSelf = self;
   dispatch_async(dispatch_get_main_queue(), ^{
     if (theLinphoneCore) {
       NSLog(@"[LinphoneManager] createLinphoneCore: Core already exists. (Timer status: %@)", iterateTimer ? @"Running" : @"Stopped");
-      if (!iterateTimer) [self startIterateTimer];
+      if (!iterateTimer) [weakSelf startIterateTimer];
       return;
     }
     NSLog(@"[LinphoneManager] createLinphoneCore: Started on Main Thread");
@@ -313,6 +315,28 @@ static void linphone_iphone_info_received(LinphoneCore *lc, LinphoneCall *call, 
       postNotificationName:kLinphoneRegistrationUpdate
                     object:self
                   userInfo:dict];
+
+  // Mirror Android onAccountRegistrationStateChanged: if registration succeeded
+  // but FCM push params are missing, ask NativeModuleiOS to inject the token.
+  if (state == LinphoneRegistrationOk) {
+    LinphoneAccount *acc = linphone_core_get_default_account(lc);
+    if (acc) {
+      const char *cp = linphone_account_params_get_contact_uri_parameters(
+          linphone_account_get_params(acc));
+      NSString *cpStr = cp ? [NSString stringWithUTF8String:cp] : @"";
+      NSString *bundleId = [[NSBundle mainBundle] bundleIdentifier] ?: @"";
+      BOOL hasPushParam = [cpStr containsString:
+          [NSString stringWithFormat:@"pn-param=%@", bundleId]];
+      if (!hasPushParam) {
+        NSLog(@"[LinphoneManager] Registration OK — pn-param missing, requesting FCM injection");
+        dispatch_async(dispatch_get_main_queue(), ^{
+          [[NSNotificationCenter defaultCenter]
+              postNotificationName:@"CansInjectFCMToken"
+                            object:nil];
+        });
+      }
+    }
+  }
 }
 
 static void linphone_iphone_registration_state(LinphoneCore *lc,
@@ -689,7 +713,7 @@ static void linphone_iphone_popup_password_request(LinphoneCore *lc,
             @"phoneNumber": phone,
             @"name": name,
             @"duration": [@(linphone_call_log_get_duration(log)) stringValue],
-            @"status": [self convertCallStateToString:linphone_call_log_get_status(log)] ?: @"Unknown",
+            @"status": [self convertCallStateToString:(LinphoneCallState)linphone_call_log_get_status(log)] ?: @"Unknown",
             @"timestamp": @(linphone_call_log_get_start_date(log))
         }];
     }
@@ -723,6 +747,16 @@ static void linphone_iphone_popup_password_request(LinphoneCore *lc,
     
     NSData *jsonData = [NSJSONSerialization dataWithJSONObject:logs options:0 error:nil];
     return jsonData ? [[NSString alloc] initWithData:jsonData encoding:NSUTF8StringEncoding] : @"[]";
+}
+
+- (NSString *)lastOutgoingCallLog {
+    if (!theLinphoneCore) return @"";
+    LinphoneCallLog *log = linphone_core_get_last_outgoing_call_log(theLinphoneCore);
+    if (!log) return @"";
+    const LinphoneAddress *addr = linphone_call_log_get_remote_address(log);
+    if (!addr) return @"";
+    const char *username = linphone_address_get_username(addr);
+    return username ? [NSString stringWithUTF8String:username] : @"";
 }
 
 - (void)hangUp {
@@ -1094,7 +1128,7 @@ static void linphone_iphone_popup_password_request(LinphoneCore *lc,
   if (!theLinphoneCore) return NO;
   LinphoneCall *call = linphone_core_get_current_call(theLinphoneCore);
   if (!call) return NO;
-  LinphoneAudioDevice *dev = linphone_call_get_output_audio_device(call);
+  const LinphoneAudioDevice *dev = linphone_call_get_output_audio_device(call);
   if (dev && linphone_audio_device_get_type(dev) == LinphoneAudioDeviceTypeBluetooth) {
     return YES;
   }
@@ -1805,6 +1839,21 @@ static void linphone_iphone_audio_devices_list_updated(LinphoneCore *lc) {
     linphone_address_unref(addr);
 }
 
+// Returns the plain-text body of a chat message using the non-deprecated content API.
+// Iterates contents and reads the first text/plain part via linphone_content_is_text +
+// linphone_content_get_utf8_text, avoiding the deprecated linphone_chat_message_get_text_content.
+static NSString *lm_getMessageText(LinphoneChatMessage *msg) {
+    const bctbx_list_t *contents = linphone_chat_message_get_contents(msg);
+    for (const bctbx_list_t *cit = contents; cit != NULL; cit = cit->next) {
+        LinphoneContent *content = (LinphoneContent *)cit->data;
+        if (linphone_content_is_text(content)) {
+            const char *txt = linphone_content_get_utf8_text(content);
+            return [NSString stringWithUTF8String:txt ?: ""];
+        }
+    }
+    return @"";
+}
+
 - (NSString *)getChatRoomsJSON {
     if (!theLinphoneCore) return @"[]";
     const bctbx_list_t *rooms = linphone_core_get_chat_rooms(theLinphoneCore);
@@ -1821,7 +1870,19 @@ static void linphone_iphone_audio_devices_list_updated(LinphoneCore *lc) {
         roomDict[@"unreadCount"] = @(linphone_chat_room_get_unread_messages_count(room));
         
         if (lastMsg) {
-            roomDict[@"lastMessage"] = [NSString stringWithUTF8String:linphone_chat_message_get_text_content(lastMsg) ?: ""];
+            NSString *lastMsgText = lm_getMessageText(lastMsg);
+            if (lastMsgText.length == 0) {
+                const bctbx_list_t *lastMsgContents = linphone_chat_message_get_contents(lastMsg);
+                for (const bctbx_list_t *cit = lastMsgContents; cit != NULL; cit = cit->next) {
+                    LinphoneContent *c = (LinphoneContent *)cit->data;
+                    const char *ctype = linphone_content_get_type(c);
+                    if (ctype && strcmp(ctype, "image") == 0) {
+                        lastMsgText = @"[Image]";
+                        break;
+                    }
+                }
+            }
+            roomDict[@"lastMessage"] = lastMsgText;
             roomDict[@"timestamp"] = @(linphone_chat_message_get_time(lastMsg) * 1000.0);
         }
         
@@ -1883,7 +1944,7 @@ static NSString *lm_chatMessageStateToString(LinphoneChatMessageState state) {
             }
 
             // ── text and image content ──
-            NSString *textContent = [NSString stringWithUTF8String:linphone_chat_message_get_text_content(msg) ?: ""];
+            NSString *textContent = lm_getMessageText(msg);
             BOOL isImage = NO;
             NSString *imagePath = @"";
 
@@ -1998,6 +2059,7 @@ static NSString *lm_chatMessageStateToString(LinphoneChatMessageState state) {
     linphone_config_set_int(config, "sip", "check_incoming_request_uri", 1);
     linphone_config_set_string(config, "sip", "save_headers", "To, Diversion, Contact, X-Voicemail");
     linphone_config_set_string(config, "misc", "file_transfer_protocol", "https");
+    linphone_core_set_file_transfer_server(theLinphoneCore, "https://files.linphone.org/http-file-transfer-server/hft.php");
 
     // Video configuration
     linphone_config_set_int(config, "video", "enabled", 1);
@@ -2022,6 +2084,21 @@ static NSString *lm_chatMessageStateToString(LinphoneChatMessageState state) {
 #pragma mark - Chat Callbacks
 
 static void linphone_iphone_message_received(LinphoneCore *lc, LinphoneChatRoom *room, LinphoneChatMessage *message) {
+    // Skip IMDN delivery/read receipts — they are SIP control messages, not chat messages.
+    // The server forwards them as MESSAGE with Content-Type: message/imdn+xml which Linphone
+    // fires through message_received; without this guard they render as empty bubbles.
+    const bctbx_list_t *earlyContents = linphone_chat_message_get_contents(message);
+    for (const bctbx_list_t *eit = earlyContents; eit != NULL; eit = eit->next) {
+        LinphoneContent *content = (LinphoneContent *)eit->data;
+        const char *ctype    = linphone_content_get_type(content);
+        const char *csubtype = linphone_content_get_subtype(content);
+        if (ctype && csubtype &&
+            strcmp(ctype, "message") == 0 && strcmp(csubtype, "imdn+xml") == 0) {
+            NSLog(@"[LinphoneManager] message_received: skipping IMDN receipt");
+            return;
+        }
+    }
+
     // id: X-Request-ID preferred, fallback to native messageId
     const char *requestIdC = linphone_chat_message_get_custom_header(message, "X-Request-ID");
     NSString *msgId;
@@ -2034,7 +2111,7 @@ static void linphone_iphone_message_received(LinphoneCore *lc, LinphoneChatRoom 
             : [NSString stringWithFormat:@"msg_%ld", (long)linphone_chat_message_get_time(message)];
     }
 
-    NSString *text = [NSString stringWithUTF8String:linphone_chat_message_get_text_content(message) ?: ""];
+    NSString *text = lm_getMessageText(message);
 
     // Detect image content (mirrors getChatHistoryJSON logic)
     BOOL isImage = NO;
@@ -2051,10 +2128,46 @@ static void linphone_iphone_message_received(LinphoneCore *lc, LinphoneChatRoom 
             }
             break;
         }
+        // RCS file-transfer envelope (application/vnd.gsma.rcs-ft-http+xml) —
+        // the actual file must be downloaded before we have a local path.
+        if (linphone_content_is_file_transfer(content)) {
+            isImage = YES;
+            const char *existingPath = linphone_content_get_file_path(content);
+            if (existingPath && strlen(existingPath) > 0) {
+                imagePath = [NSString stringWithFormat:@"file://%s", existingPath];
+            } else {
+                // Set a local destination path so Linphone knows where to write the file.
+                const char *nameC = linphone_content_get_name(content);
+                NSString *fileName = (nameC && strlen(nameC) > 0)
+                    ? [NSString stringWithUTF8String:nameC]
+                    : [NSString stringWithFormat:@"img_%ld.jpeg",
+                       (long)linphone_chat_message_get_time(message)];
+                NSString *docs = NSSearchPathForDirectoriesInDomains(
+                    NSDocumentDirectory, NSUserDomainMask, YES).firstObject;
+                NSString *localPath = [docs stringByAppendingPathComponent:fileName];
+                linphone_content_set_file_path(content, localPath.UTF8String);
+
+                // Attach per-message callbacks and start the download.
+                LinphoneChatMessageCbs *msgCbs = linphone_chat_message_get_callbacks(message);
+                if (msgCbs) {
+                    linphone_chat_message_cbs_set_msg_state_changed(msgCbs, lm_incoming_img_state_changed);
+                    linphone_chat_message_cbs_set_file_transfer_progress_indication(msgCbs, lm_img_progress);
+                }
+                linphone_chat_message_download_content(message, content);
+                NSLog(@"[LinphoneManager] message_received: incoming image download started → %@", localPath);
+            }
+            break;
+        }
     }
     if (!isImage && [text hasPrefix:@"<?xml"] && [text containsString:@"file-info"]) {
         isImage = YES;
         text = @"";
+    }
+
+    // Belt-and-suspenders: if we have no displayable content, don't emit an empty bubble.
+    if (!isImage && [text length] == 0) {
+        NSLog(@"[LinphoneManager] message_received: skipping empty-content message");
+        return;
     }
 
     const LinphoneAddress *peerAddr = linphone_chat_room_get_peer_address(room);
@@ -2170,6 +2283,71 @@ static void lm_img_msg_state_changed(LinphoneChatMessage *msg, LinphoneChatMessa
     });
 }
 
+// Per-message state callback for INCOMING file-transfer downloads.
+// Posts LinphoneMessageContentUpdated when the file is fully downloaded so JS can
+// replace the placeholder image bubble with the real local URI.
+static void lm_incoming_img_state_changed(LinphoneChatMessage *msg, LinphoneChatMessageState state) {
+    if (state == LinphoneChatMessageStateFileTransferError ||
+        state == LinphoneChatMessageStateNotDelivered) {
+        NSLog(@"[LinphoneManager] lm_incoming_img_state_changed: download FAILED state=%d "
+              @"(check disk space — ENOSPC causes silent failure)", (int)state);
+        return;
+    }
+    if (state != LinphoneChatMessageStateFileTransferDone) return;
+
+    const char *requestIdC = linphone_chat_message_get_custom_header(msg, "X-Request-ID");
+    NSString *msgId;
+    if (requestIdC && strlen(requestIdC) > 0) {
+        msgId = [NSString stringWithUTF8String:requestIdC];
+    } else {
+        const char *nativeIdC = linphone_chat_message_get_message_id(msg);
+        if (nativeIdC && strlen(nativeIdC) > 0) {
+            msgId = [NSString stringWithUTF8String:nativeIdC];
+        } else {
+            msgId = [NSString stringWithFormat:@"msg_%ld", (long)linphone_chat_message_get_time(msg)];
+        }
+    }
+
+    LinphoneChatRoom *room = linphone_chat_message_get_chat_room(msg);
+    const LinphoneAddress *peerAddr = linphone_chat_room_get_peer_address(room);
+    NSString *chatWith = [NSString stringWithUTF8String:linphone_address_get_username(peerAddr) ?: ""];
+    NSString *peerUri  = [NSString stringWithUTF8String:linphone_address_as_string_uri_only(peerAddr) ?: ""];
+
+    // Find the downloaded file path from whichever content has one.
+    NSString *imagePath = @"";
+    const bctbx_list_t *contents = linphone_chat_message_get_contents(msg);
+    for (const bctbx_list_t *cit = contents; cit != NULL; cit = cit->next) {
+        LinphoneContent *content = (LinphoneContent *)cit->data;
+        const char *fp = linphone_content_get_file_path(content);
+        if (fp && strlen(fp) > 0) {
+            imagePath = [NSString stringWithFormat:@"file://%s", fp];
+            break;
+        }
+    }
+
+    NSLog(@"[LinphoneManager] lm_incoming_img_state_changed: id=%@, chatWith=%@, path=%@",
+          msgId, chatWith, imagePath);
+
+    NSDictionary *dict = @{
+        @"id":        msgId,
+        @"chatWith":  chatWith,
+        @"peerUri":   peerUri,
+        @"imageUri":  imagePath,
+        @"type":      @"image",
+        @"text":      @"[Image]",
+        @"status":    @"Delivered",
+        @"sender":    @"other",
+        @"isRead":    @NO,
+        @"timestamp": @(linphone_chat_message_get_time(msg) * 1000.0),
+    };
+    dispatch_async(dispatch_get_main_queue(), ^{
+        [[NSNotificationCenter defaultCenter]
+            postNotificationName:@"LinphoneMessageContentUpdated"
+                          object:nil
+                        userInfo:dict];
+    });
+}
+
 // File transfer progress callback — fires for both upload and download.
 static void lm_img_progress(LinphoneChatMessage *msg, LinphoneContent *content, size_t offset, size_t total) {
     const char *requestIdC = linphone_chat_message_get_custom_header(msg, "X-Request-ID");
@@ -2256,13 +2434,102 @@ static void linphone_iphone_info_received(LinphoneCore *lc, LinphoneCall *call, 
 
 
 
+// ── FCM Push Notification ─────────────────────────────────────────────────
+
+- (void)injectFCMToken:(NSString *)fcmToken
+            forAccount:(LinphoneAccount *)account
+     completionHandler:(void (^)(BOOL))completion {
+  dispatch_async(dispatch_get_main_queue(), ^{
+    if (!theLinphoneCore || !fcmToken.length) {
+      if (completion) completion(NO);
+      return;
+    }
+    LinphoneAccount *targetAcc = account ?: linphone_core_get_default_account(theLinphoneCore);
+    if (!targetAcc) {
+      NSLog(@"[LinphoneManager] injectFCMToken: no account available");
+      if (completion) completion(NO);
+      return;
+    }
+
+    NSString *bundleId = [[NSBundle mainBundle] bundleIdentifier] ?: @"";
+    LinphoneAccountParams *params =
+        linphone_account_params_clone(linphone_account_get_params(targetAcc));
+
+    // Strip existing pn-* params, keep everything else (e.g. app-login-type=cans)
+    const char *existing = linphone_account_params_get_contact_uri_parameters(params);
+    NSString *existingStr = existing ? [NSString stringWithUTF8String:existing] : @"";
+    NSMutableArray *cleanParts = [NSMutableArray array];
+    for (NSString *part in [existingStr componentsSeparatedByString:@";"]) {
+      if (part.length > 0 && ![part hasPrefix:@"pn-"]) {
+        [cleanParts addObject:part];
+      }
+    }
+    NSString *prefix = cleanParts.count > 0
+        ? [[cleanParts componentsJoinedByString:@";"] stringByAppendingString:@";"]
+        : @"";
+
+    // pn-timeout=60: gives FreeSWITCH 60 s to wait for re-registration after push wake-up.
+    NSString *fullParams = [NSString stringWithFormat:
+        @"%@pn-provider=fcm;pn-param=%@;pn-prid=\"%@\";pn-timeout=60",
+        prefix, bundleId, fcmToken];
+
+    linphone_account_params_set_contact_uri_parameters(params, fullParams.UTF8String);
+    linphone_account_params_set_push_notification_allowed(params, NO); // disable built-in push
+    linphone_account_set_params(targetAcc, params);
+    linphone_account_params_unref(params);
+    linphone_core_refresh_registers(theLinphoneCore);
+
+    NSLog(@"[LinphoneManager] FCM token injected (pn-param=%@)", bundleId);
+    if (completion) completion(YES);
+  });
+}
+
+- (void)removeFCMTokenForAccount:(LinphoneAccount *)account {
+  dispatch_async(dispatch_get_main_queue(), ^{
+    if (!theLinphoneCore) return;
+    LinphoneAccount *targetAcc = account ?: linphone_core_get_default_account(theLinphoneCore);
+    if (!targetAcc) return;
+
+    LinphoneAccountParams *params =
+        linphone_account_params_clone(linphone_account_get_params(targetAcc));
+    const char *existing = linphone_account_params_get_contact_uri_parameters(params);
+    NSString *existingStr = existing ? [NSString stringWithUTF8String:existing] : @"";
+    NSMutableArray *cleanParts = [NSMutableArray array];
+    for (NSString *part in [existingStr componentsSeparatedByString:@";"]) {
+      if (part.length > 0 && ![part hasPrefix:@"pn-"]) {
+        [cleanParts addObject:part];
+      }
+    }
+    NSString *cleanParams = [cleanParts componentsJoinedByString:@";"];
+    linphone_account_params_set_contact_uri_parameters(params, cleanParams.UTF8String);
+    linphone_account_set_params(targetAcc, params);
+    linphone_account_params_unref(params);
+    linphone_core_refresh_registers(theLinphoneCore);
+    NSLog(@"[LinphoneManager] FCM pn-* params removed from contact URI");
+  });
+}
+
+- (void)processPushNotification:(NSString *)callId {
+  dispatch_async(dispatch_get_main_queue(), ^{
+    if (!theLinphoneCore) return;
+    if (callId.length > 0) {
+      linphone_core_process_push_notification(theLinphoneCore, callId.UTF8String);
+    } else {
+      linphone_core_refresh_registers(theLinphoneCore);
+    }
+    NSLog(@"[LinphoneManager] processPushNotification: callId=%@",
+          callId.length > 0 ? callId : @"(empty — refreshed registers)");
+  });
+}
+
 - (BOOL)getPushNotification {
     if (!theLinphoneCore) return NO;
     LinphoneAccount *acc = linphone_core_get_default_account(theLinphoneCore);
-    if (acc) {
-        return linphone_account_params_get_push_notification_allowed(linphone_account_get_params(acc));
-    }
-    return NO;
+    if (!acc) return NO;
+    const char *cp = linphone_account_params_get_contact_uri_parameters(
+        linphone_account_get_params(acc));
+    NSString *cpStr = cp ? [NSString stringWithUTF8String:cp] : @"";
+    return [cpStr containsString:@"pn-provider"];
 }
 
 - (int)getExpires {

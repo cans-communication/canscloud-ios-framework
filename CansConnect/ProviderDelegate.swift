@@ -67,7 +67,7 @@ class ProviderDelegate: NSObject {
 	}
 
 	static var providerConfiguration: CXProviderConfiguration = {
-		let providerConfiguration = CXProviderConfiguration(localizedName: Bundle.main.infoDictionary!["CFBundleName"] as! String)
+		let providerConfiguration = CXProviderConfiguration()
 		providerConfiguration.ringtoneSound = "notes_of_the_optimistic.caf"
 		providerConfiguration.supportsVideo = true
 //        providerConfiguration.iconTemplateImageData = ImageAsset.load(asset: .callkitLogo).pngData()
@@ -93,9 +93,8 @@ class ProviderDelegate: NSObject {
 		update.localizedCallerName = displayName
 
 		let callInfo = callInfos[uuid]
-		let callId = callInfo?.callId
-//		Log.directLog(BCTBX_LOG_MESSAGE, text: "CallKit: report new incoming call with call-id: [\(String(describing: callId))] and UUID: [\(uuid.description)]")
-		//CallManager.instance().setHeldOtherCalls(exceptCallid: callId ?? "")
+//		Log.directLog(BCTBX_LOG_MESSAGE, text: "CallKit: report new incoming call with call-id: [\(String(describing: callInfo?.callId))] and UUID: [\(uuid.description)]")
+		//CallManager.instance().setHeldOtherCalls(exceptCallid: callInfo?.callId ?? "")
 
         provider?.reportNewIncomingCall(with: uuid, update: update) { error in
             if error == nil {
@@ -212,15 +211,6 @@ extension ProviderDelegate: CXProviderDelegate {
 		}
 
 		do {
-			if (call?.conference != nil && action.isOnHold) {
-				try CallManager.instance().lc?.leaveConference()
-//				Log.directLog(BCTBX_LOG_DEBUG, text: "CallKit: call-id: [\(String(describing: callId))] leaving conference")
-				NotificationCenter.default.post(name: Notification.Name("LinphoneCallUpdate"), object: self)
-				return
-			}
-
-			let state = action.isOnHold ? "Paused" : "Resumed"
-//			Log.directLog(BCTBX_LOG_DEBUG, text: "CallKit: Call  with call-id: [\(String(describing: callId))] and UUID: [\(uuid)] paused status changed to: [\(state)]")
 			if (action.isOnHold) {
 				if (call!.params?.localConferenceMode ?? false) {
 					return
@@ -228,12 +218,8 @@ extension ProviderDelegate: CXProviderDelegate {
                 CallManager.instance().speakerBeforePause = CallManager.instance().isSpeakerEnabled()
 				try call!.pause()
 			} else {
-				if (call?.conference != nil && CallManager.instance().lc?.callsNb ?? 0 > 1) {
-					try CallManager.instance().lc?.enterConference()
-					NotificationCenter.default.post(name: Notification.Name("LinphoneCallUpdate"), object: self)
-				} else {
-					try call!.resume()
-				}
+				// Conference enter (enterConference) removed in Linphone SDK 5.x — resume call directly
+				try call!.resume()
 			}
 		} catch {
 //			Log.directLog(BCTBX_LOG_ERROR, text: "CallKit: Call set held (paused or resumed) \(uuid) failed because \(error)")
@@ -266,18 +252,13 @@ extension ProviderDelegate: CXProviderDelegate {
 
     public func provider(_ provider: CXProvider, perform action: CXSetGroupCallAction) {
 //		Log.directLog(BCTBX_LOG_MESSAGE, text: "CallKit: Call grouped callUUid : \(action.callUUID) with callUUID: \(String(describing: action.callUUIDToGroupWith)).")
-		do {
-			try CallManager.instance().lc?.addAllToConference()
-		} catch {
-//			Log.directLog(BCTBX_LOG_ERROR, text: "CallKit: Call grouped failed because \(error)")
-		}
+		// addAllToConference removed in Linphone SDK 5.x — conference grouping not supported
 		action.fulfill()
 	}
 
     public func provider(_ provider: CXProvider, perform action: CXSetMutedCallAction) {
 		let uuid = action.callUUID
-		let callId = callInfos[uuid]?.callId
-//		Log.directLog(BCTBX_LOG_MESSAGE, text: "CallKit: Call muted with call-id: \(String(describing: callId)) an UUID: \(uuid.description).")
+//		Log.directLog(BCTBX_LOG_MESSAGE, text: "CallKit: Call muted with call-id: \(String(describing: callInfos[uuid]?.callId)) an UUID: \(uuid.description).")
 		CallManager.instance().lc!.micEnabled = !CallManager.instance().lc!.micEnabled
 		action.fulfill()
 	}
@@ -300,8 +281,7 @@ extension ProviderDelegate: CXProviderDelegate {
 
     public func provider(_ provider: CXProvider, timedOutPerforming action: CXAction) {
 		let uuid = action.uuid
-		let callId = callInfos[uuid]?.callId
-//		Log.directLog(BCTBX_LOG_MESSAGE, text: "CallKit: Call time out with call-id: \(String(describing: callId)) an UUID: \(uuid.description).")
+//		Log.directLog(BCTBX_LOG_MESSAGE, text: "CallKit: Call time out with call-id: \(String(describing: callInfos[uuid]?.callId)) an UUID: \(uuid.description).")
 		action.fulfill()
 	}
 

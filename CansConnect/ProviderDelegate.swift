@@ -257,8 +257,6 @@ extension ProviderDelegate: CXProviderDelegate {
 	}
 
     public func provider(_ provider: CXProvider, perform action: CXSetMutedCallAction) {
-		let uuid = action.callUUID
-//		Log.directLog(BCTBX_LOG_MESSAGE, text: "CallKit: Call muted with call-id: \(String(describing: callInfos[uuid]?.callId)) an UUID: \(uuid.description).")
 		CallManager.instance().lc!.micEnabled = !CallManager.instance().lc!.micEnabled
 		action.fulfill()
 	}
@@ -280,8 +278,6 @@ extension ProviderDelegate: CXProviderDelegate {
 	}
 
     public func provider(_ provider: CXProvider, timedOutPerforming action: CXAction) {
-		let uuid = action.uuid
-//		Log.directLog(BCTBX_LOG_MESSAGE, text: "CallKit: Call time out with call-id: \(String(describing: callInfos[uuid]?.callId)) an UUID: \(uuid.description).")
 		action.fulfill()
 	}
 

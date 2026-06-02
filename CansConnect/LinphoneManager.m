@@ -6,6 +6,9 @@
 #import "LinphoneManager.h"
 #import <CommonCrypto/CommonDigest.h>
 
+#pragma clang diagnostic push
+#pragma clang diagnostic ignored "-Wdeprecated-declarations"
+
 static LinphoneCore *theLinphoneCore = nil;
 static NSString *const kCANSApiLoginURL = @"com.canscloud.apiLoginURL";
 NSString *const kLinphoneRegistrationUpdate = @"LinphoneRegistrationUpdate";
@@ -122,8 +125,8 @@ static void linphone_iphone_info_received(LinphoneCore *lc, LinphoneCall *call, 
   __weak typeof(self) weakSelf = self;
   dispatch_async(dispatch_get_main_queue(), ^{
     if (theLinphoneCore) {
-      NSLog(@"[LinphoneManager] createLinphoneCore: Core already exists. (Timer status: %@)", iterateTimer ? @"Running" : @"Stopped");
-      if (!iterateTimer) [weakSelf startIterateTimer];
+      NSLog(@"[LinphoneManager] createLinphoneCore: Core already exists. (Timer status: %@)", self->iterateTimer ? @"Running" : @"Stopped");
+      if (!self->iterateTimer) [weakSelf startIterateTimer];
       return;
     }
     NSLog(@"[LinphoneManager] createLinphoneCore: Started on Main Thread");
@@ -1619,6 +1622,43 @@ static void linphone_iphone_audio_devices_list_updated(LinphoneCore *lc) {
   return NO;
 }
 
+- (BOOL)isRemoteVideoEnabled {
+    if (!theLinphoneCore) return NO;
+    LinphoneCall *call = linphone_core_get_current_call(theLinphoneCore);
+    if (!call) return NO;
+
+    const LinphoneCallParams *remoteParams = linphone_call_get_remote_params(call);
+    const LinphoneCallParams *currentParams = linphone_call_get_current_params(call);
+
+    BOOL remoteHasVideo = remoteParams ? linphone_call_params_video_enabled(remoteParams) : NO;
+    LinphoneMediaDirection remoteDir = remoteParams
+        ? linphone_call_params_get_video_direction(remoteParams)
+        : LinphoneMediaDirectionInactive;
+    BOOL remoteIsSending = remoteHasVideo &&
+        (remoteDir == LinphoneMediaDirectionSendOnly || remoteDir == LinphoneMediaDirectionSendRecv);
+
+    BOOL currentHasVideo = currentParams ? linphone_call_params_video_enabled(currentParams) : NO;
+    LinphoneMediaDirection currentDir = currentParams
+        ? linphone_call_params_get_video_direction(currentParams)
+        : LinphoneMediaDirectionInactive;
+    BOOL weAreReceiving = currentHasVideo &&
+        (currentDir == LinphoneMediaDirectionRecvOnly || currentDir == LinphoneMediaDirectionSendRecv);
+
+    return remoteIsSending && weAreReceiving;
+}
+
+- (NSDictionary *)getRemoteVideoStats {
+    if (!theLinphoneCore) return nil;
+    LinphoneCall *call = linphone_core_get_current_call(theLinphoneCore);
+    if (!call) return nil;
+
+    // Linphone 5.4 CallStats has no receiveFramerate — use downloadBandwidth as proxy.
+    LinphoneCallStats *stats = linphone_call_get_stats(call, LinphoneStreamTypeVideo);
+    float downloadBandwidth = stats ? linphone_call_stats_get_download_bandwidth(stats) : 0.0f;
+
+    return @{@"fps": @(0.0), @"bitrate": @(downloadBandwidth)};
+}
+
 - (void)switchCamera {
   if (!theLinphoneCore)
     return;
@@ -1769,10 +1809,47 @@ static void linphone_iphone_audio_devices_list_updated(LinphoneCore *lc) {
         return;
     }
 
-    // Toggle local capture — no SDP renegotiation, avoids TextureView flicker
-    linphone_core_enable_video_capture(theLinphoneCore, enabled);
+    // Switch video device — avoids SDP renegotiation (no re-INVITE, no flicker).
+    // StaticImage collapses UL to ~20 kbps so remote FPS polling can detect camera-off.
+    // isVideoCaptureEnabled=false alone keeps the encoder on the last frozen frame (~1000 kbps),
+    // which the remote's bitrate threshold cannot distinguish from live video.
+    if (enabled) {
+        const char **cameras = linphone_core_get_video_devices(theLinphoneCore);
+        const char *targetCamera = NULL;
+        if (cameras) {
+            for (int i = 0; cameras[i] != NULL; i++) {
+                if (strstr(cameras[i], "front") != NULL || strstr(cameras[i], "Front") != NULL) {
+                    targetCamera = cameras[i];
+                    break;
+                }
+            }
+            if (!targetCamera) {
+                for (int i = 0; cameras[i] != NULL; i++) {
+                    if (strstr(cameras[i], "StaticImage") == NULL) {
+                        targetCamera = cameras[i];
+                        break;
+                    }
+                }
+            }
+        }
+        if (targetCamera) {
+            linphone_core_set_video_device(theLinphoneCore, targetCamera);
+        }
+        // Cycle capture off→on to force Linphone to open the hardware camera
+        // against the already-bound preview surface.
+        linphone_core_enable_video_capture(theLinphoneCore, NO);
+        dispatch_after(dispatch_time(DISPATCH_TIME_NOW, (int64_t)(0.2 * NSEC_PER_SEC)),
+                       dispatch_get_main_queue(), ^{
+            if (theLinphoneCore) {
+                linphone_core_enable_video_capture(theLinphoneCore, YES);
+            }
+        });
+    } else {
+        linphone_core_set_video_device(theLinphoneCore, "StaticImage: Static picture");
+        linphone_core_enable_video_capture(theLinphoneCore, NO);
+    }
 
-    // Notify remote peer via SIP INFO so it knows our camera state
+    // Primary: notify remote peer via SIP INFO
     LinphoneContent *content = linphone_factory_create_content(linphone_factory_get());
     linphone_content_set_type(content, "application");
     linphone_content_set_subtype(content, "cans-video-state");
@@ -1784,6 +1861,20 @@ static void linphone_iphone_audio_devices_list_updated(LinphoneCore *lc) {
 
     linphone_content_unref(content);
     NSLog(@"[LinphoneManager] setVideoEnabled: %d, sent SIP INFO cans-video-state", enabled);
+
+    // Fallback: SIP MESSAGE with X-CANS-CTRL — passes B2BUA proxies that drop SIP INFO
+    // with custom Content-Types. callLog.remoteAddress is unaffected by B2BUA Contact rewriting.
+    const LinphoneAddress *remoteAddr = linphone_call_log_get_remote_address(linphone_call_get_call_log(call));
+    if (!remoteAddr) remoteAddr = linphone_call_get_remote_address(call);
+    if (remoteAddr) {
+        LinphoneChatRoom *room = linphone_core_get_chat_room(theLinphoneCore, remoteAddr);
+        if (room) {
+            const char *ctrlValue = enabled ? "video-state:on" : "video-state:off";
+            LinphoneChatMessage *msg = linphone_chat_room_create_empty_message(room);
+            linphone_chat_message_add_custom_header(msg, "X-CANS-CTRL", ctrlValue);
+            linphone_chat_message_send(msg);
+        }
+    }
 }
 
 - (void)sendTextMessage:(NSString *)peerUri text:(NSString *)text requestId:(NSString *)requestId {
@@ -1865,7 +1956,10 @@ static NSString *lm_getMessageText(LinphoneChatMessage *msg) {
         LinphoneChatMessage *lastMsg = linphone_chat_room_get_last_message_in_history(room);
         
         NSMutableDictionary *roomDict = [NSMutableDictionary dictionary];
-        roomDict[@"phoneNumber"] = [NSString stringWithUTF8String:linphone_address_get_username(peer) ?: ""];
+        const char *peerUsername = linphone_address_get_username(peer) ?: "";
+        const char *peerDN = linphone_address_get_display_name(peer);
+        roomDict[@"phoneNumber"] = [NSString stringWithUTF8String:peerUsername];
+        roomDict[@"displayName"] = [NSString stringWithUTF8String:(peerDN && strlen(peerDN) > 0) ? peerDN : peerUsername];
         roomDict[@"peerUri"] = [NSString stringWithUTF8String:linphone_address_as_string_uri_only(peer) ?: ""];
         roomDict[@"unreadCount"] = @(linphone_chat_room_get_unread_messages_count(room));
         
@@ -2084,6 +2178,10 @@ static NSString *lm_chatMessageStateToString(LinphoneChatMessageState state) {
 #pragma mark - Chat Callbacks
 
 static void linphone_iphone_message_received(LinphoneCore *lc, LinphoneChatRoom *room, LinphoneChatMessage *message) {
+    const LinphoneAddress *dbgPeer = linphone_chat_room_get_peer_address(room);
+    NSString *dbgPeerUser = [NSString stringWithUTF8String:linphone_address_get_username(dbgPeer) ?: ""];
+    NSLog(@"[LinphoneManager] message_received: from=%@", dbgPeerUser);
+
     // Skip IMDN delivery/read receipts — they are SIP control messages, not chat messages.
     // The server forwards them as MESSAGE with Content-Type: message/imdn+xml which Linphone
     // fires through message_received; without this guard they render as empty bubbles.
@@ -2163,6 +2261,8 @@ static void linphone_iphone_message_received(LinphoneCore *lc, LinphoneChatRoom 
         isImage = YES;
         text = @"";
     }
+
+    NSLog(@"[LinphoneManager] message_received: text='%@' isImage=%d", text, isImage);
 
     // Belt-and-suspenders: if we have no displayable content, don't emit an empty bubble.
     if (!isImage && [text length] == 0) {
@@ -2741,3 +2841,5 @@ static void linphone_iphone_info_received(LinphoneCore *lc, LinphoneCall *call, 
 }
 
 @end
+
+#pragma clang diagnostic pop

@@ -141,6 +141,8 @@ extern NSString *const kCansCustomRegistrationEvent;
 
 // Video Call Methods
 - (BOOL)isVideoCall;
+- (BOOL)isRemoteVideoEnabled;
+- (NSDictionary *)getRemoteVideoStats;
 - (void)switchCamera;
 - (void)makeVideoCall:(NSString *)phoneNumber;
 - (void)acceptVideoCall;

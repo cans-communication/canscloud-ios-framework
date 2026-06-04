@@ -1,28 +1,26 @@
 Pod::Spec.new do |s|
   s.name             = 'CansConnect'
   s.version          = '1.0.0'
-  s.summary          = 'CansConnect local development for React Native'
+  s.summary          = 'CansConnect ios sdk development for CANScall'
   s.homepage         = 'https://cans.cc'
   s.license          = { :type => 'MIT' }
   s.author           = { 'CANScall' => 'near@canscloud.com' }
-  s.source           = { :path => '.' }
+  s.source           = { :git => 'https://github.com/cans-communication/canscloud-ios-framework.git', :tag => s.version.to_s }
 
   s.platform         = :ios, '15.1'
-  
-  s.source_files     = '**/*.{h,m,swift}'
-  s.resources = ['**/linphonerc-factory']
+
+  s.source_files     = 'CansConnect/**/*.{h,m,swift}'
+  s.resources = ['CansConnect/**/linphonerc-factory']
   s.exclude_files    = [
       'DemoApp/**/*',
       'msgNotificationContent/**/*',
       'msgNotificationService/**/*'
     ]
-  
+
   s.header_dir       = 'CansConnect'
-  
-  s.dependency 'linphone-sdk', '~> 5.2'
-  
-  # 💡 หมายเหตุ: หากตอนรัน pod install แล้วมันฟ้องว่าหา 'core' ไม่เจอ
-  # ให้ลองเปลี่ยนเป็น 'linphone-sdk/swift' หรือ 'linphone-sdk/default' แทนครับ
+
+  s.dependency 'linphone-sdk', '~> 5.4'
+
   
   s.pod_target_xcconfig = { 
     'DEFINES_MODULE' => 'YES',

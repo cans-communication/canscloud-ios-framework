@@ -48,7 +48,6 @@ extern NSString *const kCansCustomRegistrationEvent;
 - (void)removeAccountAll;
 - (void)startCall:(NSString *)phoneNumber;
 - (NSInteger)callsCount;
-// Method สำหรับ Call Management และ Audio
 - (void)acceptCall;
 - (NSString *)getCallingLogsJSON;
 - (NSString *)getHistoryCallLogsJSON;

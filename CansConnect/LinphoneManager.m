@@ -119,8 +119,6 @@ static void linphone_iphone_chat_room_state_changed(LinphoneCore *lc, LinphoneCh
   return [fullPath stringByAppendingPathComponent:file];
 }
 
-// 🚀 สร้าง Core บน Main Thread และใช้ Core ธรรมดาเพื่อ Bypass ปัญหา Apple Developer
-// 🚀 สร้าง Core บน Main Thread และแก้บั๊ก Config เก่าพัง
 - (void)createLinphoneCore {
   __weak typeof(self) weakSelf = self;
   dispatch_async(dispatch_get_main_queue(), ^{
@@ -139,7 +137,7 @@ static void linphone_iphone_chat_room_state_changed(LinphoneCore *lc, LinphoneCh
     }
     NSLog(@"[LinphoneManager] Factory initialized at: %p", factory);
 
-    // 🛡️ Initialize logging service early to set up global SDK state
+    // Initialize logging service early to set up global SDK state
     LinphoneLoggingService *logService = linphone_logging_service_get();
     if (logService) {
       linphone_logging_service_set_log_level(logService,
@@ -202,9 +200,6 @@ static void linphone_iphone_chat_room_state_changed(LinphoneCore *lc, LinphoneCh
     linphone_config_set_int(config, "sip", "publish_presence", 0);
     linphone_config_set_string(config, "sip", "save_headers", "To, Diversion, Contact, X-Voicemail");
 
-
-    // 🛡️ API Fix: linphone_factory_create_core_with_config_3 is the correct
-    // modern API.
     NSLog(@"[LinphoneManager] Attempting to create core with correct API "
           @"(v3)...");
     theLinphoneCore =
@@ -491,7 +486,6 @@ static void linphone_iphone_popup_password_request(LinphoneCore *lc,
   return data ? [[NSString alloc] initWithData:data encoding:NSUTF8StringEncoding] : @"[]";
 }
 
-// ฟังก์ชันเดิมสำหรับลบบัญชี
 - (void)removeAccountAtIndex:(NSInteger)index {
   const bctbx_list_t *accounts =
       linphone_core_get_account_list(theLinphoneCore);
@@ -547,12 +541,12 @@ static void linphone_iphone_popup_password_request(LinphoneCore *lc,
 }
 - (NSString *)updateCurrentLoginTypeFromAccount {
   if (!theLinphoneCore) return @"";
-  
+
   LinphoneAccount *defaultAccount = linphone_core_get_default_account(theLinphoneCore);
   if (defaultAccount) {
     LinphoneAccountParams *params = (LinphoneAccountParams *)linphone_account_get_params(defaultAccount);
     const char *contactParams = linphone_account_params_get_contact_uri_parameters(params);
-    
+
     NSString *type = @"";
     if (contactParams) {
       NSString *paramsStr = [NSString stringWithUTF8String:contactParams];
@@ -565,7 +559,7 @@ static void linphone_iphone_popup_password_request(LinphoneCore *lc,
         }
       }
     }
-    
+
     NSLog(@"[LinphoneManager] updateCurrentLoginTypeFromAccount: type=%@", type);
     return type;
   }
@@ -586,13 +580,10 @@ static void linphone_iphone_popup_password_request(LinphoneCore *lc,
   LinphoneAddress *address =
       linphone_core_interpret_url(theLinphoneCore, [phoneNumber UTF8String]);
   if (!address) {
-    NSLog(
-        @"[LinphoneManager] ❌ FATAL: แปลงเบอร์/URL ไม่สำเร็จ! เบอร์อาจจะผิดฟอร์แมต");
     return;
   }
 
   char *addrStr = linphone_address_as_string(address);
-  NSLog(@"[LinphoneManager] ✅ SIP Address ที่จะได้โทรออกคือ: %s", addrStr);
   ms_free(addrStr);
 
   LinphoneCallParams *params =
@@ -601,13 +592,6 @@ static void linphone_iphone_popup_password_request(LinphoneCore *lc,
 
   LinphoneCall *call = linphone_core_invite_address_with_params(
       theLinphoneCore, address, params);
-
-  if (call) {
-    NSLog(@"[LinphoneManager] 🚀 สร้าง Call Object สำเร็จ! ส่ง INVITE แล้ว");
-  } else {
-    NSLog(@"[LinphoneManager] ❌ FATAL: "
-          @"linphone_core_invite_address_with_params ล้มเหลว!");
-  }
 
   linphone_address_unref(address);
   linphone_call_params_unref(params);
@@ -702,13 +686,13 @@ static void linphone_iphone_popup_password_request(LinphoneCore *lc,
     if (!theLinphoneCore) return @"[]";
     NSMutableArray *logs = [NSMutableArray array];
     const bctbx_list_t *history = linphone_core_get_call_logs(theLinphoneCore);
-    
+
     for (const bctbx_list_t *it = history; it != NULL; it = it->next) {
         LinphoneCallLog *log = (LinphoneCallLog *)it->data;
         const LinphoneAddress *addr = linphone_call_log_get_remote_address(log);
         NSString *phone = addr ? [NSString stringWithUTF8String:linphone_address_get_username(addr) ?: ""] : @"";
         NSString *name = addr ? [NSString stringWithUTF8String:linphone_address_get_display_name(addr) ?: ""] : @"";
-        
+
         [logs addObject:@{
             @"callID": linphone_call_log_get_call_id(log) ? [NSString stringWithUTF8String:linphone_call_log_get_call_id(log)] : @"",
             @"phoneNumber": phone,
@@ -718,7 +702,7 @@ static void linphone_iphone_popup_password_request(LinphoneCore *lc,
             @"timestamp": @(linphone_call_log_get_start_date(log))
         }];
     }
-    
+
     NSData *jsonData = [NSJSONSerialization dataWithJSONObject:logs options:0 error:nil];
     return jsonData ? [[NSString alloc] initWithData:jsonData encoding:NSUTF8StringEncoding] : @"[]";
 }
@@ -727,14 +711,14 @@ static void linphone_iphone_popup_password_request(LinphoneCore *lc,
     if (!theLinphoneCore) return @"[]";
     NSMutableArray *logs = [NSMutableArray array];
     const bctbx_list_t *history = linphone_core_get_call_logs(theLinphoneCore);
-    
+
     for (const bctbx_list_t *it = history; it != NULL; it = it->next) {
         LinphoneCallLog *log = (LinphoneCallLog *)it->data;
         if (linphone_call_log_get_status(log) == LinphoneCallMissed) {
             const LinphoneAddress *addr = linphone_call_log_get_remote_address(log);
             NSString *phone = addr ? [NSString stringWithUTF8String:linphone_address_get_username(addr) ?: ""] : @"";
             NSString *name = addr ? [NSString stringWithUTF8String:linphone_address_get_display_name(addr) ?: ""] : @"";
-            
+
             [logs addObject:@{
                 @"callID": linphone_call_log_get_call_id(log) ? [NSString stringWithUTF8String:linphone_call_log_get_call_id(log)] : @"",
                 @"phoneNumber": phone,
@@ -745,7 +729,7 @@ static void linphone_iphone_popup_password_request(LinphoneCore *lc,
             }];
         }
     }
-    
+
     NSData *jsonData = [NSJSONSerialization dataWithJSONObject:logs options:0 error:nil];
     return jsonData ? [[NSString alloc] initWithData:jsonData encoding:NSUTF8StringEncoding] : @"[]";
 }
@@ -1296,28 +1280,28 @@ static void linphone_iphone_call_state(LinphoneCore *lc, LinphoneCall *call,
   NSString *msgStr = message ? [NSString stringWithUTF8String:message] : @"";
 
   // Voicemail Detection via SIP Headers (Logic from Android)
-  if (state == LinphoneCallOutgoingEarlyMedia || state == LinphoneCallOutgoingProgress || 
+  if (state == LinphoneCallOutgoingEarlyMedia || state == LinphoneCallOutgoingProgress ||
       state == LinphoneCallConnected || state == LinphoneCallStreamsRunning) {
-      
+
       const LinphoneCallParams *params = linphone_call_get_params(call);
-      if (linphone_call_get_dir(call) == LinphoneCallOutgoing && 
+      if (linphone_call_get_dir(call) == LinphoneCallOutgoing &&
           linphone_call_params_video_enabled(params)) {
-          
+
           const LinphoneCallParams *remoteParams = linphone_call_get_remote_params(call);
           if (remoteParams) {
               const char *diversion = linphone_call_params_get_custom_header(remoteParams, "Diversion");
               const char *contact = linphone_call_params_get_custom_header(remoteParams, "Contact");
               const char *xVoicemail = linphone_call_params_get_custom_header(remoteParams, "X-Voicemail");
-              
+
               BOOL isVoicemail = NO;
               if (diversion && (strcasestr(diversion, "voicemail") || strcasestr(diversion, "vmail"))) isVoicemail = YES;
               if (contact && (strcasestr(contact, "voicemail") || strcasestr(contact, "vmail"))) isVoicemail = YES;
               if (xVoicemail && strcasecmp(xVoicemail, "yes") == 0) isVoicemail = YES;
-              
+
               if (isVoicemail) {
                   NSLog(@"[LinphoneManager] Voicemail detected via SIP headers. Terminating call.");
                   linphone_call_terminate(call);
-                  
+
                   // Emit as MissCall to match Android behavior
                   NSDictionary *dict = @{@"stateString": @"MissCall", @"message": @"Voicemail detected"};
                   [[NSNotificationCenter defaultCenter] postNotificationName:kLinphoneCallStateUpdate object:nil userInfo:dict];
@@ -1326,12 +1310,9 @@ static void linphone_iphone_call_state(LinphoneCore *lc, LinphoneCall *call,
           }
       }
   }
-  
-  // Remote Video State Monitoring — mirrors Android's lastRemoteCameraOnState dedup.
+
+  // Remote Video State Monitoring — mirrors Android's lastRemoteCameraOnState.
   // Skip during LinphoneCallUpdating: remote params reflect mid-negotiation SDP which
-  // may temporarily show a stale direction, causing a spurious isRemoteCameraOn=NO event
-  // that hides the remote view (black flash). LinphoneCallUpdatedByRemote fires after
-  // negotiation is complete, so that state is safe to read.
   if (state == LinphoneCallStreamsRunning || state == LinphoneCallUpdatedByRemote) {
       const LinphoneCallParams *remoteParams = linphone_call_get_remote_params(call);
       if (remoteParams) {
@@ -1391,7 +1372,6 @@ static void linphone_iphone_audio_devices_list_updated(LinphoneCore *lc) {
     [[NSNotificationCenter defaultCenter] postNotificationName:kLinphoneAudioDeviceUpdate object:nil userInfo:@{@"action": @"onAudioDevicesListUpdated"}];
 }
 
-// 1. ฟังก์ชันช่วยทำ MD5 Hash
 - (NSString *)md5Hash:(NSString *)input {
   const char *cStr = [input UTF8String];
   unsigned char digest[CC_MD5_DIGEST_LENGTH];
@@ -1404,7 +1384,7 @@ static void linphone_iphone_audio_devices_list_updated(LinphoneCore *lc) {
   return output;
 }
 
-// 2. ฟังก์ชันช่วยแปลง NSDictionary เป็น JSON String
+// convert NSDictionary to JSON String
 - (NSString *)jsonStringFromDictionary:(NSDictionary *)dict {
   NSError *error;
   NSData *jsonData = [NSJSONSerialization dataWithJSONObject:dict
@@ -1415,7 +1395,7 @@ static void linphone_iphone_audio_devices_list_updated(LinphoneCore *lc) {
   return [[NSString alloc] initWithData:jsonData encoding:NSUTF8StringEncoding];
 }
 
-// 3. ฟังก์ชันช่วยส่ง Event กลับไปยัง NativeModuleiOS
+// send Event back to NativeModuleiOS
 - (void)postCansEventWithState:(NSString *)state
              payloadDictionary:(NSDictionary *)dict {
   NSString *jsonString = [self jsonStringFromDictionary:dict];
@@ -1434,7 +1414,6 @@ static void linphone_iphone_audio_devices_list_updated(LinphoneCore *lc) {
   });
 }
 
-// 4. ฟังก์ชันหลักสำหรับ CANS Account Login
 - (void)registerCansAccountWithUsername:(NSString *)username
                                password:(NSString *)password
                                  domain:(NSString *)domain
@@ -1445,7 +1424,7 @@ static void linphone_iphone_audio_devices_list_updated(LinphoneCore *lc) {
   apiURL = [apiURL stringByTrimmingCharactersInSet:[NSCharacterSet whitespaceAndNewlineCharacterSet]];
 
   NSLog(@"[CansConnect] DEBUG: trimmed username=[%@] len=%lu, domain=[%@] len=%lu", username, (unsigned long)username.length, domain, (unsigned long)domain.length);
-  
+
   if (!username.length || !password.length || !domain.length) {
     NSLog(@"[CansConnect] registerCansAccountWithUsername: empty inputs");
     [self postCansEventWithState:@"FAIL" payloadDictionary:@{}];
@@ -1462,7 +1441,7 @@ static void linphone_iphone_audio_devices_list_updated(LinphoneCore *lc) {
   // Build fullUsername without stringWithFormat to avoid any weirdness
   NSString *fullUsername = [username stringByAppendingString:@"@"];
   fullUsername = [fullUsername stringByAppendingString:domain];
-  
+
   NSData *fullUserBytes = [fullUsername dataUsingEncoding:NSUTF8StringEncoding];
   NSLog(@"[CansConnect] fullUsername: %@ (bytes: %@)", fullUsername, fullUserBytes);
   NSString *loginUrlString = [NSString stringWithFormat:@"%@api/v3/sign-in/cc", apiURL];
@@ -1479,7 +1458,7 @@ static void linphone_iphone_audio_devices_list_updated(LinphoneCore *lc) {
   NSError *jsonError;
   NSData *jsonData = [NSJSONSerialization dataWithJSONObject:loginBody options:0 error:&jsonError];
   loginRequest.HTTPBody = jsonData;
-  
+
   NSLog(@"[CansConnect] V3 Login Request: URL=%@ Body=%@", loginUrlString, [[NSString alloc] initWithData:jsonData encoding:NSUTF8StringEncoding]);
 
   NSURLSession *session = [NSURLSession sharedSession];
@@ -1579,7 +1558,6 @@ static void linphone_iphone_audio_devices_list_updated(LinphoneCore *lc) {
       }] resume];
 }
 
-// 5. นำ HA1 มาเซ็ตค่าให้กับ Linphone
 - (void)setupLinphoneWithExtension:(NSString *)extension
                                ha1:(NSString *)ha1
                             domain:(NSString *)domainName
@@ -1640,8 +1618,6 @@ static void linphone_iphone_audio_devices_list_updated(LinphoneCore *lc) {
 
   linphone_core_refresh_registers(theLinphoneCore);
 }
-
-// --- ชุดฟังก์ชันจัดการ Video Call ---
 
 - (BOOL)isVideoCall {
   if (!theLinphoneCore)
@@ -1824,12 +1800,10 @@ static void linphone_iphone_audio_devices_list_updated(LinphoneCore *lc) {
   }
 }
 
-// รับสายแบบ Audio ปกติ
 - (void)acceptCall {
   if (!theLinphoneCore)
     return;
 
-  // หา Call ปัจจุบัน
   LinphoneCall *currentCall = linphone_core_get_current_call(theLinphoneCore);
   if (!currentCall) {
     const bctbx_list_t *calls = linphone_core_get_calls(theLinphoneCore);
@@ -1838,12 +1812,10 @@ static void linphone_iphone_audio_devices_list_updated(LinphoneCore *lc) {
     }
   }
 
-  // ถ้าเจอสาย ให้กดรับ
   if (currentCall) {
     LinphoneCallParams *params =
         linphone_core_create_call_params(theLinphoneCore, currentCall);
 
-    // ⭐ รับสายเป็น Audio อย่างเดียว ปิดวิดีโอ
     linphone_call_params_enable_video(params, FALSE);
     linphone_call_accept_with_params(currentCall, params);
 
@@ -2492,11 +2464,6 @@ static void linphone_iphone_message_received(LinphoneCore *lc, LinphoneChatRoom 
 
     NSString *text = lm_getMessageText(message);
 
-    // Detect image content (mirrors getChatHistoryJSON logic).
-    // attachedDownloadCbs tracks whether lm_incoming_img_state_changed already occupies the
-    // default Cbs slot (file-transfer download path).  If it does, we must NOT overwrite it
-    // with lm_incoming_msg_state_changed below; lm_incoming_img_state_changed handles both
-    // download completion and delivery-status forwarding for those messages.
     BOOL isImage          = NO;
     BOOL attachedDownloadCbs = NO;
     NSString *imagePath = @"";
@@ -2565,7 +2532,6 @@ static void linphone_iphone_message_received(LinphoneCore *lc, LinphoneChatRoom 
 
     NSLog(@"[LinphoneManager] message_received: text='%@' isImage=%d", text, isImage);
 
-    // Belt-and-suspenders: if we have no displayable content, don't emit an empty bubble.
     if (!isImage && [text length] == 0) {
         NSLog(@"[LinphoneManager] message_received: skipping empty-content message");
         return;
@@ -2628,7 +2594,6 @@ static void lm_chat_msg_state_changed(LinphoneChatMessage *msg, LinphoneChatMess
     });
 }
 
-// Per-message callback for INCOMING text messages (and inline images already on disk).
 // Mirrors Android monitorMessageStatus — attaches a ChatMessageListenerStub to each
 // received message so that Delivered / DeliveredToUser / Displayed state transitions
 // are forwarded to JS as onMessageStatusChanged events (read-receipt / delivery icons).
@@ -2869,10 +2834,6 @@ static void lm_incoming_img_state_changed(LinphoneChatMessage *msg, LinphoneChat
 
 // ── Transfer stall detection ──────────────────────────────────────────────
 // Mirrors Android NativeModuleAndroid.startTransferTimeout.
-// Uses a generation-token pattern to "cancel" superseded dispatch_after blocks:
-// each progress callback increments the token; the block checks the token on fire.
-// lm_lastOffsets holds the offset seen at the PREVIOUS timer fire (initially -1),
-// so "stalled" = transfer still in progress AND offset hasn't grown since last fire.
 static NSMutableDictionary *lm_timerGens   = nil; // requestId → @(generation)
 static NSMutableDictionary *lm_lastOffsets = nil; // requestId → @(lastOffset)
 
@@ -2885,10 +2846,6 @@ static void lm_startTransferTimeout(LinphoneChatMessage *msg, NSString *reqId, s
     NSInteger capturedGen = newGen;
     NSInteger capturedOff = (NSInteger)currentOffset;
 
-    // Sentinel: initialize lastOffset to -1 for new transfers so that a first
-    // progress tick at byte 0 (capturedOff=0) does not satisfy capturedOff <= lastOff
-    // (0 <= 0) and incorrectly trigger a stall.  Android initialises with ?: -1;
-    // we must do the same here because nil NSNumber.integerValue returns 0.
     if (!lm_lastOffsets[reqId]) {
         lm_lastOffsets[reqId] = @(-1);
     }

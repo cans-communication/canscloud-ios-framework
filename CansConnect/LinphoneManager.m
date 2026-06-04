@@ -42,15 +42,15 @@ static void linphone_iphone_audio_devices_list_updated(LinphoneCore *lc);
 
 static void linphone_iphone_message_received(LinphoneCore *lc, LinphoneChatRoom *room, LinphoneChatMessage *message);
 
-static void linphone_iphone_chat_message_state_changed(LinphoneCore *lc, LinphoneChatRoom *room, LinphoneChatMessage *message, LinphoneChatMessageState state);
-
 // Per-message callbacks (Linphone 5.x — set on each outgoing LinphoneChatMessage object)
 static void lm_chat_msg_state_changed(LinphoneChatMessage *msg, LinphoneChatMessageState state);
 static void lm_img_msg_state_changed(LinphoneChatMessage *msg, LinphoneChatMessageState state);
 static void lm_incoming_img_state_changed(LinphoneChatMessage *msg, LinphoneChatMessageState state);
+static void lm_incoming_msg_state_changed(LinphoneChatMessage *msg, LinphoneChatMessageState state);
 static void lm_img_progress(LinphoneChatMessage *msg, LinphoneContent *content, size_t offset, size_t total);
 
 static void linphone_iphone_info_received(LinphoneCore *lc, LinphoneCall *call, const LinphoneInfoMessage *msg);
+static void linphone_iphone_chat_room_state_changed(LinphoneCore *lc, LinphoneChatRoom *room, LinphoneChatRoomState state);
 
 @interface LinphoneManager () {
   NSTimer *iterateTimer;
@@ -243,9 +243,7 @@ static void linphone_iphone_info_received(LinphoneCore *lc, LinphoneCall *call, 
       linphone_core_cbs_set_audio_devices_list_updated(cbs, linphone_iphone_audio_devices_list_updated);
       linphone_core_cbs_set_message_received(cbs, linphone_iphone_message_received);
       linphone_core_cbs_set_info_received(cbs, linphone_iphone_info_received);
-      // Note: linphone_core_cbs_set_chat_message_state_changed does not exist on CoreCbs.
-      // Message state changes are typically set on individual LinphoneChatMessage objects.
-      // linphone_core_cbs_set_chat_message_state_changed(cbs, linphone_iphone_chat_message_state_changed);
+      linphone_core_cbs_set_chat_room_state_changed(cbs, linphone_iphone_chat_room_state_changed);
 
       linphone_core_add_callbacks(theLinphoneCore, cbs);
 
@@ -934,6 +932,13 @@ static void linphone_iphone_popup_password_request(LinphoneCore *lc,
   return data ? [[NSString alloc] initWithData:data encoding:NSUTF8StringEncoding] : @"[]";
 }
 
+- (void)setPayLoadAtIndex:(int)index enabled:(BOOL)enabled {
+  if (!theLinphoneCore) return;
+  LinphonePayloadType *pt = (LinphonePayloadType *)bctbx_list_nth_data(
+      linphone_core_get_audio_payload_types(theLinphoneCore), index);
+  if (pt) linphone_payload_type_enable(pt, enabled);
+}
+
 // ── Ringtone / Vibrate ────────────────────────────────────────────────────
 
 - (BOOL)getDeviceRingtone {
@@ -963,6 +968,18 @@ static void linphone_iphone_popup_password_request(LinphoneCore *lc,
     case LinphoneMediaEncryptionDTLS: return @"DTLS";
     default: return @"None";
   }
+}
+
+- (void)setMediaEncryption:(int)position {
+  if (!theLinphoneCore) return;
+  LinphoneMediaEncryption enc;
+  switch (position) {
+    case 1: enc = LinphoneMediaEncryptionSRTP; break;
+    case 2: enc = LinphoneMediaEncryptionZRTP; break;
+    case 3: enc = LinphoneMediaEncryptionDTLS; break;
+    default: enc = LinphoneMediaEncryptionNone; break;
+  }
+  linphone_core_set_media_encryption(theLinphoneCore, enc);
 }
 
 - (BOOL)getEncryptionMandatory {
@@ -1060,6 +1077,14 @@ static void linphone_iphone_popup_password_request(LinphoneCore *lc,
   if (theLinphoneCore) {
     linphone_core_set_log_collection_upload_server_url(theLinphoneCore, [url UTF8String]);
   }
+}
+
+- (void)uploadLogCollection {
+  if (theLinphoneCore) linphone_core_upload_log_collection(theLinphoneCore);
+}
+
+- (void)resetLogCollection {
+  linphone_core_reset_log_collection();
 }
 
 // ── Echo Calibration / Tester ─────────────────────────────────────────────
@@ -1222,17 +1247,41 @@ static void linphone_iphone_popup_password_request(LinphoneCore *lc,
   return linphone_core_get_missed_calls_count(theLinphoneCore);
 }
 
-- (void)transferCallNow:(NSString *)phoneNumber {
-    if (!theLinphoneCore) return;
+- (BOOL)transferCallNow:(NSString *)phoneNumber {
+    if (!theLinphoneCore) return NO;
     LinphoneCall *call = linphone_core_get_current_call(theLinphoneCore);
-    if (call) {
-        linphone_call_transfer(call, [phoneNumber UTF8String]);
+    if (!call) {
+        const bctbx_list_t *calls = linphone_core_get_calls(theLinphoneCore);
+        if (calls) call = (LinphoneCall *)calls->data;
     }
+    if (!call) {
+        NSLog(@"[LinphoneManager] transferCallNow: no active call");
+        return NO;
+    }
+    LinphoneAddress *address = linphone_core_interpret_url(theLinphoneCore, [phoneNumber UTF8String]);
+    if (!address) {
+        NSLog(@"[LinphoneManager] transferCallNow: could not resolve address for %@", phoneNumber);
+        return NO;
+    }
+    NSLog(@"[LinphoneManager] transferCallNow: blind transfer to %@", phoneNumber);
+    linphone_call_transfer_to(call, address);
+    linphone_address_unref(address);
+    return YES;
 }
 
-- (void)transferCallAskFirst:(NSString *)phoneNumber {
-    // Basic implementation to match Android's logic if possible
-    [self transferCallNow:phoneNumber];
+- (BOOL)transferCallAskFirst:(NSString *)phoneNumber {
+    if (!theLinphoneCore) return NO;
+    int callCount = linphone_core_get_calls_nb(theLinphoneCore);
+    if (callCount != 2) {
+        NSLog(@"[LinphoneManager] transferCallAskFirst: need exactly 2 calls, got %d", callCount);
+        return NO;
+    }
+    const bctbx_list_t *calls = linphone_core_get_calls(theLinphoneCore);
+    LinphoneCall *firstCall  = (LinphoneCall *)calls->data;
+    LinphoneCall *secondCall = (LinphoneCall *)calls->next->data;
+    NSLog(@"[LinphoneManager] transferCallAskFirst: attended transfer");
+    linphone_call_transfer_to_another(firstCall, secondCall);
+    return YES;
 }
 
 // ==========================================
@@ -1717,6 +1766,11 @@ static void linphone_iphone_audio_devices_list_updated(LinphoneCore *lc) {
   if (!theLinphoneCore || !phoneNumber)
     return;
 
+  NSLog(@"[LinphoneManager] makeVideoCall: %@", phoneNumber);
+  // Re-enable capture/display in case a previous call left them disabled (background state).
+  linphone_core_enable_video_capture(theLinphoneCore, YES);
+  linphone_core_enable_video_display(theLinphoneCore, YES);
+
   LinphoneAddress *addr =
       linphone_core_interpret_url(theLinphoneCore, [phoneNumber UTF8String]);
   if (!addr)
@@ -1883,18 +1937,39 @@ static void linphone_iphone_audio_devices_list_updated(LinphoneCore *lc) {
     if (!addr) return;
 
     LinphoneChatRoom *room = linphone_core_get_chat_room(theLinphoneCore, addr);
-    if (room) {
-        LinphoneChatMessage *msg = linphone_chat_room_create_message(room, text.UTF8String);
-        if (requestId) {
-            linphone_chat_message_add_custom_header(msg, "X-Request-ID", requestId.UTF8String);
-        }
-        LinphoneChatMessageCbs *msgCbs = linphone_chat_message_get_callbacks(msg);
-        if (msgCbs) {
-            linphone_chat_message_cbs_set_msg_state_changed(msgCbs, lm_chat_msg_state_changed);
-        }
-        linphone_chat_message_send(msg);
-    }
     linphone_address_unref(addr);
+
+    if (!room) {
+        // Mirror Android waitForRoomCreated failure path — emit NotDelivered so JS
+        // can persist the message via FailedMessageUtils.
+        NSLog(@"[LinphoneManager] sendTextMessage: failed to get chat room for %@", peerUri);
+        if (requestId.length > 0) {
+            NSDictionary *errDict = @{
+                @"id":     requestId,
+                @"status": @"NotDelivered",
+                @"sender": @"me",
+                @"type":   @"text",
+                @"text":   text ?: @"",
+            };
+            dispatch_async(dispatch_get_main_queue(), ^{
+                [[NSNotificationCenter defaultCenter]
+                    postNotificationName:@"LinphoneMessageStateChanged"
+                                  object:nil
+                                userInfo:errDict];
+            });
+        }
+        return;
+    }
+
+    LinphoneChatMessage *msg = linphone_chat_room_create_message(room, text.UTF8String);
+    if (requestId) {
+        linphone_chat_message_add_custom_header(msg, "X-Request-ID", requestId.UTF8String);
+    }
+    LinphoneChatMessageCbs *msgCbs = linphone_chat_message_get_callbacks(msg);
+    if (msgCbs) {
+        linphone_chat_message_cbs_set_msg_state_changed(msgCbs, lm_chat_msg_state_changed);
+    }
+    linphone_chat_message_send(msg);
 }
 
 - (void)sendImageMessage:(NSString *)peerUri filePath:(NSString *)filePath requestId:(NSString *)requestId {
@@ -1903,31 +1978,51 @@ static void linphone_iphone_audio_devices_list_updated(LinphoneCore *lc) {
     if (!addr) return;
 
     LinphoneChatRoom *room = linphone_core_get_chat_room(theLinphoneCore, addr);
-    if (room) {
-        // Derive file extension for subtype (e.g. "jpeg", "png")
-        NSString *ext = filePath.pathExtension.lowercaseString;
-        if (ext.length == 0) ext = @"jpeg";
-
-        LinphoneChatMessage *msg = linphone_chat_room_create_empty_message(room);
-        LinphoneContent *content = linphone_factory_create_content(linphone_factory_get());
-        linphone_content_set_type(content, "image");
-        linphone_content_set_subtype(content, ext.UTF8String);
-        linphone_content_set_name(content, filePath.lastPathComponent.UTF8String);
-        linphone_content_set_file_path(content, filePath.UTF8String);
-        linphone_chat_message_add_file_content(msg, content);
-        if (requestId) {
-            linphone_chat_message_add_custom_header(msg, "X-Request-ID", requestId.UTF8String);
-            linphone_chat_message_add_custom_header(msg, "X-Local-Filename", filePath.lastPathComponent.UTF8String);
-        }
-        LinphoneChatMessageCbs *msgCbs = linphone_chat_message_get_callbacks(msg);
-        if (msgCbs) {
-            linphone_chat_message_cbs_set_msg_state_changed(msgCbs, lm_img_msg_state_changed);
-            linphone_chat_message_cbs_set_file_transfer_progress_indication(msgCbs, lm_img_progress);
-        }
-        linphone_chat_message_send(msg);
-        linphone_content_unref(content);
-    }
     linphone_address_unref(addr);
+
+    if (!room) {
+        // Mirror Android waitForRoomCreated failure path — emit NotDelivered.
+        NSLog(@"[LinphoneManager] sendImageMessage: failed to get chat room for %@", peerUri);
+        if (requestId.length > 0) {
+            NSDictionary *errDict = @{
+                @"id":     requestId,
+                @"status": @"NotDelivered",
+                @"sender": @"me",
+                @"type":   @"image",
+                @"text":   @"[Image]",
+            };
+            dispatch_async(dispatch_get_main_queue(), ^{
+                [[NSNotificationCenter defaultCenter]
+                    postNotificationName:@"LinphoneMessageStateChanged"
+                                  object:nil
+                                userInfo:errDict];
+            });
+        }
+        return;
+    }
+
+    // Derive file extension for subtype (e.g. "jpeg", "png")
+    NSString *ext = filePath.pathExtension.lowercaseString;
+    if (ext.length == 0) ext = @"jpeg";
+
+    LinphoneChatMessage *msg = linphone_chat_room_create_empty_message(room);
+    LinphoneContent *content = linphone_factory_create_content(linphone_factory_get());
+    linphone_content_set_type(content, "image");
+    linphone_content_set_subtype(content, ext.UTF8String);
+    linphone_content_set_name(content, filePath.lastPathComponent.UTF8String);
+    linphone_content_set_file_path(content, filePath.UTF8String);
+    linphone_chat_message_add_file_content(msg, content);
+    if (requestId) {
+        linphone_chat_message_add_custom_header(msg, "X-Request-ID", requestId.UTF8String);
+        linphone_chat_message_add_custom_header(msg, "X-Local-Filename", filePath.lastPathComponent.UTF8String);
+    }
+    LinphoneChatMessageCbs *msgCbs = linphone_chat_message_get_callbacks(msg);
+    if (msgCbs) {
+        linphone_chat_message_cbs_set_msg_state_changed(msgCbs, lm_img_msg_state_changed);
+        linphone_chat_message_cbs_set_file_transfer_progress_indication(msgCbs, lm_img_progress);
+    }
+    linphone_chat_message_send(msg);
+    linphone_content_unref(content);
 }
 
 // Returns the plain-text body of a chat message using the non-deprecated content API.
@@ -1945,44 +2040,128 @@ static NSString *lm_getMessageText(LinphoneChatMessage *msg) {
     return @"";
 }
 
+// Returns YES if the message contains any image or file-transfer content.
+// Mirrors Android hasFileContent: content.isFileTransfer || content.type == "image".
+// Uses strstr to match "image/jpeg", "image/png", etc., not just exact "image".
+static BOOL lm_hasFileContent(LinphoneChatMessage *msg) {
+    const bctbx_list_t *contents = linphone_chat_message_get_contents(msg);
+    for (const bctbx_list_t *cit = contents; cit != NULL; cit = cit->next) {
+        LinphoneContent *content = (LinphoneContent *)cit->data;
+        if (linphone_content_is_file_transfer(content)) return YES;
+        const char *ctype = linphone_content_get_type(content);
+        if (ctype && strstr(ctype, "image")) return YES;
+    }
+    return NO;
+}
+
+// Forward declaration — lm_chatMessageStateToString is defined after this method.
+static NSString *lm_chatMessageStateToString(LinphoneChatMessageState state);
+
 - (NSString *)getChatRoomsJSON {
     if (!theLinphoneCore) return @"[]";
     const bctbx_list_t *rooms = linphone_core_get_chat_rooms(theLinphoneCore);
     NSMutableArray *roomsArray = [NSMutableArray array];
-    
+
     for (const bctbx_list_t *it = rooms; it != NULL; it = it->next) {
         LinphoneChatRoom *room = (LinphoneChatRoom *)it->data;
         const LinphoneAddress *peer = linphone_chat_room_get_peer_address(room);
-        LinphoneChatMessage *lastMsg = linphone_chat_room_get_last_message_in_history(room);
-        
+
         NSMutableDictionary *roomDict = [NSMutableDictionary dictionary];
-        const char *peerUsername = linphone_address_get_username(peer) ?: "";
-        const char *peerDN = linphone_address_get_display_name(peer);
-        roomDict[@"phoneNumber"] = [NSString stringWithUTF8String:peerUsername];
-        roomDict[@"displayName"] = [NSString stringWithUTF8String:(peerDN && strlen(peerDN) > 0) ? peerDN : peerUsername];
-        roomDict[@"peerUri"] = [NSString stringWithUTF8String:linphone_address_as_string_uri_only(peer) ?: ""];
-        roomDict[@"unreadCount"] = @(linphone_chat_room_get_unread_messages_count(room));
-        
+        const char *peerUsernameC = linphone_address_get_username(peer) ?: "";
+        const char *peerDNC       = linphone_address_get_display_name(peer);
+        NSString *peerUsernameStr = [NSString stringWithUTF8String:peerUsernameC];
+        NSString *peerUriStr      = [NSString stringWithUTF8String:linphone_address_as_string_uri_only(peer) ?: ""];
+
+        roomDict[@"phoneNumber"] = peerUsernameStr;
+        roomDict[@"displayName"] = [NSString stringWithUTF8String:(peerDNC && strlen(peerDNC) > 0) ? peerDNC : peerUsernameC];
+        roomDict[@"peerUri"]     = peerUriStr;
+
+        // localUsername — used by NativeModuleiOS getChatRooms to filter rooms per active account,
+        // mirrors Android: room.localAddress.username == currentUsername
+        const LinphoneAddress *localAddr = linphone_chat_room_get_local_address(room);
+        const char *localUsernameC = (localAddr && linphone_address_get_username(localAddr))
+                                     ? linphone_address_get_username(localAddr) : "";
+        roomDict[@"localUsername"] = [NSString stringWithUTF8String:localUsernameC];
+
+        // isMuted — mirrors Android: room.hasBeenLeft() || !room.isReadOnly
+        BOOL hasLeft    = (BOOL)linphone_chat_room_has_been_left(room);
+        BOOL isReadOnly = (BOOL)linphone_chat_room_is_read_only(room);
+        roomDict[@"isMuted"] = @(hasLeft || !isReadOnly);
+
+        // isGroup — mirrors Android: room.currentParams?.isGroupEnabled ?: false
+        const LinphoneChatRoomParams *roomParams = linphone_chat_room_get_current_params(room);
+        roomDict[@"isGroup"] = @(roomParams ? (BOOL)linphone_chat_room_params_group_enabled(roomParams) : NO);
+
+        // Walk history newest-first, skipping X-CANS-CTRL control messages.
+        // Mirrors Android processChatRoomToMap: for (i in history.indices.reversed()) { if ctrlHeader.isNullOrEmpty } }
+        LinphoneChatMessage *lastMsg = nil;
+        const bctbx_list_t *history = linphone_chat_room_get_history(room, 0);
+        NSMutableArray *histArray = [NSMutableArray array];
+        for (const bctbx_list_t *hit = history; hit != NULL; hit = hit->next) {
+            [histArray addObject:[NSValue valueWithPointer:hit->data]];
+        }
+        for (NSInteger i = (NSInteger)histArray.count - 1; i >= 0; i--) {
+            LinphoneChatMessage *candidate = (LinphoneChatMessage *)((NSValue *)histArray[(NSUInteger)i]).pointerValue;
+            const char *ctrlHdr = linphone_chat_message_get_custom_header(candidate, "X-CANS-CTRL");
+            if (!ctrlHdr || strlen(ctrlHdr) == 0) {
+                lastMsg = candidate;
+                break;
+            }
+        }
+
         if (lastMsg) {
-            NSString *lastMsgText = lm_getMessageText(lastMsg);
-            if (lastMsgText.length == 0) {
-                const bctbx_list_t *lastMsgContents = linphone_chat_message_get_contents(lastMsg);
-                for (const bctbx_list_t *cit = lastMsgContents; cit != NULL; cit = cit->next) {
-                    LinphoneContent *c = (LinphoneContent *)cit->data;
-                    const char *ctype = linphone_content_get_type(c);
-                    if (ctype && strcmp(ctype, "image") == 0) {
-                        lastMsgText = @"[Image]";
-                        break;
-                    }
+            NSString *lastMsgText = @"";
+            NSString *lastMsgType = @"text";
+
+            // Determine message type from content — mirrors Android:
+            // firstContent.isFileTransfer || firstContent.type?.contains("image") == true
+            const bctbx_list_t *contents = linphone_chat_message_get_contents(lastMsg);
+            BOOL foundImage = NO;
+            for (const bctbx_list_t *cit = contents; cit != NULL && !foundImage; cit = cit->next) {
+                LinphoneContent *c = (LinphoneContent *)cit->data;
+                const char *ctype = linphone_content_get_type(c);
+                if ((ctype && strstr(ctype, "image") != NULL) || linphone_content_is_file_transfer(c)) {
+                    lastMsgType = @"image";
+                    lastMsgText = @"Sent an image";
+                    foundImage  = YES;
                 }
             }
-            roomDict[@"lastMessage"] = lastMsgText;
-            roomDict[@"timestamp"] = @(linphone_chat_message_get_time(lastMsg) * 1000.0);
+            if (!foundImage) {
+                lastMsgText = lm_getMessageText(lastMsg);
+                // XML body signals a multimedia/RCS message — mirrors Android trim().startsWith("<?xml")
+                if ([lastMsgText hasPrefix:@"<?xml"]) {
+                    lastMsgText = @"Multimedia message";
+                }
+            }
+
+            roomDict[@"lastMessage"]     = lastMsgText;
+            roomDict[@"lastMessageType"] = lastMsgType;
+            roomDict[@"timestamp"]       = @(linphone_chat_message_get_time(lastMsg) * 1000.0);
+            roomDict[@"isMe"]            = @((BOOL)linphone_chat_message_is_outgoing(lastMsg));
+            roomDict[@"status"]          = lm_chatMessageStateToString(linphone_chat_message_get_state(lastMsg));
+
+            // Unread count with Android correction: ensure >= 1 when the last message is
+            // incoming and has not been read yet (linphone count can lag behind actual state).
+            NSInteger unreadCount = (NSInteger)linphone_chat_room_get_unread_messages_count(room);
+            if (unreadCount == 0
+                    && !linphone_chat_message_is_outgoing(lastMsg)
+                    && !linphone_chat_message_is_read(lastMsg)) {
+                unreadCount = 1;
+            }
+            roomDict[@"unreadCount"] = @(unreadCount);
+        } else {
+            // No non-control message found — emit safe defaults matching Android's else-branch.
+            roomDict[@"lastMessage"]     = @"";
+            roomDict[@"lastMessageType"] = @"text";
+            roomDict[@"timestamp"]       = @(0.0);
+            roomDict[@"isMe"]            = @NO;
+            roomDict[@"status"]          = @"None";
+            roomDict[@"unreadCount"]     = @(0);
         }
-        
+
         [roomsArray addObject:roomDict];
     }
-    
+
     NSData *data = [NSJSONSerialization dataWithJSONObject:roomsArray options:0 error:nil];
     return [[NSString alloc] initWithData:data encoding:NSUTF8StringEncoding];
 }
@@ -2003,17 +2182,100 @@ static NSString *lm_chatMessageStateToString(LinphoneChatMessageState state) {
     }
 }
 
+// Fires when a LinphoneChatRoom changes state.  Mirrors Android coreListener.onChatRoomStateChanged:
+// when the room reaches Created or Instantiated, post LinphoneChatRoomCreated so NativeModuleiOS
+// can emit event_refresh to JS (keeping the chat-list current without a manual pull-to-refresh).
+static void linphone_iphone_chat_room_state_changed(LinphoneCore *lc,
+                                                     LinphoneChatRoom *room,
+                                                     LinphoneChatRoomState state) {
+    if (state != LinphoneChatRoomStateCreated && state != LinphoneChatRoomStateInstantiated) return;
+
+    const LinphoneAddress *peer = linphone_chat_room_get_peer_address(room);
+    if (!peer) return;
+
+    NSString *peerUri      = [NSString stringWithUTF8String:linphone_address_as_string_uri_only(peer) ?: ""];
+    NSString *peerUsername = [NSString stringWithUTF8String:linphone_address_get_username(peer) ?: ""];
+
+    dispatch_async(dispatch_get_main_queue(), ^{
+        [[NSNotificationCenter defaultCenter]
+            postNotificationName:@"LinphoneChatRoomCreated"
+                          object:nil
+                        userInfo:@{ @"peerUri":      peerUri,
+                                    @"peerUsername": peerUsername }];
+    });
+}
+
+// Three-stage fallback — mirrors Android getOrCreateSpecificChatRoom(peerUri).
+// Stage 1: direct lookup by peer + local address (fast path for existing rooms).
+// Stage 2: broader search with Basic ChatRoomParams (catches rooms not in the address index).
+// Stage 3: create a new Basic one-to-one chat room when none exists.
+// Returns nil only when the core is unavailable or the address cannot be parsed.
+- (nullable LinphoneChatRoom *)getOrCreateSpecificChatRoom:(NSString *)peerUri {
+    if (!theLinphoneCore || !peerUri.length) return nil;
+
+    LinphoneAccount *defaultAccount = linphone_core_get_default_account(theLinphoneCore);
+    if (!defaultAccount) return nil;
+    const LinphoneAddress *localAddr =
+        linphone_account_params_get_identity_address(linphone_account_get_params(defaultAccount));
+    if (!localAddr) return nil;
+
+    LinphoneAddress *remoteAddr = linphone_core_interpret_url(theLinphoneCore, peerUri.UTF8String);
+    if (!remoteAddr) return nil;
+    linphone_address_clean(remoteAddr);
+
+    LinphoneChatRoom *room = nil;
+
+#pragma clang diagnostic push
+#pragma clang diagnostic ignored "-Wdeprecated-declarations"
+    // Stage 1: direct peer + local address lookup
+    room = linphone_core_get_chat_room_2(theLinphoneCore, remoteAddr, localAddr);
+
+    if (!room) {
+        // Stage 2: broader search with Basic params
+        LinphoneChatRoomParams *params = linphone_core_create_default_chat_room_params(theLinphoneCore);
+        if (params) {
+            linphone_chat_room_params_set_backend(params, LinphoneChatRoomBackendBasic);
+            linphone_chat_room_params_enable_group(params, FALSE);
+            bctbx_list_t *participants = bctbx_list_append(NULL, remoteAddr);
+            room = linphone_core_search_chat_room(theLinphoneCore, params, localAddr, remoteAddr, participants);
+            bctbx_list_free(participants);
+            linphone_chat_room_params_unref(params);
+        }
+    }
+
+    if (!room) {
+        // Stage 3: create a new Basic chat room
+        LinphoneChatRoomParams *params = linphone_core_create_default_chat_room_params(theLinphoneCore);
+        if (params) {
+            linphone_chat_room_params_set_backend(params, LinphoneChatRoomBackendBasic);
+            linphone_chat_room_params_enable_group(params, FALSE);
+            bctbx_list_t *participants = bctbx_list_append(NULL, remoteAddr);
+            room = linphone_core_create_chat_room_6(theLinphoneCore, params, localAddr, participants);
+            bctbx_list_free(participants);
+            linphone_chat_room_params_unref(params);
+        }
+    }
+#pragma clang diagnostic pop
+
+    linphone_address_unref(remoteAddr);
+
+    if (room) {
+        linphone_chat_room_mark_as_read(room);
+    }
+    return room;
+}
+
 - (NSString *)getChatHistoryJSON:(NSString *)peerUri {
     if (!theLinphoneCore) return @"[]";
-    LinphoneAddress *addr = linphone_core_interpret_url(theLinphoneCore, peerUri.UTF8String);
-    if (!addr) return @"[]";
 
-    LinphoneChatRoom *room = linphone_core_get_chat_room(theLinphoneCore, addr);
+    // Use getOrCreateSpecificChatRoom so history loads for first-contact peers (room may
+    // not exist yet when the other side sent first).  Mirrors Android getChatHistory which
+    // calls getOrCreateSpecificChatRoom before iterating room.getHistory(0).
+    LinphoneChatRoom *room = [self getOrCreateSpecificChatRoom:peerUri];
     NSMutableArray *messagesArray = [NSMutableArray array];
 
     if (room) {
-        // Mark as read before returning history (mirrors Android getChatHistory room.markAsRead())
-        linphone_chat_room_mark_as_read(room);
+        // mark_as_read already called inside getOrCreateSpecificChatRoom
 
         const bctbx_list_t *history = linphone_chat_room_get_history(room, 0);
         const LinphoneAddress *peerAddr = linphone_chat_room_get_peer_address(room);
@@ -2039,20 +2301,18 @@ static NSString *lm_chatMessageStateToString(LinphoneChatMessageState state) {
 
             // ── text and image content ──
             NSString *textContent = lm_getMessageText(msg);
-            BOOL isImage = NO;
+            BOOL isImage = lm_hasFileContent(msg);
             NSString *imagePath = @"";
 
-            const bctbx_list_t *contents = linphone_chat_message_get_contents(msg);
-            for (const bctbx_list_t *cit = contents; cit != NULL; cit = cit->next) {
-                LinphoneContent *content = (LinphoneContent *)cit->data;
-                const char *ctype = linphone_content_get_type(content);
-                if (ctype && strcmp(ctype, "image") == 0) {
-                    isImage = YES;
+            if (isImage) {
+                const bctbx_list_t *contents = linphone_chat_message_get_contents(msg);
+                for (const bctbx_list_t *cit = contents; cit != NULL; cit = cit->next) {
+                    LinphoneContent *content = (LinphoneContent *)cit->data;
                     const char *fp = linphone_content_get_file_path(content);
                     if (fp && strlen(fp) > 0) {
                         imagePath = [NSString stringWithFormat:@"file://%s", fp];
+                        break;
                     }
-                    break;
                 }
             }
 
@@ -2083,7 +2343,6 @@ static NSString *lm_chatMessageStateToString(LinphoneChatMessageState state) {
         }
     }
 
-    linphone_address_unref(addr);
     NSData *data = [NSJSONSerialization dataWithJSONObject:messagesArray options:0 error:nil];
     return [[NSString alloc] initWithData:data encoding:NSUTF8StringEncoding] ?: @"[]";
 }
@@ -2116,6 +2375,27 @@ static NSString *lm_chatMessageStateToString(LinphoneChatMessageState state) {
     LinphoneChatRoom *room = linphone_core_get_chat_room(theLinphoneCore, addr);
     if (room) linphone_chat_room_mark_as_read(room);
     linphone_address_unref(addr);
+}
+
+// Mirrors Android NativeModuleAndroid.chatCleanupAll.
+// Deletes all chat rooms + history and clears call logs.
+// FailedMessageUtils.clearAllFailedMessages is called by NativeModuleiOS before this.
+- (void)chatCleanupAll {
+    if (!theLinphoneCore) return;
+    // Collect room pointers before iterating (list can change during deletion).
+    NSMutableArray *roomPtrs = [NSMutableArray array];
+    const bctbx_list_t *rooms = linphone_core_get_chat_rooms(theLinphoneCore);
+    for (const bctbx_list_t *it = rooms; it != NULL; it = it->next) {
+        [roomPtrs addObject:[NSValue valueWithPointer:it->data]];
+    }
+    for (NSValue *v in roomPtrs) {
+        LinphoneChatRoom *room = (LinphoneChatRoom *)v.pointerValue;
+        linphone_chat_room_delete_history(room);
+        linphone_core_delete_chat_room(theLinphoneCore, room);
+    }
+    linphone_core_clear_call_logs(theLinphoneCore);
+    NSLog(@"[LinphoneManager] chatCleanupAll: deleted %lu rooms, cleared call logs",
+          (unsigned long)roomPtrs.count);
 }
 
 - (void)configureChatSettings:(NSString *)username {
@@ -2172,6 +2452,7 @@ static NSString *lm_chatMessageStateToString(LinphoneChatMessageState state) {
 
 - (void)removeAccountAll {
     if (!theLinphoneCore) return;
+    [self chatCleanupAll];
     linphone_core_clear_accounts(theLinphoneCore);
 }
 
@@ -2211,8 +2492,13 @@ static void linphone_iphone_message_received(LinphoneCore *lc, LinphoneChatRoom 
 
     NSString *text = lm_getMessageText(message);
 
-    // Detect image content (mirrors getChatHistoryJSON logic)
-    BOOL isImage = NO;
+    // Detect image content (mirrors getChatHistoryJSON logic).
+    // attachedDownloadCbs tracks whether lm_incoming_img_state_changed already occupies the
+    // default Cbs slot (file-transfer download path).  If it does, we must NOT overwrite it
+    // with lm_incoming_msg_state_changed below; lm_incoming_img_state_changed handles both
+    // download completion and delivery-status forwarding for those messages.
+    BOOL isImage          = NO;
+    BOOL attachedDownloadCbs = NO;
     NSString *imagePath = @"";
     const bctbx_list_t *contents = linphone_chat_message_get_contents(message);
     for (const bctbx_list_t *cit = contents; cit != NULL; cit = cit->next) {
@@ -2246,10 +2532,13 @@ static void linphone_iphone_message_received(LinphoneCore *lc, LinphoneChatRoom 
                 linphone_content_set_file_path(content, localPath.UTF8String);
 
                 // Attach per-message callbacks and start the download.
+                // lm_incoming_img_state_changed handles both FileTransferDone and delivery
+                // states for these messages — do not overwrite with lm_incoming_msg_state_changed.
                 LinphoneChatMessageCbs *msgCbs = linphone_chat_message_get_callbacks(message);
                 if (msgCbs) {
                     linphone_chat_message_cbs_set_msg_state_changed(msgCbs, lm_incoming_img_state_changed);
                     linphone_chat_message_cbs_set_file_transfer_progress_indication(msgCbs, lm_img_progress);
+                    attachedDownloadCbs = YES;
                 }
                 linphone_chat_message_download_content(message, content);
                 NSLog(@"[LinphoneManager] message_received: incoming image download started → %@", localPath);
@@ -2260,6 +2549,18 @@ static void linphone_iphone_message_received(LinphoneCore *lc, LinphoneChatRoom 
     if (!isImage && [text hasPrefix:@"<?xml"] && [text containsString:@"file-info"]) {
         isImage = YES;
         text = @"";
+    }
+
+    // Attach delivery-status monitor to incoming messages whose default Cbs slot is still free
+    // (text messages and already-downloaded images). Mirrors Android monitorMessageStatus which
+    // calls message.addListener(ChatMessageListenerStub) for every incoming message.
+    // File-transfer images already have lm_incoming_img_state_changed on the Cbs slot —
+    // that callback now also handles Delivered/DeliveredToUser/Displayed forwarding.
+    if (!attachedDownloadCbs) {
+        LinphoneChatMessageCbs *msgCbs = linphone_chat_message_get_callbacks(message);
+        if (msgCbs) {
+            linphone_chat_message_cbs_set_msg_state_changed(msgCbs, lm_incoming_msg_state_changed);
+        }
     }
 
     NSLog(@"[LinphoneManager] message_received: text='%@' isImage=%d", text, isImage);
@@ -2327,6 +2628,62 @@ static void lm_chat_msg_state_changed(LinphoneChatMessage *msg, LinphoneChatMess
     });
 }
 
+// Per-message callback for INCOMING text messages (and inline images already on disk).
+// Mirrors Android monitorMessageStatus — attaches a ChatMessageListenerStub to each
+// received message so that Delivered / DeliveredToUser / Displayed state transitions
+// are forwarded to JS as onMessageStatusChanged events (read-receipt / delivery icons).
+// Deactivates itself on terminal states by nulling the callback pointer, which is the
+// C equivalent of Android's msg.removeListener(this).
+static void lm_incoming_msg_state_changed(LinphoneChatMessage *msg, LinphoneChatMessageState state) {
+    const char *requestIdC = linphone_chat_message_get_custom_header(msg, "X-Request-ID");
+    NSString *msgId;
+    if (requestIdC && strlen(requestIdC) > 0) {
+        msgId = [NSString stringWithUTF8String:requestIdC];
+    } else {
+        const char *nativeIdC = linphone_chat_message_get_message_id(msg);
+        if (nativeIdC && strlen(nativeIdC) > 0) {
+            msgId = [NSString stringWithUTF8String:nativeIdC];
+        } else {
+            msgId = [NSString stringWithFormat:@"msg_%ld", (long)linphone_chat_message_get_time(msg)];
+        }
+    }
+
+    LinphoneChatRoom *room     = linphone_chat_message_get_chat_room(msg);
+    const LinphoneAddress *peer = linphone_chat_room_get_peer_address(room);
+    NSString *chatWith = [NSString stringWithUTF8String:linphone_address_get_username(peer) ?: ""];
+
+    NSString *statusStr = lm_chatMessageStateToString(state);
+    NSLog(@"[LinphoneManager] lm_incoming_msg_state_changed: id=%@, status=%@, chatWith=%@",
+          msgId, statusStr, chatWith);
+
+    NSDictionary *dict = @{
+        @"id":        msgId,
+        @"status":    statusStr,
+        @"sender":    @"other",
+        @"timestamp": @(linphone_chat_message_get_time(msg) * 1000.0),
+        @"chatWith":  chatWith,
+    };
+    dispatch_async(dispatch_get_main_queue(), ^{
+        [[NSNotificationCenter defaultCenter]
+            postNotificationName:@"LinphoneMessageStateChanged"
+                          object:nil
+                        userInfo:dict];
+    });
+
+    // Deactivate on terminal states — mirrors Android msg.removeListener(this).
+    // Setting the pointer to NULL stops further firings; the Cbs object is owned
+    // by the message and will be freed when the message is released.
+    BOOL isTerminal = (state == LinphoneChatMessageStateDisplayed      ||
+                       state == LinphoneChatMessageStateNotDelivered    ||
+                       state == LinphoneChatMessageStateFileTransferError);
+    if (isTerminal) {
+        LinphoneChatMessageCbs *cbs = linphone_chat_message_get_callbacks(msg);
+        if (cbs) {
+            linphone_chat_message_cbs_set_msg_state_changed(cbs, NULL);
+        }
+    }
+}
+
 // Image message state-change callback — emits full content (including imageUri) via
 // "LinphoneMessageReceived" so the JS onMessageReceived handler can update imageUri.
 static void lm_img_msg_state_changed(LinphoneChatMessage *msg, LinphoneChatMessageState state) {
@@ -2366,6 +2723,20 @@ static void lm_img_msg_state_changed(LinphoneChatMessage *msg, LinphoneChatMessa
     NSString *statusStr = lm_chatMessageStateToString(state);
     NSLog(@"[LinphoneManager] lm_img_msg_state_changed: id=%@, status=%@, chatWith=%@", msgId, statusStr, chatWith);
 
+    // Clean up stall-detection tracking on any terminal state.
+    BOOL isTerminal = (state == LinphoneChatMessageStateDelivered ||
+                       state == LinphoneChatMessageStateNotDelivered ||
+                       state == LinphoneChatMessageStateFileTransferError ||
+                       state == LinphoneChatMessageStateFileTransferDone ||
+                       state == LinphoneChatMessageStateDisplayed);
+    if (isTerminal && requestIdC && strlen(requestIdC) > 0) {
+        NSString *reqIdCleanup = [NSString stringWithUTF8String:requestIdC];
+        dispatch_async(dispatch_get_main_queue(), ^{
+            if (lm_timerGens)   [lm_timerGens   removeObjectForKey:reqIdCleanup];
+            if (lm_lastOffsets) [lm_lastOffsets  removeObjectForKey:reqIdCleanup];
+        });
+    }
+
     NSDictionary *dict = @{
         @"id":        msgId,
         @"status":    statusStr,
@@ -2387,6 +2758,54 @@ static void lm_img_msg_state_changed(LinphoneChatMessage *msg, LinphoneChatMessa
 // Posts LinphoneMessageContentUpdated when the file is fully downloaded so JS can
 // replace the placeholder image bubble with the real local URI.
 static void lm_incoming_img_state_changed(LinphoneChatMessage *msg, LinphoneChatMessageState state) {
+    // Forward delivery states (Delivered / DeliveredToUser / Displayed) to JS so that
+    // read-receipt and delivery icons update for file-transfer image messages, matching
+    // Android's monitorMessageStatus which attaches one listener to every received message.
+    if (state == LinphoneChatMessageStateDelivered       ||
+        state == LinphoneChatMessageStateDeliveredToUser ||
+        state == LinphoneChatMessageStateDisplayed) {
+
+        const char *reqC = linphone_chat_message_get_custom_header(msg, "X-Request-ID");
+        NSString *delivId;
+        if (reqC && strlen(reqC) > 0) {
+            delivId = [NSString stringWithUTF8String:reqC];
+        } else {
+            const char *nativeC = linphone_chat_message_get_message_id(msg);
+            delivId = (nativeC && strlen(nativeC) > 0)
+                ? [NSString stringWithUTF8String:nativeC]
+                : [NSString stringWithFormat:@"msg_%ld", (long)linphone_chat_message_get_time(msg)];
+        }
+        LinphoneChatRoom *delivRoom    = linphone_chat_message_get_chat_room(msg);
+        const LinphoneAddress *delivPeer = linphone_chat_room_get_peer_address(delivRoom);
+        NSString *delivWith = [NSString stringWithUTF8String:linphone_address_get_username(delivPeer) ?: ""];
+        NSString *delivStatus = lm_chatMessageStateToString(state);
+        NSLog(@"[LinphoneManager] lm_incoming_img_state_changed: delivery id=%@ status=%@", delivId, delivStatus);
+
+        NSDictionary *delivDict = @{
+            @"id":        delivId,
+            @"status":    delivStatus,
+            @"sender":    @"other",
+            @"timestamp": @(linphone_chat_message_get_time(msg) * 1000.0),
+            @"chatWith":  delivWith,
+        };
+        dispatch_async(dispatch_get_main_queue(), ^{
+            [[NSNotificationCenter defaultCenter]
+                postNotificationName:@"LinphoneMessageStateChanged"
+                              object:nil
+                            userInfo:delivDict];
+        });
+
+        // Deactivate on Displayed (terminal) — keep alive through Delivered/DeliveredToUser
+        // so FileTransferDone processing below can still run if it fires after Displayed.
+        if (state == LinphoneChatMessageStateDisplayed) {
+            LinphoneChatMessageCbs *cbs = linphone_chat_message_get_callbacks(msg);
+            if (cbs) {
+                linphone_chat_message_cbs_set_msg_state_changed(cbs, NULL);
+            }
+        }
+        return;
+    }
+
     if (state == LinphoneChatMessageStateFileTransferError ||
         state == LinphoneChatMessageStateNotDelivered) {
         NSLog(@"[LinphoneManager] lm_incoming_img_state_changed: download FAILED state=%d "
@@ -2448,6 +2867,86 @@ static void lm_incoming_img_state_changed(LinphoneChatMessage *msg, LinphoneChat
     });
 }
 
+// ── Transfer stall detection ──────────────────────────────────────────────
+// Mirrors Android NativeModuleAndroid.startTransferTimeout.
+// Uses a generation-token pattern to "cancel" superseded dispatch_after blocks:
+// each progress callback increments the token; the block checks the token on fire.
+// lm_lastOffsets holds the offset seen at the PREVIOUS timer fire (initially -1),
+// so "stalled" = transfer still in progress AND offset hasn't grown since last fire.
+static NSMutableDictionary *lm_timerGens   = nil; // requestId → @(generation)
+static NSMutableDictionary *lm_lastOffsets = nil; // requestId → @(lastOffset)
+
+static void lm_startTransferTimeout(LinphoneChatMessage *msg, NSString *reqId, size_t currentOffset) {
+    if (!lm_timerGens)   lm_timerGens   = [NSMutableDictionary dictionary];
+    if (!lm_lastOffsets) lm_lastOffsets  = [NSMutableDictionary dictionary];
+
+    NSInteger newGen = [lm_timerGens[reqId] integerValue] + 1;
+    lm_timerGens[reqId] = @(newGen);
+    NSInteger capturedGen = newGen;
+    NSInteger capturedOff = (NSInteger)currentOffset;
+
+    // Sentinel: initialize lastOffset to -1 for new transfers so that a first
+    // progress tick at byte 0 (capturedOff=0) does not satisfy capturedOff <= lastOff
+    // (0 <= 0) and incorrectly trigger a stall.  Android initialises with ?: -1;
+    // we must do the same here because nil NSNumber.integerValue returns 0.
+    if (!lm_lastOffsets[reqId]) {
+        lm_lastOffsets[reqId] = @(-1);
+    }
+
+    // Retain message so the pointer stays valid when the block fires 15 s later.
+    linphone_chat_message_ref(msg);
+    LinphoneChatMessage *capturedMsg = msg;
+
+    dispatch_after(dispatch_time(DISPATCH_TIME_NOW, (int64_t)(15.0 * NSEC_PER_SEC)),
+                   dispatch_get_main_queue(), ^{
+        // Superseded by a newer timer — nothing to do.
+        if ([lm_timerGens[reqId] integerValue] != capturedGen) {
+            linphone_chat_message_unref(capturedMsg);
+            return;
+        }
+
+        NSInteger lastOff = [lm_lastOffsets[reqId] integerValue];
+        LinphoneChatMessageState state = linphone_chat_message_get_state(capturedMsg);
+        BOOL stalled = (state == LinphoneChatMessageStateFileTransferInProgress)
+                       && (capturedOff <= lastOff);
+
+        if (stalled) {
+            NSLog(@"[LinphoneManager] lm_startTransferTimeout: stall detected for %@ — cancelling", reqId);
+            linphone_chat_message_cancel_file_transfer(capturedMsg);
+
+            LinphoneChatRoom *room = linphone_chat_message_get_chat_room(capturedMsg);
+            const LinphoneAddress *peer = linphone_chat_room_get_peer_address(room);
+            NSString *chatWith = [NSString stringWithUTF8String:linphone_address_get_username(peer) ?: ""];
+            NSString *peerUri  = [NSString stringWithUTF8String:linphone_address_as_string_uri_only(peer) ?: ""];
+            NSDictionary *errDict = @{
+                @"id":        reqId,
+                @"status":    @"FileTransferError",
+                @"type":      @"image",
+                @"text":      @"[Image]",
+                @"imageUri":  @"",
+                @"chatWith":  chatWith,
+                @"peerUri":   peerUri,
+                @"sender":    @"me",
+                @"isRead":    @YES,
+                @"timestamp": @(linphone_chat_message_get_time(capturedMsg) * 1000.0),
+            };
+            // Post to LinphoneMessageReceived (mirrors Android emitting onMessageReceived
+            // from startTransferTimeout) so the chat bubble updates via onMessageReceived.
+            [[NSNotificationCenter defaultCenter]
+                postNotificationName:@"LinphoneMessageReceived"
+                              object:nil
+                            userInfo:errDict];
+            [lm_timerGens   removeObjectForKey:reqId];
+            [lm_lastOffsets  removeObjectForKey:reqId];
+        } else {
+            // Progress was made — record this offset for the next timer check.
+            lm_lastOffsets[reqId] = @(capturedOff);
+            [lm_timerGens   removeObjectForKey:reqId];
+        }
+        linphone_chat_message_unref(capturedMsg);
+    });
+}
+
 // File transfer progress callback — fires for both upload and download.
 static void lm_img_progress(LinphoneChatMessage *msg, LinphoneContent *content, size_t offset, size_t total) {
     const char *requestIdC = linphone_chat_message_get_custom_header(msg, "X-Request-ID");
@@ -2475,36 +2974,12 @@ static void lm_img_progress(LinphoneChatMessage *msg, LinphoneContent *content, 
     };
     dispatch_async(dispatch_get_main_queue(), ^{
         [[NSNotificationCenter defaultCenter] postNotificationName:@"LinphoneMessageProgress" object:nil userInfo:dict];
-    });
-}
-
-static void linphone_iphone_chat_message_state_changed(LinphoneCore *lc, LinphoneChatRoom *room, LinphoneChatMessage *message, LinphoneChatMessageState state) {
-    // id: X-Request-ID preferred, fallback to native messageId
-    const char *requestIdC = linphone_chat_message_get_custom_header(message, "X-Request-ID");
-    NSString *msgId;
-    if (requestIdC && strlen(requestIdC) > 0) {
-        msgId = [NSString stringWithUTF8String:requestIdC];
-    } else {
-        const char *nativeIdC = linphone_chat_message_get_message_id(message);
-        if (nativeIdC && strlen(nativeIdC) > 0) {
-            msgId = [NSString stringWithUTF8String:nativeIdC];
-        } else {
-            msgId = [NSString stringWithFormat:@"msg_%ld", (long)linphone_chat_message_get_time(message)];
+        // Start stall-detection timer for outgoing uploads only.
+        if (linphone_chat_message_is_outgoing(msg) && requestIdC && strlen(requestIdC) > 0) {
+            NSString *reqId = [NSString stringWithUTF8String:requestIdC];
+            lm_startTransferTimeout(msg, reqId, offset);
         }
-    }
-
-    BOOL isOutgoing = linphone_chat_message_is_outgoing(message);
-    const LinphoneAddress *peerAddr = linphone_chat_room_get_peer_address(room);
-    NSString *chatWith = [NSString stringWithUTF8String:linphone_address_get_username(peerAddr) ?: ""];
-
-    NSDictionary *dict = @{
-        @"id":        msgId,
-        @"status":    lm_chatMessageStateToString(state),
-        @"sender":    isOutgoing ? @"me" : @"other",
-        @"timestamp": @(linphone_chat_message_get_time(message) * 1000.0),
-        @"chatWith":  chatWith,
-    };
-    [[NSNotificationCenter defaultCenter] postNotificationName:@"LinphoneMessageStateChanged" object:nil userInfo:dict];
+    });
 }
 
 static void linphone_iphone_info_received(LinphoneCore *lc, LinphoneCall *call, const LinphoneInfoMessage *msg) {

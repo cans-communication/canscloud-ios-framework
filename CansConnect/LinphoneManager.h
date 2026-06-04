@@ -81,6 +81,7 @@ extern NSString *const kCansCustomRegistrationEvent;
 - (int)getCodecBitrateKbps;
 - (void)setCodecBitrateKbps:(int)kbps;
 - (NSString *)getCodecsListJSON;
+- (void)setPayLoadAtIndex:(int)index enabled:(BOOL)enabled;
 
 // Ringtone / Vibrate
 - (BOOL)getDeviceRingtone;
@@ -90,6 +91,7 @@ extern NSString *const kCansCustomRegistrationEvent;
 
 // Encryption
 - (NSString *)getMediaEncryptionName;
+- (void)setMediaEncryption:(int)position;
 - (BOOL)getEncryptionMandatory;
 - (void)setEncryptionMandatory:(BOOL)mandatory;
 
@@ -116,6 +118,8 @@ extern NSString *const kCansCustomRegistrationEvent;
 // Logging
 - (NSString *)getLogsUploadServerURL;
 - (void)setLogsUploadServerURL:(NSString *)url;
+- (void)uploadLogCollection;
+- (void)resetLogCollection;
 
 // Echo Calibration / Tester
 - (void)startEchoCancellerCalibration;
@@ -151,8 +155,8 @@ extern NSString *const kCansCustomRegistrationEvent;
 - (void)setVideoEnabled:(BOOL)enabled;
 - (NSString *)destinationUsername;
 - (int)missedCallsCount;
-- (void)transferCallNow:(NSString *)phoneNumber;
-- (void)transferCallAskFirst:(NSString *)phoneNumber;
+- (BOOL)transferCallNow:(NSString *)phoneNumber;
+- (BOOL)transferCallAskFirst:(NSString *)phoneNumber;
 
 // Messaging & Chat
 - (void)configureChatSettings:(NSString *)username;
@@ -166,6 +170,7 @@ extern NSString *const kCansCustomRegistrationEvent;
                requestId:(NSString *)requestId;
 - (void)deleteMessage:(NSString *)peerUri msgId:(NSString *)msgId;
 - (void)markAsRead:(NSString *)peerUri;
+- (void)chatCleanupAll;
 - (void)setDefaultAccount:(NSInteger)index phoneNumber:(NSString *)phoneNumber;
 - (void)setDefaultAccountSync:(NSInteger)index phoneNumber:(NSString *)phoneNumber;
 - (NSString *)updateCurrentLoginTypeFromAccount;

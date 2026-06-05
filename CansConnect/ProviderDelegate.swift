@@ -114,9 +114,10 @@ class ProviderDelegate: NSObject {
                 default:
                     callInfo?.reason = Reason.Unknown
                 }
-                callInfo?.declined = true
-                self.callInfos.updateValue(callInfo!, forKey: uuid)
-                try? call?.decline(reason: callInfo!.reason)
+                guard let callInfo = callInfo else { return }
+                callInfo.declined = true
+                self.callInfos.updateValue(callInfo, forKey: uuid)
+                try? call?.decline(reason: callInfo.reason)
             }
         }
 	}
@@ -188,16 +189,19 @@ extension ProviderDelegate: CXProviderDelegate {
         let callId = callInfo?.callId
 //        Log.directLog(BCTBX_LOG_MESSAGE, text: "CallKit: answer call with call-id: \(String(describing: callId)) and UUID: \(uuid.description).")
 
-        let call = CallManager.instance().callByCallId(callId: callId)
-        
-        if (UIApplication.shared.applicationState != .active) {
+        guard let call = CallManager.instance().callByCallId(callId: callId) else {
+            action.fail()
+            return
+        }
+
+        if UIApplication.shared.applicationState != .active {
             CallManager.instance().backgroundContextCall = call
-            CallManager.instance().backgroundContextCameraIsEnabled = call!.params?.videoEnabled ?? false
-            call?.cameraEnabled = false // Disable camera while app is not on foreground
+            CallManager.instance().backgroundContextCameraIsEnabled = call.params?.videoEnabled ?? false
+            call.cameraEnabled = false // Disable camera while app is not on foreground
         }
         CallManager.instance().callkitAudioSessionActivated = false
         CallManager.instance().lc?.configureAudioSession()
-        CallManager.instance().acceptCall(call: call!, hasVideo: call!.params?.videoEnabled ?? false)
+        CallManager.instance().acceptCall(call: call, hasVideo: call.params?.videoEnabled ?? false)
         action.fulfill()
 	}
 
@@ -227,27 +231,27 @@ extension ProviderDelegate: CXProviderDelegate {
 	}
 
     public func provider(_ provider: CXProvider, perform action: CXStartCallAction) {
-		do {
-			let uuid = action.callUUID
-			let callInfo = callInfos[uuid]
-			let update = CXCallUpdate()
-			update.remoteHandle = action.handle
-			update.localizedCallerName = callInfo?.displayName
-            self.provider?.reportCall(with: action.callUUID, updated: update)
-			
-			let addr = callInfo?.toAddr
-			if (addr == nil) {
-//				Log.directLog(BCTBX_LOG_ERROR, text: "CallKit: can not call a null address!")
-				action.fail()
-			}
+		let uuid = action.callUUID
+		let callInfo = callInfos[uuid]
+		let update = CXCallUpdate()
+		update.remoteHandle = action.handle
+		update.localizedCallerName = callInfo?.displayName
+		self.provider?.reportCall(with: uuid, updated: update)
 
-			CallManager.instance().lc?.configureAudioSession()
-			try CallManager.instance().doCall(addr: addr!, isSas: callInfo?.sasEnabled ?? false)
+		guard let addr = callInfo?.toAddr else {
+//			Log.directLog(BCTBX_LOG_ERROR, text: "CallKit: can not call a null address!")
+			action.fail()
+			return
+		}
+
+		CallManager.instance().lc?.configureAudioSession()
+		do {
+			try CallManager.instance().doCall(addr: addr, isSas: callInfo?.sasEnabled ?? false)
+			action.fulfill()
 		} catch {
 //			Log.directLog(BCTBX_LOG_ERROR, text: "CallKit: Call started failed because \(error)")
 			action.fail()
 		}
-		action.fulfill()
 	}
 
     public func provider(_ provider: CXProvider, perform action: CXSetGroupCallAction) {
@@ -257,7 +261,7 @@ extension ProviderDelegate: CXProviderDelegate {
 	}
 
     public func provider(_ provider: CXProvider, perform action: CXSetMutedCallAction) {
-		CallManager.instance().lc!.micEnabled = !CallManager.instance().lc!.micEnabled
+		CallManager.instance().lc?.micEnabled = !action.isMuted
 		action.fulfill()
 	}
 

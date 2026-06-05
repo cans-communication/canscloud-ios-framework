@@ -21,7 +21,7 @@ import linphonesw
 import CansConnect
 //import Firebase
 
-var APP_GROUP_ID = "group.cc.cans.canscloud.msgNotification"
+let APP_GROUP_ID = "group.cc.cans.canscloud.msgNotification"
 
 enum LinphoneError: Error {
 	case timeout

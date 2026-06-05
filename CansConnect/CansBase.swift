@@ -8,10 +8,18 @@
 import Foundation
 import linphonesw
 
-@objc public class CansBase: NSObject, URLSessionDelegate {
-    
+@objc public class CansBase: NSObject {
+
+    private var cdrUsername: String = ""
+    private var cdrPassword: String = ""
+
     public override init() {
-        
+    }
+
+    /// Call once before `fetchCdrHistory`. Credentials are stored on this instance only — never globally.
+    @objc public func configureCdr(username: String, password: String) {
+        self.cdrUsername = username
+        self.cdrPassword = password
     }
     
     public struct CdrHistoryApi: Decodable {
@@ -44,15 +52,19 @@ import linphonesw
     }
     
     public func fetchCdrHistory(request: CdrHistoryRequest, completion: @escaping (CdrHistoryApi?) -> Void) {
+        guard !cdrUsername.isEmpty else {
+            print("[CansBase] fetchCdrHistory: call configureCdr(username:password:) before fetching.")
+            completion(nil)
+            return
+        }
+
         let extensionSource = "extension_source=\(request.extensionSource)"
         let extension_destination = "extension_destination=\(request.extensionDestination)"
         let page = "page=\(String(request.page))"
-        
+
         if let url = URL(string: "https://\(request.domain)/history?\(extensionSource)&\(extension_destination)&\(page)") {
-            
-            let user = "cdr"
-            let password = "AIzaSyC2ZpuUWO0QjkJXYpIXmxROuIdWPhY9Ub0"
-            let credentialData = "\(user):\(password)".data(using: String.Encoding.utf8)!
+
+            let credentialData = "\(cdrUsername):\(cdrPassword)".data(using: .utf8)!
             let base64Credentials = credentialData.base64EncodedString(options: [])
             
             var urlRequest = URLRequest(url: url)
@@ -61,7 +73,7 @@ import linphonesw
             urlRequest.setValue("application/json", forHTTPHeaderField: "Content-Type")
             
             let configuration = URLSessionConfiguration.default
-            let session = URLSession(configuration: configuration, delegate: self, delegateQueue: OperationQueue.main)
+            let session = URLSession(configuration: configuration)
             
             let task = session.dataTask(with: urlRequest, completionHandler: { (data, response, error) in
                 guard let data = data, error == nil else {
@@ -87,14 +99,6 @@ import linphonesw
         }
       }
     
-    public func urlSession(_ session: URLSession, didReceive challenge: URLAuthenticationChallenge, completionHandler: @escaping (URLSession.AuthChallengeDisposition, URLCredential?) -> Void) {
-        if challenge.protectionSpace.host == "test.cans.cc" {
-            completionHandler(.useCredential, URLCredential(trust: challenge.protectionSpace.serverTrust!))
-        } else {
-            completionHandler(.performDefaultHandling, nil)
-        }
-    }
-    
     @objc public func startCall(addr: OpaquePointer?, isSas: Bool) {
         CallManager.instance().startCall(addr: addr, isSas: isSas)
     }
@@ -108,7 +112,7 @@ import linphonesw
     }
     
     public func configureSwift() {
-        // 🛑 ปิดใช้งานชั่วคราวเพื่อ Bypass ปัญหา App Group จาก Apple Developer
+        // 🛑 temporary fix Bypass Problem App Group from Apple Developer
         /*
         let filename = "linphonerc-factory"
         guard

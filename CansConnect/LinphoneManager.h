@@ -14,8 +14,6 @@
 @class UIView;
 #endif
 
-// Note: If you get a 'file not found' error here, ensure you have the Linphone
-// SDK installed in CansConnect/linphone-sdk or via CocoaPods.
 #if __has_include(<LinphoneSDK/linphonecore.h>)
 #import <LinphoneSDK/linphonecore.h>
 #import <LinphoneSDK/core_utils.h>

@@ -573,7 +573,6 @@ static void linphone_iphone_popup_password_request(LinphoneCore *lc,
   NSLog(@"[LinphoneManager] 📞 กำลังเตรียมโทรหา: %@", phoneNumber);
 
   if (!theLinphoneCore) {
-    NSLog(@"[LinphoneManager] ❌ theLinphoneCore is NULL! (โทรไม่ได้)");
     return;
   }
 

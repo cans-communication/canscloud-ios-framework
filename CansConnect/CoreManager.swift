@@ -118,8 +118,7 @@ import linphonesw
     }
     
     @objc var isInConference: Bool {
-        // Linphone SDK 5.x ถอด Core.conference ออกไปแล้ว
-        // คืนค่า false ชั่วคราวเพื่อให้บิลด์ผ่าน (หากไม่ได้ใช้ฟีเจอร์ประชุมสาย)
+        // TODO: 
         return false 
     }
     

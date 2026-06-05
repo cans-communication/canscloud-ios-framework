@@ -19,10 +19,11 @@ Pod::Spec.new do |s|
 
   s.header_dir       = 'CansConnect'
 
-  s.dependency 'linphone-sdk', '~> 5.4'
+  s.dependency 'linphone-sdk'
 
-  
-  s.pod_target_xcconfig = { 
+  s.static_framework = true
+
+  s.pod_target_xcconfig = {
     'DEFINES_MODULE' => 'YES',
     'HEADER_SEARCH_PATHS' => '$(inherited) "${PODS_XCFRAMEWORKS_BUILD_DIR}/linphone-sdk/**"',
     'CLANG_ALLOW_NON_MODULAR_INCLUDES_IN_FRAMEWORK_MODULES' => 'YES'

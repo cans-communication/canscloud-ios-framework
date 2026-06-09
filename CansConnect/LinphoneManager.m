@@ -199,6 +199,11 @@ static void linphone_iphone_chat_room_state_changed(LinphoneCore *lc, LinphoneCh
     linphone_config_set_int(config, "app", "publish_presence", 0);
     linphone_config_set_int(config, "sip", "publish_presence", 0);
     linphone_config_set_string(config, "sip", "save_headers", "To, Diversion, Contact, X-Voicemail");
+    // Disable CallKit mode — app does not use CXProvider/CXCallController. With
+    // use_callkit=1 Linphone uses VoiceProcessingIO and defers AVAudioSession
+    // activation to CallKit; without CallKit integration the session is never
+    // activated and no audio flows on physical devices (simulator ignores this).
+    // linphone_config_set_int(config, "app", "use_callkit", 0);
 
     NSLog(@"[LinphoneManager] Attempting to create core with correct API "
           @"(v3)...");
@@ -1146,6 +1151,18 @@ static void linphone_iphone_popup_password_request(LinphoneCore *lc,
   return NO;
 }
 
+- (BOOL)isBluetoothDevices {
+  if (!theLinphoneCore) return NO;
+  const bctbx_list_t *devices = linphone_core_get_extended_audio_devices(theLinphoneCore);
+  for (const bctbx_list_t *it = devices; it != NULL; it = it->next) {
+    LinphoneAudioDevice *dev = (LinphoneAudioDevice *)it->data;
+    if (linphone_audio_device_get_type(dev) == LinphoneAudioDeviceTypeBluetooth) {
+      return YES;
+    }
+  }
+  return NO;
+}
+
 - (void)routeAudioToSpeaker {
   if (!theLinphoneCore) return;
   LinphoneAudioDevice *speaker = NULL;
@@ -1309,6 +1326,8 @@ static void linphone_iphone_call_state(LinphoneCore *lc, LinphoneCall *call,
           }
       }
   }
+
+  NSLog(@"[LinphoneManager][VideoCall] call_state_changed: state=%@ message=%s", stateStr, message ?: "");
 
   // Remote Video State Monitoring — mirrors Android's lastRemoteCameraOnState.
   // Skip during LinphoneCallUpdating: remote params reflect mid-negotiation SDP which
@@ -1742,9 +1761,12 @@ static void linphone_iphone_audio_devices_list_updated(LinphoneCore *lc) {
     return;
 
   NSLog(@"[LinphoneManager] makeVideoCall: %@", phoneNumber);
-  // Re-enable capture/display in case a previous call left them disabled (background state).
+  // Re-enable capture/display/preview in case a previous call left them disabled (background state).
+  // Mirrors Android: core.isVideoPreviewEnabled = true before dialing.
   linphone_core_enable_video_capture(theLinphoneCore, YES);
   linphone_core_enable_video_display(theLinphoneCore, YES);
+  linphone_core_enable_video_preview(theLinphoneCore, YES);
+  linphone_core_enable_self_view(theLinphoneCore, YES);
 
   LinphoneAddress *addr =
       linphone_core_interpret_url(theLinphoneCore, [phoneNumber UTF8String]);
@@ -1763,6 +1785,7 @@ static void linphone_iphone_audio_devices_list_updated(LinphoneCore *lc) {
 }
 
 - (void)acceptVideoCall {
+  NSLog(@"[LinphoneManager][VideoCall] acceptVideoCall called");
   if (!theLinphoneCore)
     return;
 
@@ -1785,21 +1808,34 @@ static void linphone_iphone_audio_devices_list_updated(LinphoneCore *lc) {
 
 - (void)setVideoWindowsWithRemoteView:(UIView *)remoteView
                             localView:(UIView *)localView {
+  NSLog(@"[LinphoneManager][VideoCall] setVideoWindowsWithRemoteView: remote=%@ local=%@", remoteView, localView);
   if (!theLinphoneCore)
     return;
 
   if (remoteView) {
     linphone_core_set_native_video_window_id(theLinphoneCore,
                                              (__bridge void *)remoteView);
+    NSLog(@"[LinphoneManager][VideoCall] native video window bound: %@", remoteView);
   }
 
   if (localView) {
+    // Tear down the existing ogl_display before binding the new view.
+    // ogl_display is created at core startup with no UIView; calling set_native_preview_window_id
+    // on an already-running ogl_display does NOT reinitialize it — it keeps rendering zero frames.
+    // Disabling preview first forces ogl_display destruction so the subsequent YES call creates
+    // a fresh instance properly bound to the new view.
+    linphone_core_enable_video_preview(theLinphoneCore, NO);
     linphone_core_set_native_preview_window_id(theLinphoneCore,
                                                (__bridge void *)localView);
+    NSLog(@"[LinphoneManager][VideoCall] native preview window bound: %@", localView);
+    linphone_core_enable_video_capture(theLinphoneCore, YES);
+    linphone_core_enable_video_preview(theLinphoneCore, YES);
+    NSLog(@"[LinphoneManager][VideoCall] preview pipeline re-enabled for new window");
   }
 }
 
 - (void)acceptCall {
+  NSLog(@"[LinphoneManager][VideoCall] acceptCall called");
   if (!theLinphoneCore)
     return;
 
@@ -1838,6 +1874,7 @@ static void linphone_iphone_audio_devices_list_updated(LinphoneCore *lc) {
     // StaticImage collapses UL to ~20 kbps so remote FPS polling can detect camera-off.
     // isVideoCaptureEnabled=false alone keeps the encoder on the last frozen frame (~1000 kbps),
     // which the remote's bitrate threshold cannot distinguish from live video.
+    NSLog(@"[LinphoneManager][VideoCall] setVideoEnabled: enabled=%d, switching device", enabled);
     if (enabled) {
         const char **cameras = linphone_core_get_video_devices(theLinphoneCore);
         const char *targetCamera = NULL;
@@ -1858,6 +1895,7 @@ static void linphone_iphone_audio_devices_list_updated(LinphoneCore *lc) {
             }
         }
         if (targetCamera) {
+            NSLog(@"[LinphoneManager][VideoCall] setVideoEnabled: switching to camera=%s", targetCamera);
             linphone_core_set_video_device(theLinphoneCore, targetCamera);
         }
         // Cycle capture off→on to force Linphone to open the hardware camera
@@ -1867,9 +1905,11 @@ static void linphone_iphone_audio_devices_list_updated(LinphoneCore *lc) {
                        dispatch_get_main_queue(), ^{
             if (theLinphoneCore) {
                 linphone_core_enable_video_capture(theLinphoneCore, YES);
+                NSLog(@"[LinphoneManager][VideoCall] setVideoEnabled: video capture re-enabled");
             }
         });
     } else {
+        NSLog(@"[LinphoneManager][VideoCall] setVideoEnabled: switching to StaticImage");
         linphone_core_set_video_device(theLinphoneCore, "StaticImage: Static picture");
         linphone_core_enable_video_capture(theLinphoneCore, NO);
     }
@@ -1900,6 +1940,49 @@ static void linphone_iphone_audio_devices_list_updated(LinphoneCore *lc) {
             linphone_chat_message_send(msg);
         }
     }
+}
+
+- (void)startVideoPreview {
+  if (!theLinphoneCore) return;
+  LinphoneCall *call = linphone_core_get_current_call(theLinphoneCore);
+  if (call) {
+    LinphoneCallState st = linphone_call_get_state(call);
+    if (st == LinphoneCallEnd || st == LinphoneCallReleased || st == LinphoneCallError) return;
+  }
+  const char **cameras = linphone_core_get_video_devices(theLinphoneCore);
+  if (cameras) {
+    const char *target = NULL;
+    for (int i = 0; cameras[i]; i++) {
+      if (strstr(cameras[i], "front")) { target = cameras[i]; break; }
+    }
+    if (!target) {
+      for (int i = 0; cameras[i]; i++) {
+        if (!strstr(cameras[i], "StaticImage")) { target = cameras[i]; break; }
+      }
+    }
+    if (target) linphone_core_set_video_device(theLinphoneCore, target);
+  }
+  linphone_core_enable_video_capture(theLinphoneCore, YES);
+  // Cycle preview off→on so ogl_display is re-created against the current preview window ID.
+  // Skipping the NO step leaves any stale ogl_display (created at startup with no view) in place.
+  linphone_core_enable_video_preview(theLinphoneCore, NO);
+  linphone_core_enable_video_preview(theLinphoneCore, YES);
+  NSLog(@"[LinphoneManager] startVideoPreview done");
+}
+
+- (void)stopVideoPreview {
+  if (!theLinphoneCore) return;
+  linphone_core_enable_video_preview(theLinphoneCore, NO);
+  linphone_core_set_native_video_window_id(theLinphoneCore, NULL);
+  linphone_core_set_native_preview_window_id(theLinphoneCore, NULL);
+  NSLog(@"[LinphoneManager] stopVideoPreview done");
+}
+
+- (int)conferenceDuration {
+  if (!theLinphoneCore) return 0;
+  LinphoneConference *conf = linphone_core_get_conference(theLinphoneCore);
+  if (!conf) return 0;
+  return (int)linphone_conference_get_duration(conf);
 }
 
 - (void)sendTextMessage:(NSString *)peerUri text:(NSString *)text requestId:(NSString *)requestId {

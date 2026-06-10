@@ -2077,6 +2077,7 @@ static void linphone_iphone_audio_devices_list_updated(LinphoneCore *lc) {
     linphone_core_set_video_device(theLinphoneCore, [target UTF8String]);
   }
   // Cycle capture off→on to force Linphone to open the front camera hardware.
+  linphone_core_enable_video_capture(theLinphoneCore, NO);
   linphone_core_enable_video_preview(theLinphoneCore, NO);
   dispatch_after(dispatch_time(DISPATCH_TIME_NOW, (int64_t)(0.15 * NSEC_PER_SEC)),
                  dispatch_get_main_queue(), ^{
@@ -2400,14 +2401,16 @@ static void linphone_iphone_chat_room_state_changed(LinphoneCore *lc,
 
     LinphoneChatRoom *room = nil;
 
-    const char *peerStr = linphone_address_as_string(remoteAddr);
-    const char *localStr = linphone_address_as_string(localAddr);
+    char *peerStr = linphone_address_as_string(remoteAddr);
+    char *localStr = linphone_address_as_string(localAddr);
     const char *peerUserC = linphone_address_get_username(remoteAddr);
     const char *localUserC = linphone_address_get_username(localAddr);
     NSString *targetPeer  = peerUserC  ? [NSString stringWithUTF8String:peerUserC]  : @"";
     NSString *targetLocal = localUserC ? [NSString stringWithUTF8String:localUserC] : @"";
     NSLog(@"[LinphoneManager] getOrCreateSpecificChatRoom: peer=%s local=%s peerUser=%@ localUser=%@",
           peerStr ?: "?", localStr ?: "?", targetPeer, targetLocal);
+    if (peerStr) ms_free(peerStr);
+    if (localStr) ms_free(localStr);
 
     // Stage 0: iterate the full room list (same source as getChatRoomsJSON).
     // Stage 1/2 use address-equality which can miss rooms whose DB address has
@@ -2419,11 +2422,17 @@ static void linphone_iphone_chat_room_state_changed(LinphoneCore *lc,
             LinphoneChatRoom *r = (LinphoneChatRoom *)rit->data;
             const LinphoneAddress *rPeer  = linphone_chat_room_get_peer_address(r);
             const LinphoneAddress *rLocal = linphone_chat_room_get_local_address(r);
-            const char *rPeerU  = linphone_address_get_username(rPeer);
-            const char *rLocalU = linphone_address_get_username(rLocal);
-            if (rPeerU && rLocalU
-                && [targetPeer  isEqualToString:[NSString stringWithUTF8String:rPeerU]]
-                && [targetLocal isEqualToString:[NSString stringWithUTF8String:rLocalU]]) {
+            const char *rPeerU  = rPeer  ? linphone_address_get_username(rPeer)  : NULL;
+            const char *rLocalU = rLocal ? linphone_address_get_username(rLocal) : NULL;
+            const char *rPeerD  = rPeer  ? linphone_address_get_domain(rPeer)    : NULL;
+            const char *rLocalD = rLocal ? linphone_address_get_domain(rLocal)   : NULL;
+            const char *peerDomainC  = linphone_address_get_domain(remoteAddr);
+            const char *localDomainC = linphone_address_get_domain(localAddr);
+            if (rPeerU && rLocalU && rPeerD && rLocalD && peerUserC && localUserC && peerDomainC && localDomainC
+                && strcmp(rPeerU, peerUserC) == 0
+                && strcmp(rLocalU, localUserC) == 0
+                && strcmp(rPeerD, peerDomainC) == 0
+                && strcmp(rLocalD, localDomainC) == 0) {
                 room = r;
                 break;
             }

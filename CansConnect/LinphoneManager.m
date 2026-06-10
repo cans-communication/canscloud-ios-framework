@@ -203,7 +203,7 @@ static void linphone_iphone_chat_room_state_changed(LinphoneCore *lc, LinphoneCh
     // use_callkit=1 Linphone uses VoiceProcessingIO and defers AVAudioSession
     // activation to CallKit; without CallKit integration the session is never
     // activated and no audio flows on physical devices (simulator ignores this).
-    // linphone_config_set_int(config, "app", "use_callkit", 0);
+    linphone_config_set_int(config, "app", "use_callkit", 0);
 
     NSLog(@"[LinphoneManager] Attempting to create core with correct API "
           @"(v3)...");
@@ -1702,6 +1702,86 @@ static void linphone_iphone_audio_devices_list_updated(LinphoneCore *lc) {
     return @{@"fps": @(0.0), @"bitrate": @(downloadBandwidth)};
 }
 
+// Returns the Linphone camera name string for the front-facing camera, or nil if not found.
+// Linphone names cameras using AVFoundation unique device IDs (e.g.
+// "AV Capture: com.apple.avfoundation.avcapturedevice.built-in_video:1") — there is no
+// "front"/"back" substring, so string searches always fail. We resolve it by asking
+// AVCaptureDevice for front-position devices and matching their uniqueID against Linphone's list.
+- (NSString *)frontCameraNameForLinphone {
+    if (!theLinphoneCore) return nil;
+    NSMutableArray<NSString *> *frontIDs = [NSMutableArray array];
+    if (@available(iOS 10.0, *)) {
+        AVCaptureDeviceDiscoverySession *session = [AVCaptureDeviceDiscoverySession
+            discoverySessionWithDeviceTypes:@[AVCaptureDeviceTypeBuiltInWideAngleCamera]
+                                  mediaType:AVMediaTypeVideo
+                                   position:AVCaptureDevicePositionFront];
+        for (AVCaptureDevice *dev in session.devices) {
+            [frontIDs addObject:dev.uniqueID];
+        }
+    } else {
+#pragma clang diagnostic push
+#pragma clang diagnostic ignored "-Wdeprecated-declarations"
+        for (AVCaptureDevice *dev in [AVCaptureDevice devicesWithMediaType:AVMediaTypeVideo]) {
+            if (dev.position == AVCaptureDevicePositionFront) {
+                [frontIDs addObject:dev.uniqueID];
+            }
+        }
+#pragma clang diagnostic pop
+    }
+    if (frontIDs.count == 0) return nil;
+    const char **cameras = linphone_core_get_video_devices(theLinphoneCore);
+    if (!cameras) return nil;
+    for (int i = 0; cameras[i] != NULL; i++) {
+        NSString *camStr = [NSString stringWithUTF8String:cameras[i]];
+        for (NSString *uid in frontIDs) {
+            if ([camStr containsString:uid]) {
+                NSLog(@"[LinphoneManager] frontCameraNameForLinphone: matched camera=%@", camStr);
+                return camStr;
+            }
+        }
+    }
+    NSLog(@"[LinphoneManager] frontCameraNameForLinphone: no front camera matched in Linphone list");
+    return nil;
+}
+
+// Returns the Linphone camera name for the back-facing camera, or nil.
+- (NSString *)backCameraNameForLinphone {
+    if (!theLinphoneCore) return nil;
+    NSMutableArray<NSString *> *backIDs = [NSMutableArray array];
+    if (@available(iOS 10.0, *)) {
+        AVCaptureDeviceDiscoverySession *session = [AVCaptureDeviceDiscoverySession
+            discoverySessionWithDeviceTypes:@[AVCaptureDeviceTypeBuiltInWideAngleCamera]
+                                  mediaType:AVMediaTypeVideo
+                                   position:AVCaptureDevicePositionBack];
+        for (AVCaptureDevice *dev in session.devices) {
+            [backIDs addObject:dev.uniqueID];
+        }
+    } else {
+#pragma clang diagnostic push
+#pragma clang diagnostic ignored "-Wdeprecated-declarations"
+        for (AVCaptureDevice *dev in [AVCaptureDevice devicesWithMediaType:AVMediaTypeVideo]) {
+            if (dev.position == AVCaptureDevicePositionBack) {
+                [backIDs addObject:dev.uniqueID];
+            }
+        }
+#pragma clang diagnostic pop
+    }
+    if (backIDs.count == 0) return nil;
+    const char **cameras = linphone_core_get_video_devices(theLinphoneCore);
+    if (!cameras) return nil;
+    for (int i = 0; cameras[i] != NULL; i++) {
+        NSString *camStr = [NSString stringWithUTF8String:cameras[i]];
+        for (NSString *uid in backIDs) {
+            if ([camStr containsString:uid]) {
+                NSLog(@"[LinphoneManager] backCameraNameForLinphone: matched camera=%@", camStr);
+                return camStr;
+            }
+        }
+    }
+    NSLog(@"[LinphoneManager] backCameraNameForLinphone: no back camera matched in Linphone list");
+    return nil;
+}
+
 - (void)switchCamera {
   if (!theLinphoneCore)
     return;
@@ -1713,32 +1793,27 @@ static void linphone_iphone_audio_devices_list_updated(LinphoneCore *lc) {
   NSString *currentStr = [NSString stringWithUTF8String:currentDevice];
   NSString *newDeviceStr = nil;
 
-  const char **cameras = linphone_core_get_video_devices(theLinphoneCore);
-  if (!cameras)
-    return;
+  NSString *frontName = [self frontCameraNameForLinphone];
+  NSString *backName  = [self backCameraNameForLinphone];
 
-  if ([currentStr containsString:@"front"]) {
-    for (int i = 0; cameras[i] != NULL; i++) {
-      if (strstr(cameras[i], "back") != NULL) {
-        newDeviceStr = [NSString stringWithUTF8String:cameras[i]];
-        break;
-      }
-    }
+  // Determine current camera face via AVCaptureDevice uniqueID matching.
+  BOOL currentIsFront = frontName && [currentStr isEqualToString:frontName];
+  if (currentIsFront) {
+    newDeviceStr = backName;
   } else {
-    for (int i = 0; cameras[i] != NULL; i++) {
-      if (strstr(cameras[i], "front") != NULL) {
-        newDeviceStr = [NSString stringWithUTF8String:cameras[i]];
-        break;
-      }
-    }
+    newDeviceStr = frontName;
   }
 
+  // Fallback: pick any non-StaticImage camera that isn't current.
   if (!newDeviceStr) {
-    for (int i = 0; cameras[i] != NULL; i++) {
-      if (strcmp(cameras[i], currentDevice) != 0 &&
-          strstr(cameras[i], "StaticImage") == NULL) {
-        newDeviceStr = [NSString stringWithUTF8String:cameras[i]];
-        break;
+    const char **cameras = linphone_core_get_video_devices(theLinphoneCore);
+    if (cameras) {
+      for (int i = 0; cameras[i] != NULL; i++) {
+        if (strcmp(cameras[i], currentDevice) != 0 &&
+            strstr(cameras[i], "StaticImage") == NULL) {
+          newDeviceStr = [NSString stringWithUTF8String:cameras[i]];
+          break;
+        }
       }
     }
   }
@@ -1761,6 +1836,12 @@ static void linphone_iphone_audio_devices_list_updated(LinphoneCore *lc) {
     return;
 
   NSLog(@"[LinphoneManager] makeVideoCall: %@", phoneNumber);
+  // Select front camera before dialing — iOS Linphone defaults to back camera.
+  NSString *frontName = [self frontCameraNameForLinphone];
+  if (frontName) {
+    NSLog(@"[LinphoneManager] makeVideoCall: selecting front camera=%@", frontName);
+    linphone_core_set_video_device(theLinphoneCore, [frontName UTF8String]);
+  }
   // Re-enable capture/display/preview in case a previous call left them disabled (background state).
   // Mirrors Android: core.isVideoPreviewEnabled = true before dialing.
   linphone_core_enable_video_capture(theLinphoneCore, YES);
@@ -1788,6 +1869,13 @@ static void linphone_iphone_audio_devices_list_updated(LinphoneCore *lc) {
   NSLog(@"[LinphoneManager][VideoCall] acceptVideoCall called");
   if (!theLinphoneCore)
     return;
+
+  // Select front camera before accepting — iOS Linphone defaults to back camera.
+  NSString *frontName = [self frontCameraNameForLinphone];
+  if (frontName) {
+    NSLog(@"[LinphoneManager][VideoCall] acceptVideoCall: selecting front camera=%@", frontName);
+    linphone_core_set_video_device(theLinphoneCore, [frontName UTF8String]);
+  }
 
   LinphoneCall *currentCall = linphone_core_get_current_call(theLinphoneCore);
   if (!currentCall) {
@@ -1876,27 +1964,22 @@ static void linphone_iphone_audio_devices_list_updated(LinphoneCore *lc) {
     // which the remote's bitrate threshold cannot distinguish from live video.
     NSLog(@"[LinphoneManager][VideoCall] setVideoEnabled: enabled=%d, switching device", enabled);
     if (enabled) {
-        const char **cameras = linphone_core_get_video_devices(theLinphoneCore);
-        const char *targetCamera = NULL;
-        if (cameras) {
-            for (int i = 0; cameras[i] != NULL; i++) {
-                if (strstr(cameras[i], "front") != NULL || strstr(cameras[i], "Front") != NULL) {
-                    targetCamera = cameras[i];
-                    break;
-                }
-            }
-            if (!targetCamera) {
+        NSString *targetCamera = [self frontCameraNameForLinphone];
+        if (!targetCamera) {
+            // Fallback: first non-StaticImage camera
+            const char **cameras = linphone_core_get_video_devices(theLinphoneCore);
+            if (cameras) {
                 for (int i = 0; cameras[i] != NULL; i++) {
                     if (strstr(cameras[i], "StaticImage") == NULL) {
-                        targetCamera = cameras[i];
+                        targetCamera = [NSString stringWithUTF8String:cameras[i]];
                         break;
                     }
                 }
             }
         }
         if (targetCamera) {
-            NSLog(@"[LinphoneManager][VideoCall] setVideoEnabled: switching to camera=%s", targetCamera);
-            linphone_core_set_video_device(theLinphoneCore, targetCamera);
+            NSLog(@"[LinphoneManager][VideoCall] setVideoEnabled: switching to camera=%@", targetCamera);
+            linphone_core_set_video_device(theLinphoneCore, [targetCamera UTF8String]);
         }
         // Cycle capture off→on to force Linphone to open the hardware camera
         // against the already-bound preview surface.
@@ -1949,24 +2032,37 @@ static void linphone_iphone_audio_devices_list_updated(LinphoneCore *lc) {
     LinphoneCallState st = linphone_call_get_state(call);
     if (st == LinphoneCallEnd || st == LinphoneCallReleased || st == LinphoneCallError) return;
   }
-  const char **cameras = linphone_core_get_video_devices(theLinphoneCore);
-  if (cameras) {
-    const char *target = NULL;
-    for (int i = 0; cameras[i]; i++) {
-      if (strstr(cameras[i], "front")) { target = cameras[i]; break; }
-    }
-    if (!target) {
+  NSString *target = [self frontCameraNameForLinphone];
+  if (!target) {
+    // Fallback: first non-StaticImage camera
+    const char **cameras = linphone_core_get_video_devices(theLinphoneCore);
+    if (cameras) {
       for (int i = 0; cameras[i]; i++) {
-        if (!strstr(cameras[i], "StaticImage")) { target = cameras[i]; break; }
+        if (!strstr(cameras[i], "StaticImage")) {
+          target = [NSString stringWithUTF8String:cameras[i]]; break;
+        }
       }
     }
-    if (target) linphone_core_set_video_device(theLinphoneCore, target);
   }
-  linphone_core_enable_video_capture(theLinphoneCore, YES);
-  // Cycle preview off→on so ogl_display is re-created against the current preview window ID.
-  // Skipping the NO step leaves any stale ogl_display (created at startup with no view) in place.
+  if (target) {
+    NSLog(@"[LinphoneManager] startVideoPreview: selecting camera=%@", target);
+    linphone_core_set_video_device(theLinphoneCore, [target UTF8String]);
+  }
+  // Cycle capture off→on to force Linphone to open the front camera hardware.
+  // Just calling set_video_device on an already-running pipeline has no effect —
+  // the capture must be restarted for the new device to take hold (same pattern as setVideoEnabled).
+  linphone_core_enable_video_capture(theLinphoneCore, NO);
   linphone_core_enable_video_preview(theLinphoneCore, NO);
-  linphone_core_enable_video_preview(theLinphoneCore, YES);
+  dispatch_after(dispatch_time(DISPATCH_TIME_NOW, (int64_t)(0.15 * NSEC_PER_SEC)),
+                 dispatch_get_main_queue(), ^{
+    if (theLinphoneCore) {
+      linphone_core_enable_video_capture(theLinphoneCore, YES);
+      // Cycle preview off→on so ogl_display is re-created against the current preview window ID.
+      linphone_core_enable_video_preview(theLinphoneCore, NO);
+      linphone_core_enable_video_preview(theLinphoneCore, YES);
+      NSLog(@"[LinphoneManager] startVideoPreview: capture+preview re-enabled with front camera");
+    }
+  });
   NSLog(@"[LinphoneManager] startVideoPreview done");
 }
 

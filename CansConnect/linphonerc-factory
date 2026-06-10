@@ -23,7 +23,7 @@ send_logs_include_linphonerc_and_chathistory=0
 publish_presence=0
 backgroundmode_preference=1
 use_rls_presence=0
-use_callkit=1
+use_callkit=0
 
 accept_early_media=0
 
@@ -60,4 +60,3 @@ ringer_dev_id=AQ: Audio Queue Device
 
 [video]
 display_filter_auto_rotate=0
-

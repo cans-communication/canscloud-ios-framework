@@ -132,6 +132,7 @@ extern NSString *const kCansCustomRegistrationEvent;
 - (BOOL)toggleMute;
 - (BOOL)isBluetoothAudioRouteAvailable;
 - (BOOL)isBluetoothState;
+- (BOOL)isBluetoothDevices;
 
 // Helper Convert
 - (NSString *)convertCallStateToString:(LinphoneCallState)state;
@@ -150,6 +151,9 @@ extern NSString *const kCansCustomRegistrationEvent;
 - (void)setVideoWindowsWithRemoteView:(UIView *)remoteView
                             localView:(UIView *)localView;
 - (void)setVideoEnabled:(BOOL)enabled;
+- (void)startVideoPreview;
+- (void)stopVideoPreview;
+- (int)conferenceDuration;
 - (NSString *)destinationUsername;
 - (int)missedCallsCount;
 - (BOOL)transferCallNow:(NSString *)phoneNumber;

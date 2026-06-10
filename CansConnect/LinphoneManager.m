@@ -199,6 +199,11 @@ static void linphone_iphone_chat_room_state_changed(LinphoneCore *lc, LinphoneCh
     linphone_config_set_int(config, "app", "publish_presence", 0);
     linphone_config_set_int(config, "sip", "publish_presence", 0);
     linphone_config_set_string(config, "sip", "save_headers", "To, Diversion, Contact, X-Voicemail");
+    // Disable CallKit mode — app does not use CXProvider/CXCallController. With
+    // use_callkit=1 Linphone uses VoiceProcessingIO and defers AVAudioSession
+    // activation to CallKit; without CallKit integration the session is never
+    // activated and no audio flows on physical devices (simulator ignores this).
+    linphone_config_set_int(config, "app", "use_callkit", 0);
 
     NSLog(@"[LinphoneManager] Attempting to create core with correct API "
           @"(v3)...");
@@ -1092,19 +1097,36 @@ static void linphone_iphone_popup_password_request(LinphoneCore *lc,
 // ==========================================
 
 - (BOOL)isSpeakerEnabled {
+  if (theLinphoneCore) {
+    LinphoneCall *call = linphone_core_get_current_call(theLinphoneCore);
+    const LinphoneAudioDevice *dev = call
+        ? linphone_call_get_output_audio_device(call)
+        : linphone_core_get_output_audio_device(theLinphoneCore);
+    if (dev) {
+      LinphoneAudioDeviceType t = linphone_audio_device_get_type(dev);
+      BOOL isSpeaker = (t == LinphoneAudioDeviceTypeSpeaker);
+      NSLog(@"[LinphoneManager] isSpeakerEnabled: Linphone device type=%d isSpeaker=%d", (int)t, (int)isSpeaker);
+      return isSpeaker;
+    }
+    NSLog(@"[LinphoneManager] isSpeakerEnabled: Linphone device=NULL, falling back to AVAudioSession");
+  }
+  // Fallback: Linphone core not ready or no call — read AVAudioSession.
   AVAudioSessionRouteDescription *route =
       [[AVAudioSession sharedInstance] currentRoute];
   for (AVAudioSessionPortDescription *desc in [route outputs]) {
-    if ([[desc portType] isEqualToString:AVAudioSessionPortBuiltInSpeaker])
+    if ([[desc portType] isEqualToString:AVAudioSessionPortBuiltInSpeaker]) {
+      NSLog(@"[LinphoneManager] isSpeakerEnabled: AVAudioSession=Speaker → YES");
       return YES;
+    }
   }
+  NSLog(@"[LinphoneManager] isSpeakerEnabled: AVAudioSession=Receiver → NO");
   return NO;
 }
 
 - (void)toggleSpeaker {
-  // Use the Linphone audio device API exclusively — AVAudioSession overrides conflict
-  // with linphone_call_set_output_audio_device used in routeAudioTo* methods.
-  if ([self isSpeakerEnabled]) {
+  BOOL currentlyOn = [self isSpeakerEnabled];
+  NSLog(@"[LinphoneManager] toggleSpeaker: currentlyOn=%d → routing to %@", currentlyOn, currentlyOn ? @"earpiece" : @"speaker");
+  if (currentlyOn) {
     [self routeAudioToEarpiece];
   } else {
     [self routeAudioToSpeaker];
@@ -1146,17 +1168,33 @@ static void linphone_iphone_popup_password_request(LinphoneCore *lc,
   return NO;
 }
 
+- (BOOL)isBluetoothDevices {
+  if (!theLinphoneCore) return NO;
+  const bctbx_list_t *devices = linphone_core_get_extended_audio_devices(theLinphoneCore);
+  for (const bctbx_list_t *it = devices; it != NULL; it = it->next) {
+    LinphoneAudioDevice *dev = (LinphoneAudioDevice *)it->data;
+    if (linphone_audio_device_get_type(dev) == LinphoneAudioDeviceTypeBluetooth) {
+      return YES;
+    }
+  }
+  return NO;
+}
+
 - (void)routeAudioToSpeaker {
   if (!theLinphoneCore) return;
   LinphoneAudioDevice *speaker = NULL;
   const bctbx_list_t *devices = linphone_core_get_audio_devices(theLinphoneCore);
+  NSMutableArray *names = [NSMutableArray array];
   for (const bctbx_list_t *it = devices; it != NULL; it = it->next) {
     LinphoneAudioDevice *dev = (LinphoneAudioDevice *)it->data;
-    if (linphone_audio_device_get_type(dev) == LinphoneAudioDeviceTypeSpeaker) {
+    LinphoneAudioDeviceType t = linphone_audio_device_get_type(dev);
+    const char *n = linphone_audio_device_get_device_name(dev);
+    [names addObject:[NSString stringWithFormat:@"%s(t=%d)", n ?: "?", (int)t]];
+    if (t == LinphoneAudioDeviceTypeSpeaker) {
       speaker = dev;
-      break;
     }
   }
+  NSLog(@"[LinphoneManager] routeAudioToSpeaker: devices=%@ found=%d", names, speaker != NULL);
   if (speaker) {
     LinphoneCall *call = linphone_core_get_current_call(theLinphoneCore);
     if (call) {
@@ -1164,27 +1202,41 @@ static void linphone_iphone_popup_password_request(LinphoneCore *lc,
     } else {
       linphone_core_set_output_audio_device(theLinphoneCore, speaker);
     }
+    NSLog(@"[LinphoneManager] routeAudioToSpeaker: done");
   }
 }
 
 - (void)routeAudioToEarpiece {
   if (!theLinphoneCore) return;
   LinphoneAudioDevice *earpiece = NULL;
+  LinphoneAudioDevice *defaultDev = NULL;
   const bctbx_list_t *devices = linphone_core_get_audio_devices(theLinphoneCore);
+  NSMutableArray *names = [NSMutableArray array];
   for (const bctbx_list_t *it = devices; it != NULL; it = it->next) {
     LinphoneAudioDevice *dev = (LinphoneAudioDevice *)it->data;
-    if (linphone_audio_device_get_type(dev) == LinphoneAudioDeviceTypeEarpiece) {
+    LinphoneAudioDeviceType t = linphone_audio_device_get_type(dev);
+    const char *n = linphone_audio_device_get_device_name(dev);
+    [names addObject:[NSString stringWithFormat:@"%s(t=%d)", n ?: "?", (int)t]];
+    if (t == LinphoneAudioDeviceTypeEarpiece) {
       earpiece = dev;
-      break;
+    } else if (t == LinphoneAudioDeviceTypeMicrophone && !defaultDev) {
+      // On iPhone, the [default] card (Microphone type) routes to earpiece/receiver
+      // when not in speaker mode — explicit Earpiece device is often absent.
+      defaultDev = dev;
     }
   }
-  if (earpiece) {
+  LinphoneAudioDevice *target = earpiece ?: defaultDev;
+  NSLog(@"[LinphoneManager] routeAudioToEarpiece: devices=%@ earpiece=%d default=%d target=%p", names, earpiece != NULL, defaultDev != NULL, target);
+  if (target) {
     LinphoneCall *call = linphone_core_get_current_call(theLinphoneCore);
     if (call) {
-      linphone_call_set_output_audio_device(call, earpiece);
+      linphone_call_set_output_audio_device(call, target);
     } else {
-      linphone_core_set_output_audio_device(theLinphoneCore, earpiece);
+      linphone_core_set_output_audio_device(theLinphoneCore, target);
     }
+    NSLog(@"[LinphoneManager] routeAudioToEarpiece: done");
+  } else {
+    NSLog(@"[LinphoneManager] routeAudioToEarpiece: NO EARPIECE OR DEFAULT DEVICE FOUND");
   }
 }
 
@@ -1309,6 +1361,8 @@ static void linphone_iphone_call_state(LinphoneCore *lc, LinphoneCall *call,
           }
       }
   }
+
+  NSLog(@"[LinphoneManager][VideoCall] call_state_changed: state=%@ message=%s", stateStr, message ?: "");
 
   // Remote Video State Monitoring — mirrors Android's lastRemoteCameraOnState.
   // Skip during LinphoneCallUpdating: remote params reflect mid-negotiation SDP which
@@ -1683,6 +1737,83 @@ static void linphone_iphone_audio_devices_list_updated(LinphoneCore *lc) {
     return @{@"fps": @(0.0), @"bitrate": @(downloadBandwidth)};
 }
 
+// Returns the Linphone camera name string for the front-facing camera, or nil if not found.
+// AVCaptureDevice for front-position devices and matching their uniqueID against Linphone's list.
+- (NSString *)frontCameraNameForLinphone {
+    if (!theLinphoneCore) return nil;
+    NSMutableArray<NSString *> *frontIDs = [NSMutableArray array];
+    if (@available(iOS 10.0, *)) {
+        AVCaptureDeviceDiscoverySession *session = [AVCaptureDeviceDiscoverySession
+            discoverySessionWithDeviceTypes:@[AVCaptureDeviceTypeBuiltInWideAngleCamera]
+                                  mediaType:AVMediaTypeVideo
+                                   position:AVCaptureDevicePositionFront];
+        for (AVCaptureDevice *dev in session.devices) {
+            [frontIDs addObject:dev.uniqueID];
+        }
+    } else {
+#pragma clang diagnostic push
+#pragma clang diagnostic ignored "-Wdeprecated-declarations"
+        for (AVCaptureDevice *dev in [AVCaptureDevice devicesWithMediaType:AVMediaTypeVideo]) {
+            if (dev.position == AVCaptureDevicePositionFront) {
+                [frontIDs addObject:dev.uniqueID];
+            }
+        }
+#pragma clang diagnostic pop
+    }
+    if (frontIDs.count == 0) return nil;
+    const char **cameras = linphone_core_get_video_devices(theLinphoneCore);
+    if (!cameras) return nil;
+    for (int i = 0; cameras[i] != NULL; i++) {
+        NSString *camStr = [NSString stringWithUTF8String:cameras[i]];
+        for (NSString *uid in frontIDs) {
+            if ([camStr containsString:uid]) {
+                NSLog(@"[LinphoneManager] frontCameraNameForLinphone: matched camera=%@", camStr);
+                return camStr;
+            }
+        }
+    }
+    NSLog(@"[LinphoneManager] frontCameraNameForLinphone: no front camera matched in Linphone list");
+    return nil;
+}
+
+// Returns the Linphone camera name for the back-facing camera, or nil.
+- (NSString *)backCameraNameForLinphone {
+    if (!theLinphoneCore) return nil;
+    NSMutableArray<NSString *> *backIDs = [NSMutableArray array];
+    if (@available(iOS 10.0, *)) {
+        AVCaptureDeviceDiscoverySession *session = [AVCaptureDeviceDiscoverySession
+            discoverySessionWithDeviceTypes:@[AVCaptureDeviceTypeBuiltInWideAngleCamera]
+                                  mediaType:AVMediaTypeVideo
+                                   position:AVCaptureDevicePositionBack];
+        for (AVCaptureDevice *dev in session.devices) {
+            [backIDs addObject:dev.uniqueID];
+        }
+    } else {
+#pragma clang diagnostic push
+#pragma clang diagnostic ignored "-Wdeprecated-declarations"
+        for (AVCaptureDevice *dev in [AVCaptureDevice devicesWithMediaType:AVMediaTypeVideo]) {
+            if (dev.position == AVCaptureDevicePositionBack) {
+                [backIDs addObject:dev.uniqueID];
+            }
+        }
+#pragma clang diagnostic pop
+    }
+    if (backIDs.count == 0) return nil;
+    const char **cameras = linphone_core_get_video_devices(theLinphoneCore);
+    if (!cameras) return nil;
+    for (int i = 0; cameras[i] != NULL; i++) {
+        NSString *camStr = [NSString stringWithUTF8String:cameras[i]];
+        for (NSString *uid in backIDs) {
+            if ([camStr containsString:uid]) {
+                NSLog(@"[LinphoneManager] backCameraNameForLinphone: matched camera=%@", camStr);
+                return camStr;
+            }
+        }
+    }
+    NSLog(@"[LinphoneManager] backCameraNameForLinphone: no back camera matched in Linphone list");
+    return nil;
+}
+
 - (void)switchCamera {
   if (!theLinphoneCore)
     return;
@@ -1694,32 +1825,26 @@ static void linphone_iphone_audio_devices_list_updated(LinphoneCore *lc) {
   NSString *currentStr = [NSString stringWithUTF8String:currentDevice];
   NSString *newDeviceStr = nil;
 
-  const char **cameras = linphone_core_get_video_devices(theLinphoneCore);
-  if (!cameras)
-    return;
+  NSString *frontName = [self frontCameraNameForLinphone];
+  NSString *backName  = [self backCameraNameForLinphone];
 
-  if ([currentStr containsString:@"front"]) {
-    for (int i = 0; cameras[i] != NULL; i++) {
-      if (strstr(cameras[i], "back") != NULL) {
-        newDeviceStr = [NSString stringWithUTF8String:cameras[i]];
-        break;
-      }
-    }
+  // Determine current camera face via AVCaptureDevice uniqueID matching.
+  BOOL currentIsFront = frontName && [currentStr isEqualToString:frontName];
+  if (currentIsFront) {
+    newDeviceStr = backName;
   } else {
-    for (int i = 0; cameras[i] != NULL; i++) {
-      if (strstr(cameras[i], "front") != NULL) {
-        newDeviceStr = [NSString stringWithUTF8String:cameras[i]];
-        break;
-      }
-    }
+    newDeviceStr = frontName;
   }
 
   if (!newDeviceStr) {
-    for (int i = 0; cameras[i] != NULL; i++) {
-      if (strcmp(cameras[i], currentDevice) != 0 &&
-          strstr(cameras[i], "StaticImage") == NULL) {
-        newDeviceStr = [NSString stringWithUTF8String:cameras[i]];
-        break;
+    const char **cameras = linphone_core_get_video_devices(theLinphoneCore);
+    if (cameras) {
+      for (int i = 0; cameras[i] != NULL; i++) {
+        if (strcmp(cameras[i], currentDevice) != 0 &&
+            strstr(cameras[i], "StaticImage") == NULL) {
+          newDeviceStr = [NSString stringWithUTF8String:cameras[i]];
+          break;
+        }
       }
     }
   }
@@ -1742,9 +1867,17 @@ static void linphone_iphone_audio_devices_list_updated(LinphoneCore *lc) {
     return;
 
   NSLog(@"[LinphoneManager] makeVideoCall: %@", phoneNumber);
-  // Re-enable capture/display in case a previous call left them disabled (background state).
+  // Select front camera before dialing — iOS Linphone defaults to back camera.
+  NSString *frontName = [self frontCameraNameForLinphone];
+  if (frontName) {
+    NSLog(@"[LinphoneManager] makeVideoCall: selecting front camera=%@", frontName);
+    linphone_core_set_video_device(theLinphoneCore, [frontName UTF8String]);
+  }
+  // Re-enable capture/display/preview in case a previous call left them disabled (background state).
   linphone_core_enable_video_capture(theLinphoneCore, YES);
   linphone_core_enable_video_display(theLinphoneCore, YES);
+  linphone_core_enable_video_preview(theLinphoneCore, YES);
+  linphone_core_enable_self_view(theLinphoneCore, YES);
 
   LinphoneAddress *addr =
       linphone_core_interpret_url(theLinphoneCore, [phoneNumber UTF8String]);
@@ -1763,8 +1896,16 @@ static void linphone_iphone_audio_devices_list_updated(LinphoneCore *lc) {
 }
 
 - (void)acceptVideoCall {
+  NSLog(@"[LinphoneManager][VideoCall] acceptVideoCall called");
   if (!theLinphoneCore)
     return;
+
+  // Select front camera before accepting — iOS Linphone defaults to back camera.
+  NSString *frontName = [self frontCameraNameForLinphone];
+  if (frontName) {
+    NSLog(@"[LinphoneManager][VideoCall] acceptVideoCall: selecting front camera=%@", frontName);
+    linphone_core_set_video_device(theLinphoneCore, [frontName UTF8String]);
+  }
 
   LinphoneCall *currentCall = linphone_core_get_current_call(theLinphoneCore);
   if (!currentCall) {
@@ -1785,21 +1926,32 @@ static void linphone_iphone_audio_devices_list_updated(LinphoneCore *lc) {
 
 - (void)setVideoWindowsWithRemoteView:(UIView *)remoteView
                             localView:(UIView *)localView {
+  NSLog(@"[LinphoneManager][VideoCall] setVideoWindowsWithRemoteView: remote=%@ local=%@", remoteView, localView);
   if (!theLinphoneCore)
     return;
 
   if (remoteView) {
     linphone_core_set_native_video_window_id(theLinphoneCore,
                                              (__bridge void *)remoteView);
+    NSLog(@"[LinphoneManager][VideoCall] native video window bound: %@", remoteView);
   }
 
   if (localView) {
+    // Tear down the existing ogl_display before binding the new view.
+    // Disabling preview first forces ogl_display destruction so the subsequent YES call creates
+    // a fresh instance properly bound to the new view.
+    linphone_core_enable_video_preview(theLinphoneCore, NO);
     linphone_core_set_native_preview_window_id(theLinphoneCore,
                                                (__bridge void *)localView);
+    NSLog(@"[LinphoneManager][VideoCall] native preview window bound: %@", localView);
+    linphone_core_enable_video_capture(theLinphoneCore, YES);
+    linphone_core_enable_video_preview(theLinphoneCore, YES);
+    NSLog(@"[LinphoneManager][VideoCall] preview pipeline re-enabled for new window");
   }
 }
 
 - (void)acceptCall {
+  NSLog(@"[LinphoneManager][VideoCall] acceptCall called");
   if (!theLinphoneCore)
     return;
 
@@ -1838,27 +1990,24 @@ static void linphone_iphone_audio_devices_list_updated(LinphoneCore *lc) {
     // StaticImage collapses UL to ~20 kbps so remote FPS polling can detect camera-off.
     // isVideoCaptureEnabled=false alone keeps the encoder on the last frozen frame (~1000 kbps),
     // which the remote's bitrate threshold cannot distinguish from live video.
+    NSLog(@"[LinphoneManager][VideoCall] setVideoEnabled: enabled=%d, switching device", enabled);
     if (enabled) {
-        const char **cameras = linphone_core_get_video_devices(theLinphoneCore);
-        const char *targetCamera = NULL;
-        if (cameras) {
-            for (int i = 0; cameras[i] != NULL; i++) {
-                if (strstr(cameras[i], "front") != NULL || strstr(cameras[i], "Front") != NULL) {
-                    targetCamera = cameras[i];
-                    break;
-                }
-            }
-            if (!targetCamera) {
+        NSString *targetCamera = [self frontCameraNameForLinphone];
+        if (!targetCamera) {
+            // Fallback: first non-StaticImage camera
+            const char **cameras = linphone_core_get_video_devices(theLinphoneCore);
+            if (cameras) {
                 for (int i = 0; cameras[i] != NULL; i++) {
                     if (strstr(cameras[i], "StaticImage") == NULL) {
-                        targetCamera = cameras[i];
+                        targetCamera = [NSString stringWithUTF8String:cameras[i]];
                         break;
                     }
                 }
             }
         }
         if (targetCamera) {
-            linphone_core_set_video_device(theLinphoneCore, targetCamera);
+            NSLog(@"[LinphoneManager][VideoCall] setVideoEnabled: switching to camera=%@", targetCamera);
+            linphone_core_set_video_device(theLinphoneCore, [targetCamera UTF8String]);
         }
         // Cycle capture off→on to force Linphone to open the hardware camera
         // against the already-bound preview surface.
@@ -1867,9 +2016,11 @@ static void linphone_iphone_audio_devices_list_updated(LinphoneCore *lc) {
                        dispatch_get_main_queue(), ^{
             if (theLinphoneCore) {
                 linphone_core_enable_video_capture(theLinphoneCore, YES);
+                NSLog(@"[LinphoneManager][VideoCall] setVideoEnabled: video capture re-enabled");
             }
         });
     } else {
+        NSLog(@"[LinphoneManager][VideoCall] setVideoEnabled: switching to StaticImage");
         linphone_core_set_video_device(theLinphoneCore, "StaticImage: Static picture");
         linphone_core_enable_video_capture(theLinphoneCore, NO);
     }
@@ -1900,6 +2051,60 @@ static void linphone_iphone_audio_devices_list_updated(LinphoneCore *lc) {
             linphone_chat_message_send(msg);
         }
     }
+}
+
+- (void)startVideoPreview {
+  if (!theLinphoneCore) return;
+  LinphoneCall *call = linphone_core_get_current_call(theLinphoneCore);
+  if (call) {
+    LinphoneCallState st = linphone_call_get_state(call);
+    if (st == LinphoneCallEnd || st == LinphoneCallReleased || st == LinphoneCallError) return;
+  }
+  NSString *target = [self frontCameraNameForLinphone];
+  if (!target) {
+    // Fallback: first non-StaticImage camera
+    const char **cameras = linphone_core_get_video_devices(theLinphoneCore);
+    if (cameras) {
+      for (int i = 0; cameras[i]; i++) {
+        if (!strstr(cameras[i], "StaticImage")) {
+          target = [NSString stringWithUTF8String:cameras[i]]; break;
+        }
+      }
+    }
+  }
+  if (target) {
+    NSLog(@"[LinphoneManager] startVideoPreview: selecting camera=%@", target);
+    linphone_core_set_video_device(theLinphoneCore, [target UTF8String]);
+  }
+  // Cycle capture off→on to force Linphone to open the front camera hardware.
+  linphone_core_enable_video_capture(theLinphoneCore, NO);
+  linphone_core_enable_video_preview(theLinphoneCore, NO);
+  dispatch_after(dispatch_time(DISPATCH_TIME_NOW, (int64_t)(0.15 * NSEC_PER_SEC)),
+                 dispatch_get_main_queue(), ^{
+    if (theLinphoneCore) {
+      linphone_core_enable_video_capture(theLinphoneCore, YES);
+      // Cycle preview off→on so ogl_display is re-created against the current preview window ID.
+      linphone_core_enable_video_preview(theLinphoneCore, NO);
+      linphone_core_enable_video_preview(theLinphoneCore, YES);
+      NSLog(@"[LinphoneManager] startVideoPreview: capture+preview re-enabled with front camera");
+    }
+  });
+  NSLog(@"[LinphoneManager] startVideoPreview done");
+}
+
+- (void)stopVideoPreview {
+  if (!theLinphoneCore) return;
+  linphone_core_enable_video_preview(theLinphoneCore, NO);
+  linphone_core_set_native_video_window_id(theLinphoneCore, NULL);
+  linphone_core_set_native_preview_window_id(theLinphoneCore, NULL);
+  NSLog(@"[LinphoneManager] stopVideoPreview done");
+}
+
+- (int)conferenceDuration {
+  if (!theLinphoneCore) return 0;
+  LinphoneConference *conf = linphone_core_get_conference(theLinphoneCore);
+  if (!conf) return 0;
+  return (int)linphone_conference_get_duration(conf);
 }
 
 - (void)sendTextMessage:(NSString *)peerUri text:(NSString *)text requestId:(NSString *)requestId {
@@ -2196,10 +2401,52 @@ static void linphone_iphone_chat_room_state_changed(LinphoneCore *lc,
 
     LinphoneChatRoom *room = nil;
 
+    char *peerStr = linphone_address_as_string(remoteAddr);
+    char *localStr = linphone_address_as_string(localAddr);
+    const char *peerUserC = linphone_address_get_username(remoteAddr);
+    const char *localUserC = linphone_address_get_username(localAddr);
+    NSString *targetPeer  = peerUserC  ? [NSString stringWithUTF8String:peerUserC]  : @"";
+    NSString *targetLocal = localUserC ? [NSString stringWithUTF8String:localUserC] : @"";
+    NSLog(@"[LinphoneManager] getOrCreateSpecificChatRoom: peer=%s local=%s peerUser=%@ localUser=%@",
+          peerStr ?: "?", localStr ?: "?", targetPeer, targetLocal);
+    if (peerStr) ms_free(peerStr);
+    if (localStr) ms_free(localStr);
+
+    // Stage 0: iterate the full room list (same source as getChatRoomsJSON).
+    // Stage 1/2 use address-equality which can miss rooms whose DB address has
+    // extra SIP parameters (e.g., gr=, transport=) that linphone_address_clean
+    // doesn't strip from the stored form.
+    if (targetPeer.length > 0 && targetLocal.length > 0) {
+        const bctbx_list_t *allRooms = linphone_core_get_chat_rooms(theLinphoneCore);
+        for (const bctbx_list_t *rit = allRooms; rit != NULL; rit = rit->next) {
+            LinphoneChatRoom *r = (LinphoneChatRoom *)rit->data;
+            const LinphoneAddress *rPeer  = linphone_chat_room_get_peer_address(r);
+            const LinphoneAddress *rLocal = linphone_chat_room_get_local_address(r);
+            const char *rPeerU  = rPeer  ? linphone_address_get_username(rPeer)  : NULL;
+            const char *rLocalU = rLocal ? linphone_address_get_username(rLocal) : NULL;
+            const char *rPeerD  = rPeer  ? linphone_address_get_domain(rPeer)    : NULL;
+            const char *rLocalD = rLocal ? linphone_address_get_domain(rLocal)   : NULL;
+            const char *peerDomainC  = linphone_address_get_domain(remoteAddr);
+            const char *localDomainC = linphone_address_get_domain(localAddr);
+            if (rPeerU && rLocalU && rPeerD && rLocalD && peerUserC && localUserC && peerDomainC && localDomainC
+                && strcmp(rPeerU, peerUserC) == 0
+                && strcmp(rLocalU, localUserC) == 0
+                && strcmp(rPeerD, peerDomainC) == 0
+                && strcmp(rLocalD, localDomainC) == 0) {
+                room = r;
+                break;
+            }
+        }
+        NSLog(@"[LinphoneManager] getOrCreateSpecificChatRoom: stage0=%p", room);
+    }
+
 #pragma clang diagnostic push
 #pragma clang diagnostic ignored "-Wdeprecated-declarations"
     // Stage 1: direct peer + local address lookup
-    room = linphone_core_get_chat_room_2(theLinphoneCore, remoteAddr, localAddr);
+    if (!room) {
+        room = linphone_core_get_chat_room_2(theLinphoneCore, remoteAddr, localAddr);
+        NSLog(@"[LinphoneManager] getOrCreateSpecificChatRoom: stage1=%p", room);
+    }
 
     if (!room) {
         // Stage 2: broader search with Basic params
@@ -2212,10 +2459,12 @@ static void linphone_iphone_chat_room_state_changed(LinphoneCore *lc,
             bctbx_list_free(participants);
             linphone_chat_room_params_unref(params);
         }
+        NSLog(@"[LinphoneManager] getOrCreateSpecificChatRoom: stage2=%p", room);
     }
 
     if (!room) {
         // Stage 3: create a new Basic chat room
+        NSLog(@"[LinphoneManager] getOrCreateSpecificChatRoom: stage3 creating new room (no existing room found)");
         LinphoneChatRoomParams *params = linphone_core_create_default_chat_room_params(theLinphoneCore);
         if (params) {
             linphone_chat_room_params_set_backend(params, LinphoneChatRoomBackendBasic);
@@ -2225,6 +2474,7 @@ static void linphone_iphone_chat_room_state_changed(LinphoneCore *lc,
             bctbx_list_free(participants);
             linphone_chat_room_params_unref(params);
         }
+        NSLog(@"[LinphoneManager] getOrCreateSpecificChatRoom: stage3=%p", room);
     }
 #pragma clang diagnostic pop
 
@@ -2243,17 +2493,24 @@ static void linphone_iphone_chat_room_state_changed(LinphoneCore *lc,
     // not exist yet when the other side sent first).  Mirrors Android getChatHistory which
     // calls getOrCreateSpecificChatRoom before iterating room.getHistory(0).
     LinphoneChatRoom *room = [self getOrCreateSpecificChatRoom:peerUri];
+    NSLog(@"[LinphoneManager] getChatHistoryJSON: peerUri=%@ room=%p", peerUri, room);
     NSMutableArray *messagesArray = [NSMutableArray array];
 
     if (room) {
         // mark_as_read already called inside getOrCreateSpecificChatRoom
 
         const bctbx_list_t *history = linphone_chat_room_get_history(room, 0);
+        int historyCount = (int)bctbx_list_size(history);
         const LinphoneAddress *peerAddr = linphone_chat_room_get_peer_address(room);
         NSString *chatWith = [NSString stringWithUTF8String:linphone_address_get_username(peerAddr) ?: ""];
+        NSLog(@"[LinphoneManager] getChatHistoryJSON: room=%p peer=%@ historyCount=%d", room, chatWith, historyCount);
 
         for (const bctbx_list_t *it = history; it != NULL; it = it->next) {
             LinphoneChatMessage *msg = (LinphoneChatMessage *)it->data;
+
+            // Skip X-CANS-CTRL control messages (camera-state signals) — never show in chat UI.
+            const char *ctrlHdr = linphone_chat_message_get_custom_header(msg, "X-CANS-CTRL");
+            if (ctrlHdr && strlen(ctrlHdr) > 0) continue;
 
             // ── id: prefer X-Request-ID header, fallback to native messageId ──
             const char *requestIdC = linphone_chat_message_get_custom_header(msg, "X-Request-ID");
@@ -2447,6 +2704,23 @@ static void linphone_iphone_message_received(LinphoneCore *lc, LinphoneChatRoom 
             NSLog(@"[LinphoneManager] message_received: skipping IMDN receipt");
             return;
         }
+    }
+
+    // Intercept X-CANS-CTRL camera-state control messages — convert to video state event,
+    // never show in chat UI. Mirrors Android NativeModuleAndroid onMessageReceived guard.
+    const char *ctrlHeader = linphone_chat_message_get_custom_header(message, "X-CANS-CTRL");
+    if (ctrlHeader && strlen(ctrlHeader) > 0) {
+        NSString *ctrlValue = [NSString stringWithUTF8String:ctrlHeader];
+        NSLog(@"[LinphoneManager] message_received: X-CANS-CTRL=%@ → remote video state", ctrlValue);
+        BOOL enabled = [ctrlValue isEqualToString:@"video-state:on"];
+        dispatch_async(dispatch_get_main_queue(), ^{
+            [[NSNotificationCenter defaultCenter]
+                postNotificationName:kLinphoneRemoteVideoStateUpdate
+                              object:nil
+                            userInfo:@{@"enabled": @(enabled)}];
+        });
+        linphone_chat_room_mark_as_read(room);
+        return;
     }
 
     // id: X-Request-ID preferred, fallback to native messageId

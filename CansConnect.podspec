@@ -1,6 +1,6 @@
 Pod::Spec.new do |s|
   s.name             = 'CansConnect'
-  s.version          = '1.0.0'
+  s.version          = '1.0.1'
   s.summary          = 'CansConnect ios sdk development for CANScall'
   s.homepage         = 'https://cans.cc'
   s.license          = { :type => 'MIT' }
@@ -28,6 +28,6 @@ Pod::Spec.new do |s|
     'HEADER_SEARCH_PATHS' => '$(inherited) "${PODS_XCFRAMEWORKS_BUILD_DIR}/linphone-sdk/**"',
     'CLANG_ALLOW_NON_MODULAR_INCLUDES_IN_FRAMEWORK_MODULES' => 'YES'
   }
-  
+
   s.swift_version = '5.0'
 end

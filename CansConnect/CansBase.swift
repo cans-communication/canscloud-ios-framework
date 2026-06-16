@@ -144,6 +144,42 @@ import linphonesw
         CallManager.instance().setCore(core: core)
         CoreManager.instance().setCore(core: core)
     }
+
+    /// Called from LinphoneManager.m after linphone_core_start to wire CallManager.lc.
+    /// Static so ObjC can call [CansBase wireCallManagerCore:theLinphoneCore] without
+    /// needing CallManager (which is internal-only) in the generated ObjC header.
+    @objc public static func wireCallManagerCore(_ core: OpaquePointer) {
+        CallManager.instance().setCore(core: core)
+    }
+
+    /// Called from AppDelegate's PKPushRegistryDelegate when a VoIP push arrives.
+    /// Must be called synchronously on the main thread before the PushKit completion handler returns.
+    /// hasVideo should be parsed from the push payload; defaults to false (audio) when absent.
+    @objc public static func reportIncomingVoIPCall(callId: String, hasVideo: Bool = false) {
+        CallManager.instance().displayIncomingCall(callId: callId, hasVideo: hasVideo)
+    }
+
+    /// Immediately ends the CallKit representation of a just-reported incoming call.
+    /// Use this when the app is Active and you reported to CallKit only to satisfy the
+    /// iOS 13+ PushKit mandate — call this right after reportIncomingVoIPCall so the
+    /// banner is dismissed before it renders, letting your custom UI handle the call.
+    @objc public static func endIncomingCallInCallKit(callId: String) {
+        guard let uuid = CallManager.instance().providerDelegate?.uuids[callId] else { return }
+        CallManager.instance().providerDelegate?.endCall(uuid: uuid, reason: .answeredElsewhere)
+    }
+
+    /// Ensures the Linphone core is initialized and processes the push callId.
+    /// Call early in didFinishLaunchingWithOptions (callId = "") to pre-warm the core,
+    /// and again from the PushKit handler with the real callId.
+    /// LinphoneManager.+load registers the observer before main() runs, so the
+    /// notification is never lost regardless of when this is called.
+    @objc public static func initializeCoreForPushWakeup(callId: String) {
+        NotificationCenter.default.post(
+            name: NSNotification.Name("CansEarlyVoIPPushWakeup"),
+            object: nil,
+            userInfo: ["callId": callId]
+        )
+    }
     
     @objc public func configure() {
     }

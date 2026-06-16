@@ -68,7 +68,11 @@ class ProviderDelegate: NSObject {
 
 	static var providerConfiguration: CXProviderConfiguration = {
 		let providerConfiguration = CXProviderConfiguration()
-		providerConfiguration.ringtoneSound = "notes_of_the_optimistic.caf"
+		// nil → iOS uses the user's system ringtone (the safe default).
+		// A filename that doesn't exist in the main bundle causes complete silence
+		// with no vibration and no fallback — do NOT set a custom name until the
+		// .caf file is confirmed present in Copy Bundle Resources.
+		providerConfiguration.ringtoneSound = nil
 		providerConfiguration.supportsVideo = true
 //        providerConfiguration.iconTemplateImageData = ImageAsset.load(asset: .callkitLogo).pngData()
 		providerConfiguration.supportedHandleTypes = [.generic, .phoneNumber, .emailAddress]
@@ -138,8 +142,8 @@ class ProviderDelegate: NSObject {
         provider?.reportOutgoingCall(with: uuid, connectedAt: nil)
 	}
 	
-	func endCall(uuid: UUID) {
-        provider?.reportCall(with: uuid, endedAt: .init(), reason: .failed)
+	func endCall(uuid: UUID, reason: CXCallEndedReason = .failed) {
+        provider?.reportCall(with: uuid, endedAt: .init(), reason: reason)
 		let callId = callInfos[uuid]?.callId
 		if (callId != nil) {
 			uuids.removeValue(forKey: callId!)
@@ -156,8 +160,8 @@ class ProviderDelegate: NSObject {
 			}
 			let call = CallManager.instance().callByCallId(callId: callId)
 			if (call == nil) {
-//				Log.directLog(BCTBX_LOG_MESSAGE, text: "CallKit: terminate call with call-id: \(String(describing: callId)) and UUID: \(uuid) which does not exist.")
-                CallManager.instance().providerDelegate?.endCall(uuid: uuid)
+                NSLog("[ProviderDelegate] endCallNotExist: callId=%@ not in Linphone after timeout — reporting unanswered", callId ?? "nil")
+                CallManager.instance().providerDelegate?.endCall(uuid: uuid, reason: .unanswered)
 			}
 		}
 	}
@@ -187,9 +191,27 @@ extension ProviderDelegate: CXProviderDelegate {
         let uuid = action.callUUID
         let callInfo = callInfos[uuid]
         let callId = callInfo?.callId
-//        Log.directLog(BCTBX_LOG_MESSAGE, text: "CallKit: answer call with call-id: \(String(describing: callId)) and UUID: \(uuid.description).")
 
-        guard let call = CallManager.instance().callByCallId(callId: callId) else {
+        // Primary lookup: match by callId stored in callInfo.
+        // Fallback: if callId is empty or stale (push wakeup before INVITE arrived),
+        // find the first incoming call directly from the core.
+        var call = CallManager.instance().callByCallId(callId: callId)
+        if call == nil {
+            call = CallManager.instance().lc?.calls.first(where: {
+                $0.state == .IncomingReceived || $0.state == .IncomingEarlyMedia
+            })
+            // Sync the stored callId so End/other actions can find the call later.
+            if let resolvedCall = call, let realCallId = resolvedCall.callLog?.callId {
+                callInfo?.callId = realCallId
+                if let info = callInfo {
+                    callInfos.updateValue(info, forKey: uuid)
+                    uuids.removeValue(forKey: callId ?? "")
+                    uuids.updateValue(uuid, forKey: realCallId)
+                }
+            }
+        }
+
+        guard let call = call else {
             action.fail()
             return
         }
@@ -290,14 +312,14 @@ extension ProviderDelegate: CXProviderDelegate {
 	}
 
     public func provider(_ provider: CXProvider, didActivate audioSession: AVAudioSession) {
-//        Log.directLog(BCTBX_LOG_MESSAGE, text: "CallKit: audio session activated.")
-        // CallManager.instance().lc?.activateAudioSession(isActive: true)
+        NSLog("[ProviderDelegate] didActivate: signalling Linphone audio session active (lc=%@)", CallManager.instance().lc == nil ? "nil" : "set")
+        CallManager.instance().lc?.activateAudioSession(activated: true)
         CallManager.instance().callkitAudioSessionActivated = true
     }
 
     public func provider(_ provider: CXProvider, didDeactivate audioSession: AVAudioSession) {
-//        Log.directLog(BCTBX_LOG_MESSAGE, text: "CallKit: audio session deactivated.")
-        // CallManager.instance().lc?.activateAudioSession(isActive: false)
+        NSLog("[ProviderDelegate] didDeactivate: signalling Linphone audio session inactive")
+        CallManager.instance().lc?.activateAudioSession(activated: false)
         CallManager.instance().callkitAudioSessionActivated = nil
     }
 }

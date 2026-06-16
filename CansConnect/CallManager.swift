@@ -113,12 +113,11 @@ import AVFoundation
 	}
 
 	@objc static func callKitEnabled() -> Bool {
-//		#if !targetEnvironment(simulator)
-//		if ConfigManager.instance().lpConfigBoolForKey(key: "use_callkit", section: "app") {
-//			return true
-//		}
-//		#endif
+		#if !targetEnvironment(simulator)
+		return true
+		#else
 		return false
+		#endif
 	}
 
 	func requestTransaction(_ transaction: CXTransaction, action: String) {
@@ -145,13 +144,15 @@ import AVFoundation
 	}
 
 	// From ios13, display the callkit view when the notification is received.
-	@objc func displayIncomingCall(callId: String) {
+    // hasVideo: initial value from push payload (default false); overridden by
+    // onCallStateChanged(.IncomingReceived) → updateCall once the INVITE arrives.
+	@objc func displayIncomingCall(callId: String, hasVideo: Bool = false) {
         let uuid = CallManager.instance().providerDelegate?.uuids["\(callId)"]
 		if (uuid != nil) {
             let callInfo = providerDelegate?.callInfos[uuid!]
 			if (callInfo?.declined ?? false) {
 				// This call was declined.
-                providerDelegate?.reportIncomingCall(call:nil, uuid: uuid!, handle: "Calling", hasVideo: true, displayName: callInfo?.displayName ?? "Calling")
+                providerDelegate?.reportIncomingCall(call:nil, uuid: uuid!, handle: "Calling", hasVideo: false, displayName: callInfo?.displayName ?? "Calling")
                 providerDelegate?.endCall(uuid: uuid!)
 			}
 			return
@@ -159,13 +160,18 @@ import AVFoundation
 
 		let call = CallManager.instance().callByCallId(callId: callId)
 		if (call != nil) {
-//			let displayName = FastAddressBook.displayName(for: call?.remoteAddress?.getCobject) ?? "Unknow"
-            let displayName = "Unknow"
-//			let video = UIApplication.shared.applicationState == .active && (lc!.videoActivationPolicy?.automaticallyAccept ?? false) && (call!.remoteParams?.videoEnabled ?? false)
-            let video = false
-			displayIncomingCall(call: call, handle: (call!.remoteAddress?.asStringUriOnly())!, hasVideo: video, callId: callId, displayName: displayName)
+            let addr = call!.remoteAddress
+            let displayName = addr?.displayName?.isEmpty == false ? addr!.displayName! : (addr?.username ?? "Unknown")
+            // Call is already in Linphone — use actual remote params instead of push hint.
+            // videoEnabled is true even when the video m= line has a=inactive, so also
+            // check direction: only treat the call as video when direction is not Inactive.
+            let rp = call!.remoteParams
+            let video = (rp?.videoEnabled ?? false) && (rp?.videoDirection ?? .Inactive) != .Inactive
+			displayIncomingCall(call: call, handle: addr?.asStringUriOnly() ?? "Unknown", hasVideo: video, callId: callId, displayName: displayName)
 		} else {
-			displayIncomingCall(call: nil, handle: "Calling", hasVideo: true, callId: callId, displayName: "Calling")
+            // Call not yet in Linphone (push arrived before INVITE processed).
+            // Use hasVideo from push payload; updateCall will correct it on IncomingReceived.
+			displayIncomingCall(call: nil, handle: "Calling", hasVideo: hasVideo, callId: callId, displayName: "Calling")
 		}
 	}
 
@@ -444,9 +450,23 @@ import AVFoundation
         let callLog = call.callLog
         let callId = callLog?.callId
         if (cstate == .PushIncomingReceived) {
-            displayIncomingCall(call: call, handle: "Calling", hasVideo: false, callId: callId!, displayName: "Calling")
+            // Only report to CallKit if PushKit hasn't already registered a UUID for this
+            // callId.  Without this guard, PushIncomingReceived creates a duplicate UUID
+            // (a second "Calling" banner) alongside the one PushKit already reported.
+            if CallManager.callKitEnabled(), let cid = callId {
+                if providerDelegate?.uuids[cid] == nil {
+                    NSLog("[CallManager] PushIncomingReceived: callId=%@, no UUID yet — reporting to CallKit", cid)
+                    displayIncomingCall(call: call, handle: "Calling", hasVideo: false, callId: cid, displayName: "Calling")
+                } else {
+                    NSLog("[CallManager] PushIncomingReceived: callId=%@, PushKit already registered UUID — skipping duplicate", cid)
+                }
+            }
         } else {
-            let video = (core.videoActivationPolicy?.automaticallyAccept ?? false) && (call.remoteParams?.videoEnabled ?? false)
+            // Reflect what the remote party is offering, regardless of local auto-accept policy.
+            // The banner should say "Video" only when the caller sends an active video stream.
+            // videoEnabled is true even for a=inactive video m= lines, so check direction too.
+            let remoteParams = call.remoteParams
+            let video = (remoteParams?.videoEnabled ?? false) && (remoteParams?.videoDirection ?? .Inactive) != .Inactive
 
             if (call.userData == nil) {
                 let appData = CallAppData()
@@ -455,17 +475,34 @@ import AVFoundation
 
             switch cstate {
                 case .IncomingReceived:
-                    let addr = call.remoteAddress;
-//                    let displayName = FastAddressBook.displayName(for: addr?.getCobject) ?? "Unknown"
-//                    let displayName = CansBridgingUtils.instance().getDisplayName(for: addr?.getCobject) ?? "Unknow"
-                    let displayName = "Unknown"
+                    let addr = call.remoteAddress
+                    // Use SIP display name if set, otherwise fall back to the username (extension number).
+                    let displayName = addr?.displayName?.isEmpty == false ? addr!.displayName! : (addr?.username ?? "Unknown")
+                    NSLog("[CallManager] IncomingReceived: callId=%@, videoEnabled=%d, videoDirection=%d, hasVideo=%d, displayName=%@",
+                          callId ?? "nil",
+                          remoteParams?.videoEnabled ?? false ? 1 : 0,
+                          remoteParams?.videoDirection.rawValue ?? -1,
+                          video ? 1 : 0,
+                          displayName)
                     if (CallManager.callKitEnabled()) {
                         let uuid = CallManager.instance().providerDelegate.uuids["\(callId!)"]
                         if (uuid != nil) {
-                            // Tha app is now registered, updated the call already existed.
+                            // UUID already registered (push wakeup path). Sync callId in case the
+                            // initial push report used "" as a placeholder before Linphone had the call.
+                            if let callInfo = providerDelegate.callInfos[uuid!], callInfo.callId.isEmpty {
+                                callInfo.callId = callId!
+                                providerDelegate.callInfos.updateValue(callInfo, forKey: uuid!)
+                                providerDelegate.uuids.removeValue(forKey: "")
+                                providerDelegate.uuids.updateValue(uuid!, forKey: callId!)
+                            }
                             CallManager.instance().providerDelegate.updateCall(uuid: uuid!, handle: addr!.asStringUriOnly(), hasVideo: video, displayName: displayName)
                         } else {
-                            CallManager.instance().displayIncomingCall(call: call, handle: addr!.asStringUriOnly(), hasVideo: video, callId: callId!, displayName: displayName)
+                            // Only register with CallKit when app is NOT in the active foreground.
+                            // When active, NativeModuleiOS emits dataFromCall to RN which shows
+                            // IncomingCallScreen instead — showing both simultaneously is wrong UX.
+                            if UIApplication.shared.applicationState != .active {
+                                CallManager.instance().displayIncomingCall(call: call, handle: addr!.asStringUriOnly(), hasVideo: video, callId: callId!, displayName: displayName)
+                            }
                         }
                     }
 //                    else if (UIApplication.shared.applicationState != .active) {
@@ -575,9 +612,25 @@ import AVFoundation
                                 break
                             }
 
-                            let transaction = CXTransaction(action:
-                            CXEndCallAction(call: uuid!))
-                            CallManager.instance().requestTransaction(transaction, action: "endCall")
+                            // Map Linphone end reason to CXCallEndedReason so CallKit shows the
+                            // correct label in Recent Calls instead of always "Call Failed".
+                            // Using reportCall(with:endedAt:reason:) directly so the reason is
+                            // communicated; no CXEndCallAction cycle needed when Linphone itself
+                            // has already ended the call.
+                            let ckReason: CXCallEndedReason
+                            if cstate == .Error {
+                                ckReason = .failed
+                            } else {
+                                switch call.reason {
+                                case .Busy, .NotAnswered:
+                                    ckReason = .unanswered
+                                default: // .None, .Normal, .Declined, etc.
+                                    ckReason = .remoteEnded
+                                }
+                            }
+                            NSLog("[CallManager] Call end: callId=%@, linphoneReason=%@, ckReason=%@",
+                                  callId!, "\(call.reason)", ckReason == .remoteEnded ? "remoteEnded" : ckReason == .failed ? "failed" : "unanswered")
+                            CallManager.instance().providerDelegate.endCall(uuid: uuid!, reason: ckReason)
                         }
                     }
                     break

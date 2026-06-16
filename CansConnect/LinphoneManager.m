@@ -78,8 +78,8 @@ static void linphone_iphone_chat_room_state_changed(LinphoneCore *lc, LinphoneCh
 }
 
 // Handles CansEarlyVoIPPushWakeup posted by CansBase.initializeCoreForPushWakeup.
-// Called on the main thread.  Safe to call multiple times — createLinphoneCore
-// and setPendingVoIPCallId are both idempotent.
+// NotificationCenter delivers on the posting thread; createLinphoneCore always dispatches to main.
+// Safe to call multiple times — createLinphoneCore and setPendingVoIPCallId are both idempotent.
 + (void)handleEarlyVoIPPushWakeup:(NSNotification *)notif {
   NSString *callId = notif.userInfo[@"callId"] ?: @"";
   NSLog(@"[LinphoneManager] handleEarlyVoIPPushWakeup: callId=%@",

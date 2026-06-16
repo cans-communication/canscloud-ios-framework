@@ -5,6 +5,7 @@
 
 #import "LinphoneManager.h"
 #import <CommonCrypto/CommonDigest.h>
+#import <CansConnect/CansConnect-Swift.h>
 
 #pragma clang diagnostic push
 #pragma clang diagnostic ignored "-Wdeprecated-declarations"
@@ -58,10 +59,47 @@ static void linphone_iphone_chat_room_state_changed(LinphoneCore *lc, LinphoneCh
   // Tracks last-known remote camera state to suppress duplicate/spurious events
   // (mirrors Android's lastRemoteCameraOnState). Reset to -1 (unknown) on End/Error/Released.
   int _lastRemoteCameraOnState; // -1=unknown, 0=off, 1=on
+  // callId from a VoIP push that arrived before the core finished initializing.
+  // Consumed and cleared inside createLinphoneCore after linphone_core_start.
+  NSString *_pendingVoIPCallId;
 }
 @end
 
 @implementation LinphoneManager
+
+// +load runs at binary-image load time, before main() and before any app code.
+// Registering here guarantees the observer exists when AppDelegate first runs.
++ (void)load {
+  [[NSNotificationCenter defaultCenter]
+      addObserver:self
+         selector:@selector(handleEarlyVoIPPushWakeup:)
+             name:@"CansEarlyVoIPPushWakeup"
+           object:nil];
+}
+
+// Handles CansEarlyVoIPPushWakeup posted by CansBase.initializeCoreForPushWakeup.
+// Called on the main thread.  Safe to call multiple times — createLinphoneCore
+// and setPendingVoIPCallId are both idempotent.
++ (void)handleEarlyVoIPPushWakeup:(NSNotification *)notif {
+  NSString *callId = notif.userInfo[@"callId"] ?: @"";
+  NSLog(@"[LinphoneManager] handleEarlyVoIPPushWakeup: callId=%@",
+        callId.length ? callId : @"(early-init, no callId)");
+  [[self sharedInstance] setPendingVoIPCallId:callId];
+  [[self sharedInstance] createLinphoneCore];
+}
+
+// Stores callId for processing after the core finishes starting.
+// If the core is already running, processes the push immediately.
+- (void)setPendingVoIPCallId:(NSString *)callId {
+  if (!callId.length) return;
+  if (theLinphoneCore) {
+    NSLog(@"[LinphoneManager] setPendingVoIPCallId: core ready — processing immediately: %@", callId);
+    [self processPushNotification:callId];
+  } else {
+    NSLog(@"[LinphoneManager] setPendingVoIPCallId: core not ready — deferring: %@", callId);
+    _pendingVoIPCallId = callId;
+  }
+}
 
 + (instancetype)sharedInstance {
   static LinphoneManager *sharedInstance = nil;
@@ -199,11 +237,7 @@ static void linphone_iphone_chat_room_state_changed(LinphoneCore *lc, LinphoneCh
     linphone_config_set_int(config, "app", "publish_presence", 0);
     linphone_config_set_int(config, "sip", "publish_presence", 0);
     linphone_config_set_string(config, "sip", "save_headers", "To, Diversion, Contact, X-Voicemail");
-    // Disable CallKit mode — app does not use CXProvider/CXCallController. With
-    // use_callkit=1 Linphone uses VoiceProcessingIO and defers AVAudioSession
-    // activation to CallKit; without CallKit integration the session is never
-    // activated and no audio flows on physical devices (simulator ignores this).
-    linphone_config_set_int(config, "app", "use_callkit", 0);
+    linphone_config_set_int(config, "app", "use_callkit", 1);
 
     NSLog(@"[LinphoneManager] Attempting to create core with correct API "
           @"(v3)...");
@@ -250,8 +284,33 @@ static void linphone_iphone_chat_room_state_changed(LinphoneCore *lc, LinphoneCh
       NSLog(@"[LinphoneManager] Starting core...");
       linphone_core_start(theLinphoneCore);
 
+      // Suppress Linphone's internal ring player so CallKit can ring natively.
+      // Without this, Linphone activates AVAudioSession before CallKit's
+      // provider:didActivate: fires, muting the system ringtone.
+      // This must be called every launch (including VoIP push wakeup before JS loads)
+      // because JS's setUseDeviceRingtone() is never called in the killed-state path.
+      linphone_core_set_ring(theLinphoneCore, NULL);
+      NSLog(@"[LinphoneManager] Ring player suppressed — CallKit will ring natively.");
+
+      // Enable vibration for incoming calls in case the app is in a non-CallKit
+      // foreground state where Linphone manages its own ringing.
+      linphone_core_enable_vibration_on_incoming_call(theLinphoneCore, true);
+
       [self startIterateTimer];
       NSLog(@"[LinphoneManager] Core started and timer running!");
+
+      // Wire up Swift CallManager so callByCallId and onCallStateChanged work.
+      // CallManager is internal (@objc but not public) so we call through CansBase.
+      [CansBase wireCallManagerCore:theLinphoneCore];
+      NSLog(@"[LinphoneManager] CansBase.wireCallManagerCore called — CallManager.lc is now set.");
+
+      // Drain any VoIP push callId that arrived before the core was ready.
+      if (_pendingVoIPCallId.length) {
+        NSString *pendingId = _pendingVoIPCallId;
+        _pendingVoIPCallId = nil;
+        NSLog(@"[LinphoneManager] createLinphoneCore: processing deferred VoIP push callId=%@", pendingId);
+        [self processPushNotification:pendingId];
+      }
     } else {
       NSLog(@"[LinphoneManager] FATAL ERROR: "
             @"linphone_factory_create_core_with_config returned NULL!");
@@ -1312,10 +1371,32 @@ static void linphone_iphone_popup_password_request(LinphoneCore *lc,
         return NO;
     }
     const bctbx_list_t *calls = linphone_core_get_calls(theLinphoneCore);
-    LinphoneCall *firstCall  = (LinphoneCall *)calls->data;
-    LinphoneCall *secondCall = (LinphoneCall *)calls->next->data;
-    NSLog(@"[LinphoneManager] transferCallAskFirst: attended transfer");
-    linphone_call_transfer_to_another(firstCall, secondCall);
+    LinphoneCall *call1 = (LinphoneCall *)calls->data;
+    LinphoneCall *call2 = (LinphoneCall *)calls->next->data;
+
+    // Identify which call is paused (original caller to transfer) and which is active
+    // (transfer target). linphone_call_transfer_to_another(pausedCall, activeCall)
+    // transfers the paused call to the active call's endpoint.
+    LinphoneCall *pausedCall = NULL;
+    LinphoneCall *activeCall = NULL;
+    LinphoneCallState state1 = linphone_call_get_state(call1);
+    LinphoneCallState state2 = linphone_call_get_state(call2);
+
+    if (state1 == LinphoneCallPaused || state1 == LinphoneCallPausedByRemote) {
+        pausedCall = call1;
+        activeCall = call2;
+    } else if (state2 == LinphoneCallPaused || state2 == LinphoneCallPausedByRemote) {
+        pausedCall = call2;
+        activeCall = call1;
+    } else {
+        // Fallback: treat the current call as active, the other as the one to transfer.
+        LinphoneCall *current = linphone_core_get_current_call(theLinphoneCore);
+        activeCall = current ? current : call1;
+        pausedCall = (activeCall == call1) ? call2 : call1;
+    }
+
+    NSLog(@"[LinphoneManager] transferCallAskFirst: attended transfer (pausedCall→activeCall)");
+    linphone_call_transfer_to_another(pausedCall, activeCall);
     return YES;
 }
 
@@ -3239,7 +3320,66 @@ static void linphone_iphone_info_received(LinphoneCore *lc, LinphoneCall *call, 
 
 
 
-// ── FCM Push Notification ─────────────────────────────────────────────────
+// ── Push Notification ────────────────────────────────────────────────────
+
++ (BOOL)isCallKitEnabled {
+#if !TARGET_OS_SIMULATOR
+    return theLinphoneCore
+        ? linphone_config_get_int(linphone_core_get_config(theLinphoneCore), "app", "use_callkit", 0) == 1
+        : NO;
+#else
+    return NO;
+#endif
+}
+
+- (void)injectVoIPToken:(NSString *)voipToken
+             forAccount:(LinphoneAccount *)account
+      completionHandler:(void (^)(BOOL))completion {
+  dispatch_async(dispatch_get_main_queue(), ^{
+    if (!theLinphoneCore || !voipToken.length) {
+      if (completion) completion(NO);
+      return;
+    }
+    LinphoneAccount *targetAcc = account ?: linphone_core_get_default_account(theLinphoneCore);
+    if (!targetAcc) {
+      NSLog(@"[LinphoneManager] injectVoIPToken: no account available");
+      if (completion) completion(NO);
+      return;
+    }
+
+    NSString *bundleId = [[NSBundle mainBundle] bundleIdentifier] ?: @"";
+    LinphoneAccountParams *params =
+        linphone_account_params_clone(linphone_account_get_params(targetAcc));
+
+    // Strip existing pn-* params, keep everything else (e.g. app-login-type=cans)
+    const char *existing = linphone_account_params_get_contact_uri_parameters(params);
+    NSString *existingStr = existing ? [NSString stringWithUTF8String:existing] : @"";
+    NSMutableArray *cleanParts = [NSMutableArray array];
+    for (NSString *part in [existingStr componentsSeparatedByString:@";"]) {
+      if (part.length > 0 && ![part hasPrefix:@"pn-"]) {
+        [cleanParts addObject:part];
+      }
+    }
+    NSString *prefix = cleanParts.count > 0
+        ? [[cleanParts componentsJoinedByString:@";"] stringByAppendingString:@";"]
+        : @"";
+
+    // APNs VoIP format: pn-param uses the .voip sub-bundle ID expected by the push server
+    NSString *voipBundleId = [NSString stringWithFormat:@"%@.voip", bundleId];
+    NSString *fullParams = [NSString stringWithFormat:
+        @"%@pn-provider=apns;pn-param=%@;pn-prid=%@",
+        prefix, voipBundleId, voipToken];
+
+    linphone_account_params_set_contact_uri_parameters(params, fullParams.UTF8String);
+    linphone_account_params_set_push_notification_allowed(params, NO);
+    linphone_account_set_params(targetAcc, params);
+    linphone_account_params_unref(params);
+    linphone_core_refresh_registers(theLinphoneCore);
+
+    NSLog(@"[LinphoneManager] VoIP token injected (pn-param=%@)", voipBundleId);
+    if (completion) completion(YES);
+  });
+}
 
 - (void)injectFCMToken:(NSString *)fcmToken
             forAccount:(LinphoneAccount *)account
@@ -3275,7 +3415,7 @@ static void linphone_iphone_info_received(LinphoneCore *lc, LinphoneCall *call, 
 
     // pn-timeout=60: gives FreeSWITCH 60 s to wait for re-registration after push wake-up.
     NSString *fullParams = [NSString stringWithFormat:
-        @"%@pn-provider=fcm;pn-param=%@;pn-prid=\"%@\";pn-timeout=60",
+        @"%@pn-provider=fcm;pn-param=%@;pn-prid=%@;pn-timeout=60",
         prefix, bundleId, fcmToken];
 
     linphone_account_params_set_contact_uri_parameters(params, fullParams.UTF8String);

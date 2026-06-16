@@ -176,10 +176,14 @@ extern NSString *const kCansCustomRegistrationEvent;
 - (void)setDefaultAccountSync:(NSInteger)index phoneNumber:(NSString *)phoneNumber;
 - (NSString *)updateCurrentLoginTypeFromAccount;
 
-// FCM Push Notification (replaces built-in Linphone push)
+// Push Notification
++ (BOOL)isCallKitEnabled;
 - (void)injectFCMToken:(NSString *)fcmToken
             forAccount:(nullable LinphoneAccount *)account
      completionHandler:(nullable void (^)(BOOL success))completion;
+- (void)injectVoIPToken:(NSString *)voipToken
+             forAccount:(nullable LinphoneAccount *)account
+      completionHandler:(nullable void (^)(BOOL success))completion;
 - (void)removeFCMTokenForAccount:(nullable LinphoneAccount *)account;
 - (void)processPushNotification:(NSString *)callId;
 

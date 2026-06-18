@@ -1954,12 +1954,12 @@ static void linphone_iphone_audio_devices_list_updated(LinphoneCore *lc) {
     return;
 
   NSLog(@"[LinphoneManager] makeVideoCall: %@", phoneNumber);
-  // Dispatch off the main thread — linphone_core_invite_address_with_params with video
-  // enabled internally calls [AVCaptureSession startRunning] which must not block the main thread.
+  // Dispatch on the main queue — linphone_core_iterate runs on the main thread via NSTimer;
+  // calling linphone_core_* from any other queue introduces races (core is not thread-safe).
   NSString *phoneCopy = [phoneNumber copy];
   LinphoneCore *lc = theLinphoneCore;
   NSString *frontName = [self frontCameraNameForLinphone];
-  dispatch_async(dispatch_get_global_queue(DISPATCH_QUEUE_PRIORITY_HIGH, 0), ^{
+  dispatch_async(dispatch_get_main_queue(), ^{
     if (frontName) {
       NSLog(@"[LinphoneManager] makeVideoCall: selecting front camera=%@", frontName);
       linphone_core_set_video_device(lc, [frontName UTF8String]);
@@ -2016,10 +2016,11 @@ static void linphone_iphone_audio_devices_list_updated(LinphoneCore *lc) {
     CansBase *cansBase = [CansBase new];
     [cansBase configureLinphoneAudioSession];
 
-    // Dispatch Linphone accept off the main thread — linphone_call_accept_with_params
+    // Dispatch on the main queue — linphone_core_iterate runs on the main thread via NSTimer;
+    // calling linphone_core_* / linphone_call_* from any other queue risks races (core is not thread-safe).
     LinphoneCall *callToAccept = currentCall;
     LinphoneCore *lc = theLinphoneCore;
-    dispatch_async(dispatch_get_global_queue(DISPATCH_QUEUE_PRIORITY_HIGH, 0), ^{
+    dispatch_async(dispatch_get_main_queue(), ^{
       LinphoneCallParams *params =
           linphone_core_create_call_params(lc, callToAccept);
       linphone_call_params_enable_video(params, TRUE);
@@ -3450,7 +3451,7 @@ static void linphone_iphone_info_received(LinphoneCore *lc, LinphoneCall *call, 
         characterSetWithCharactersInString:
             @"ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789-_.!~*'()"];
     NSString *encodedToken = [fcmToken
-        stringByAddingPercentEncodingWithAllowedCharacters:sipTokenChars];
+        stringByAddingPercentEncodingWithAllowedCharacters:sipTokenChars] ?: fcmToken;
     // pn-timeout=60: gives FreeSWITCH 60 s to wait for re-registration after push wake-up.
     NSString *fullParams = [NSString stringWithFormat:
         @"%@pn-provider=fcm;pn-param=%@;pn-prid=%@;pn-timeout=60",

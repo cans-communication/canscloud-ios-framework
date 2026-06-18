@@ -318,7 +318,18 @@ extension ProviderDelegate: CXProviderDelegate {
     }
 
     public func provider(_ provider: CXProvider, didDeactivate audioSession: AVAudioSession) {
-        NSLog("[ProviderDelegate] didDeactivate: signalling Linphone audio session inactive")
+        // Guard: when the foreground path reports a CK call and immediately dismisses it
+        // (endIncomingCallInCallKit), this fires asynchronously — potentially after the
+        // user has already answered the call via the RN IncomingCallScreen and audio is
+        // streaming. Deactivating here would silence the live call. Skip if any Linphone
+        // call is still active; LinphoneCallEnd/Error will clean up audio when the call ends.
+        let hasActiveCalls = (CallManager.instance().lc?.callsNb ?? 0) > 0
+        if hasActiveCalls {
+            NSLog("[ProviderDelegate] didDeactivate: ignoring — %d active Linphone call(s) in progress", CallManager.instance().lc?.callsNb ?? 0)
+            CallManager.instance().callkitAudioSessionActivated = nil
+            return
+        }
+        NSLog("[ProviderDelegate] didDeactivate: no active calls — deactivating Linphone audio session")
         CallManager.instance().lc?.activateAudioSession(activated: false)
         CallManager.instance().callkitAudioSessionActivated = nil
     }

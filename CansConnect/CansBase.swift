@@ -110,6 +110,33 @@ import linphonesw
     @objc public func acceptCall(call: OpaquePointer?, hasVideo:Bool) {
         CallManager.instance().acceptCall(call: call, hasVideo: hasVideo)
     }
+
+    /// Step 1 of the foreground-answer audio handoff: configure AVAudioSession
+    /// category/mode (.playAndRecord + .voiceChat) BEFORE accepting the call.
+    /// Called from LinphoneManager.m acceptCall / acceptVideoCall right after
+    /// stopForegroundRingtone deactivates the .playback session.
+    /// Does NOT start Linphone's audio unit — streams don't exist yet.
+    @objc public func configureLinphoneAudioSession() {
+        CallManager.instance().lc?.configureAudioSession()
+        NSLog("[CansBase] configureLinphoneAudioSession: AVAudioSession category/mode set (.playAndRecord + .voiceChat)")
+    }
+
+    /// Step 2 of the foreground-answer audio handoff: start Linphone's audio pipeline.
+    /// Must be called AFTER RTP streams exist (i.e. at or after StreamsRunning), not
+    /// before acceptWithParams. With use_callkit=1, activateAudioSession is a no-op
+    /// when called before streams are created; calling it here ensures effectiveness.
+    /// Also called redundantly by provider(_:didActivate:) in the background path —
+    /// calling it twice is idempotent and harmless.
+    @objc public func activateLinphoneAudioSession() {
+        CallManager.instance().lc?.activateAudioSession(activated: true)
+        NSLog("[CansBase] activateLinphoneAudioSession: audio pipeline activated (streams running)")
+    }
+
+    /// Legacy combined helper kept for callers that have not been updated.
+    @objc public func configureAndActivateAudioSession() {
+        configureLinphoneAudioSession()
+        activateLinphoneAudioSession()
+    }
     
     public func configureSwift() {
         // 🛑 temporary fix Bypass Problem App Group from Apple Developer

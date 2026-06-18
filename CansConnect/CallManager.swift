@@ -250,6 +250,12 @@ import AVFoundation
         let displayName: String? = nil
 
 		let lcallParams = try CallManager.instance().lc!.createCallParams(call: nil)
+		// Force audio-only for outgoing calls regardless of core video policy.
+		// automatically_initiate=TRUE in LinphoneManager's VideoActivationPolicy means
+		// createCallParams(call: nil) inherits videoEnabled=true from the core config.
+		// Video calls go through makeVideoCall → linphone_core_invite_address_with_params
+		// directly with explicit videoEnabled=TRUE; doCall is the audio-only path.
+		lcallParams.videoEnabled = false
 //		if ConfigManager.instance().lpConfigBoolForKey(key: "edge_opt_preference") && AppManager.network() == .network_2g {
 //			Log.directLog(BCTBX_LOG_MESSAGE, text: "Enabling low bandwidth mode")
 //			lcallParams.lowBandwidthEnabled = true
@@ -543,14 +549,17 @@ import AVFoundation
                     if (CallManager.callKitEnabled()) {
                         let uuid = CallManager.instance().providerDelegate.uuids[""]
                         if (uuid != nil) {
-                            let callInfo = CallManager.instance().providerDelegate.callInfos[uuid!]
-                            callInfo!.callId = callId!
-                            CallManager.instance().providerDelegate.callInfos.updateValue(callInfo!, forKey: uuid!)
-                            CallManager.instance().providerDelegate.uuids.removeValue(forKey: "")
-                            CallManager.instance().providerDelegate.uuids.updateValue(uuid!, forKey: callId!)
-
-//                            Log.directLog(BCTBX_LOG_MESSAGE, text: "CallKit: outgoing call started connecting with uuid \(uuid!) and callId \(callId!)")
-                            CallManager.instance().providerDelegate.reportOutgoingCallStartedConnecting(uuid: uuid!)
+                            // callId may be nil at OutgoingInit (SIP Call-ID not assigned until
+                            // the INVITE is sent at OutgoingProgress). Guard both to retry on
+                            // the next state transition instead of crashing.
+                            if let callInfo = CallManager.instance().providerDelegate.callInfos[uuid!],
+                               let resolvedCallId = callId {
+                                callInfo.callId = resolvedCallId
+                                CallManager.instance().providerDelegate.callInfos.updateValue(callInfo, forKey: uuid!)
+                                CallManager.instance().providerDelegate.uuids.removeValue(forKey: "")
+                                CallManager.instance().providerDelegate.uuids.updateValue(uuid!, forKey: resolvedCallId)
+                                CallManager.instance().providerDelegate.reportOutgoingCallStartedConnecting(uuid: uuid!)
+                            }
                         } else {
                             CallManager.instance().referedToCall = callId
                         }

@@ -254,7 +254,7 @@ static void linphone_iphone_chat_room_state_changed(LinphoneCore *lc, LinphoneCh
       LinphoneVideoActivationPolicy *videoPolicy =
           linphone_factory_create_video_activation_policy(factory);
       linphone_video_activation_policy_set_automatically_initiate(videoPolicy,
-                                                                  TRUE);
+                                                                  FALSE);
       linphone_video_activation_policy_set_automatically_accept(videoPolicy,
                                                                 TRUE);
       linphone_core_set_video_activation_policy(theLinphoneCore, videoPolicy);
@@ -646,18 +646,12 @@ static void linphone_iphone_popup_password_request(LinphoneCore *lc,
     return;
   }
 
-  char *addrStr = linphone_address_as_string(address);
-  ms_free(addrStr);
-
-  LinphoneCallParams *params =
-      linphone_core_create_call_params(theLinphoneCore, NULL);
-  linphone_call_params_enable_video(params, FALSE);
-
-  LinphoneCall *call = linphone_core_invite_address_with_params(
-      theLinphoneCore, address, params);
-
+  // Route through CallManager (via CansBase) so CallKit receives a CXStartCallAction.
+  // CallKit then fires provider(_:didActivate:audioSession:) → activateAudioSession(true).
+  // Without this, Linphone's audio pipeline never starts and the call is silent.
+  CansBase *cansBase = [CansBase new];
+  [cansBase startCallWithAddr:(void *)address isSas:NO];
   linphone_address_unref(address);
-  linphone_call_params_unref(params);
 }
 
 - (NSInteger)callsCount {
@@ -1490,6 +1484,18 @@ static void linphone_iphone_call_state(LinphoneCore *lc, LinphoneCall *call,
       }
   }
 
+  // Activate Linphone's audio pipeline at StreamsRunning — this is the earliest point
+  // where RTP streams actually exist. With use_callkit=1, activateAudioSession is a no-op
+  // when called before streams are created (e.g. in acceptCall before acceptWithParams).
+  // Calling it here is safe for all three paths:
+  //   • Foreground: didActivate never fires → this is the only activation → audio starts ✓
+  //   • Background CK (didActivate before StreamsRunning): redundant, idempotent ✓
+  //   • Background CK (didActivate after StreamsRunning): preemptive; didActivate is also fine ✓
+  if (state == LinphoneCallStreamsRunning) {
+      CansBase *cansBase = [CansBase new];
+      [cansBase activateLinphoneAudioSession];
+  }
+
   NSDictionary *dict = @{@"stateString" : stateStr, @"message" : msgStr};
 
   [[NSNotificationCenter defaultCenter]
@@ -1948,32 +1954,37 @@ static void linphone_iphone_audio_devices_list_updated(LinphoneCore *lc) {
     return;
 
   NSLog(@"[LinphoneManager] makeVideoCall: %@", phoneNumber);
-  // Select front camera before dialing — iOS Linphone defaults to back camera.
+  // Dispatch on the main queue — linphone_core_iterate runs on the main thread via NSTimer;
+  // calling linphone_core_* from any other queue introduces races (core is not thread-safe).
+  NSString *phoneCopy = [phoneNumber copy];
+  LinphoneCore *lc = theLinphoneCore;
   NSString *frontName = [self frontCameraNameForLinphone];
-  if (frontName) {
-    NSLog(@"[LinphoneManager] makeVideoCall: selecting front camera=%@", frontName);
-    linphone_core_set_video_device(theLinphoneCore, [frontName UTF8String]);
-  }
-  // Re-enable capture/display/preview in case a previous call left them disabled (background state).
-  linphone_core_enable_video_capture(theLinphoneCore, YES);
-  linphone_core_enable_video_display(theLinphoneCore, YES);
-  linphone_core_enable_video_preview(theLinphoneCore, YES);
-  linphone_core_enable_self_view(theLinphoneCore, YES);
+  dispatch_async(dispatch_get_main_queue(), ^{
+    if (frontName) {
+      NSLog(@"[LinphoneManager] makeVideoCall: selecting front camera=%@", frontName);
+      linphone_core_set_video_device(lc, [frontName UTF8String]);
+    }
+    // Re-enable capture/display/preview in case a previous call left them disabled (background state).
+    linphone_core_enable_video_capture(lc, YES);
+    linphone_core_enable_video_display(lc, YES);
+    linphone_core_enable_video_preview(lc, YES);
+    linphone_core_enable_self_view(lc, YES);
 
-  LinphoneAddress *addr =
-      linphone_core_interpret_url(theLinphoneCore, [phoneNumber UTF8String]);
-  if (!addr)
-    return;
+    LinphoneAddress *addr =
+        linphone_core_interpret_url(lc, [phoneCopy UTF8String]);
+    if (!addr)
+      return;
 
-  LinphoneCallParams *params =
-      linphone_core_create_call_params(theLinphoneCore, NULL);
-  linphone_call_params_enable_video(params, TRUE);
-  linphone_call_params_enable_audio(params, TRUE);
+    LinphoneCallParams *params =
+        linphone_core_create_call_params(lc, NULL);
+    linphone_call_params_enable_video(params, TRUE);
+    linphone_call_params_enable_audio(params, TRUE);
 
-  linphone_core_invite_address_with_params(theLinphoneCore, addr, params);
+    linphone_core_invite_address_with_params(lc, addr, params);
 
-  linphone_address_unref(addr);
-  linphone_call_params_unref(params);
+    linphone_address_unref(addr);
+    linphone_call_params_unref(params);
+  });
 }
 
 - (void)acceptVideoCall {
@@ -1997,11 +2008,25 @@ static void linphone_iphone_audio_devices_list_updated(LinphoneCore *lc) {
   }
 
   if (currentCall) {
-    LinphoneCallParams *params =
-        linphone_core_create_call_params(theLinphoneCore, currentCall);
-    linphone_call_params_enable_video(params, TRUE);
-    linphone_call_accept_with_params(currentCall, params);
-    linphone_call_params_unref(params);
+    // Release the .playback ringtone session before Linphone reconfigures
+    [[NSNotificationCenter defaultCenter]
+        postNotificationName:@"CansCallAnsweredByUser"
+        object:nil];
+    // Configure AVAudioSession category/mode (.playAndRecord + .voiceChat)
+    CansBase *cansBase = [CansBase new];
+    [cansBase configureLinphoneAudioSession];
+
+    // Dispatch on the main queue — linphone_core_iterate runs on the main thread via NSTimer;
+    // calling linphone_core_* / linphone_call_* from any other queue risks races (core is not thread-safe).
+    LinphoneCall *callToAccept = currentCall;
+    LinphoneCore *lc = theLinphoneCore;
+    dispatch_async(dispatch_get_main_queue(), ^{
+      LinphoneCallParams *params =
+          linphone_core_create_call_params(lc, callToAccept);
+      linphone_call_params_enable_video(params, TRUE);
+      linphone_call_accept_with_params(callToAccept, params);
+      linphone_call_params_unref(params);
+    });
   }
 }
 
@@ -2032,7 +2057,7 @@ static void linphone_iphone_audio_devices_list_updated(LinphoneCore *lc) {
 }
 
 - (void)acceptCall {
-  NSLog(@"[LinphoneManager][VideoCall] acceptCall called");
+  NSLog(@"[LinphoneManager] acceptCall called (foreground path)");
   if (!theLinphoneCore)
     return;
 
@@ -2045,12 +2070,18 @@ static void linphone_iphone_audio_devices_list_updated(LinphoneCore *lc) {
   }
 
   if (currentCall) {
+    // Release the .playback ringtone session before Linphone reconfigures
+    [[NSNotificationCenter defaultCenter]
+        postNotificationName:@"CansCallAnsweredByUser"
+        object:nil];
+    // Configure AVAudioSession category/mode (.playAndRecord + .voiceChat) now —
+    CansBase *cansBase = [CansBase new];
+    [cansBase configureLinphoneAudioSession];
+
     LinphoneCallParams *params =
         linphone_core_create_call_params(theLinphoneCore, currentCall);
-
     linphone_call_params_enable_video(params, FALSE);
     linphone_call_accept_with_params(currentCall, params);
-
     linphone_call_params_unref(params);
   }
 }
@@ -3413,10 +3444,18 @@ static void linphone_iphone_info_received(LinphoneCore *lc, LinphoneCall *call, 
         ? [[cleanParts componentsJoinedByString:@";"] stringByAppendingString:@";"]
         : @"";
 
+    // Percent-encode the FCM token so ':' (and other SIP-special chars) don't cause
+    // the Linphone SIP stack to wrap the value in SIP double-quotes.  When quoted,
+    // FreeSWITCH passes the literal '"token"' string to FCM → delivery fails.
+    NSCharacterSet *sipTokenChars = [NSCharacterSet
+        characterSetWithCharactersInString:
+            @"ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789-_.!~*'()"];
+    NSString *encodedToken = [fcmToken
+        stringByAddingPercentEncodingWithAllowedCharacters:sipTokenChars] ?: fcmToken;
     // pn-timeout=60: gives FreeSWITCH 60 s to wait for re-registration after push wake-up.
     NSString *fullParams = [NSString stringWithFormat:
         @"%@pn-provider=fcm;pn-param=%@;pn-prid=%@;pn-timeout=60",
-        prefix, bundleId, fcmToken];
+        prefix, bundleId, encodedToken];
 
     linphone_account_params_set_contact_uri_parameters(params, fullParams.UTF8String);
     linphone_account_params_set_push_notification_allowed(params, NO); // disable built-in push

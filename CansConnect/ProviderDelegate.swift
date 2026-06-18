@@ -216,6 +216,12 @@ extension ProviderDelegate: CXProviderDelegate {
             return
         }
 
+        // Stop the foreground ringtone before reconfiguring the audio session.
+        // This fires when the user answers via either the native CallKit banner or
+        // the RN IncomingCallScreen (NativeModuleiOS.answer also posts this, but
+        // posting twice is idempotent — stopForegroundRingtone is a no-op if not ringing).
+        NotificationCenter.default.post(name: NSNotification.Name("CansCallAnsweredByUser"), object: nil)
+
         if UIApplication.shared.applicationState != .active {
             CallManager.instance().backgroundContextCall = call
             CallManager.instance().backgroundContextCameraIsEnabled = call.params?.videoEnabled ?? false
@@ -318,7 +324,16 @@ extension ProviderDelegate: CXProviderDelegate {
     }
 
     public func provider(_ provider: CXProvider, didDeactivate audioSession: AVAudioSession) {
-        NSLog("[ProviderDelegate] didDeactivate: signalling Linphone audio session inactive")
+        // Guard: didDeactivate can be triggered for unrelated reasons (e.g. another audio
+        // client briefly claiming the session). If any Linphone call is still active, skip
+        // deactivation — the audio pipeline must stay live until the call ends.
+        let activeCalls = CallManager.instance().lc?.callsNb ?? 0
+        if activeCalls > 0 {
+            NSLog("[ProviderDelegate] didDeactivate: ignoring — %ld active Linphone call(s) in progress", activeCalls)
+            CallManager.instance().callkitAudioSessionActivated = nil
+            return
+        }
+        NSLog("[ProviderDelegate] didDeactivate: no active calls — deactivating Linphone audio session")
         CallManager.instance().lc?.activateAudioSession(activated: false)
         CallManager.instance().callkitAudioSessionActivated = nil
     }

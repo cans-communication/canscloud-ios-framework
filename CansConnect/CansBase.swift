@@ -6,6 +6,7 @@
 //
 
 import Foundation
+import CallKit
 import linphonesw
 
 @objc public class CansBase: NSObject {
@@ -109,6 +110,65 @@ import linphonesw
     
     @objc public func acceptCall(call: OpaquePointer?, hasVideo:Bool) {
         CallManager.instance().acceptCall(call: call, hasVideo: hasVideo)
+    }
+
+    /// Step 1 of the foreground-answer audio handoff: configure AVAudioSession
+    /// category/mode (.playAndRecord + .voiceChat) BEFORE accepting the call.
+    /// Called from LinphoneManager.m acceptCall / acceptVideoCall right after
+    /// stopForegroundRingtone deactivates the .playback session.
+    /// Does NOT start Linphone's audio unit — streams don't exist yet.
+    @objc public func configureLinphoneAudioSession() {
+        CallManager.instance().lc?.configureAudioSession()
+        NSLog("[CansBase] configureLinphoneAudioSession: AVAudioSession category/mode set (.playAndRecord + .voiceChat)")
+    }
+
+    /// Step 2 of the foreground-answer audio handoff: start Linphone's audio pipeline.
+    /// Must be called AFTER RTP streams exist (i.e. at or after StreamsRunning), not
+    /// before acceptWithParams. With use_callkit=1, activateAudioSession is a no-op
+    /// when called before streams are created; calling it here ensures effectiveness.
+    /// Also called redundantly by provider(_:didActivate:) in the background path —
+    /// calling it twice is idempotent and harmless.
+    @objc public func activateLinphoneAudioSession() {
+        CallManager.instance().lc?.activateAudioSession(activated: true)
+        NSLog("[CansBase] activateLinphoneAudioSession: audio pipeline activated (streams running)")
+    }
+
+    /// Legacy combined helper kept for callers that have not been updated.
+    @objc public func configureAndActivateAudioSession() {
+        configureLinphoneAudioSession()
+        activateLinphoneAudioSession()
+    }
+
+    /// Routes the current incoming call through CXAnswerCallAction if CallKit has a
+    /// registered UUID for it. Returns true when the request was submitted; iOS will
+    /// activate the audio session via provider(_:didActivate:audioSession:) — the
+    /// "blessed" VoIP audio path. Returns false when no UUID is registered (direct-SIP
+    /// foreground path — caller should fall back to acceptCall directly).
+    ///
+    /// Call this from NativeModuleiOS.answer AFTER posting CansCallAnsweredByUser
+    /// (to release the .playback ringtone session) and BEFORE any manual audio setup.
+    @objc public func requestAnswerCurrentCallViaCallKit() -> Bool {
+        guard let lc = CallManager.instance().lc else { return false }
+        guard let call = lc.calls.first(where: {
+            $0.state == .IncomingReceived || $0.state == .IncomingEarlyMedia
+        }) else { return false }
+
+        // Look up the CallKit UUID by SIP call-id. The push-wakeup path may have
+        // registered the UUID under the empty-string placeholder before the INVITE
+        // arrived — check that too.
+        let callId = call.callLog?.callId ?? ""
+        let uuid = CallManager.instance().providerDelegate?.uuids[callId]
+               ?? CallManager.instance().providerDelegate?.uuids[""]
+
+        guard let uuid = uuid else {
+            NSLog("[CansBase] requestAnswerCurrentCallViaCallKit: no CallKit UUID for callId=%@ — returning false", callId)
+            return false
+        }
+
+        let transaction = CXTransaction(action: CXAnswerCallAction(call: uuid))
+        CallManager.instance().requestTransaction(transaction, action: "answer")
+        NSLog("[CansBase] requestAnswerCurrentCallViaCallKit: CXAnswerCallAction requested for uuid=%@", uuid.uuidString)
+        return true
     }
     
     public func configureSwift() {

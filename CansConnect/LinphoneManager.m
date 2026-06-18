@@ -3443,10 +3443,18 @@ static void linphone_iphone_info_received(LinphoneCore *lc, LinphoneCall *call, 
         ? [[cleanParts componentsJoinedByString:@";"] stringByAppendingString:@";"]
         : @"";
 
+    // Percent-encode the FCM token so ':' (and other SIP-special chars) don't cause
+    // the Linphone SIP stack to wrap the value in SIP double-quotes.  When quoted,
+    // FreeSWITCH passes the literal '"token"' string to FCM → delivery fails.
+    NSCharacterSet *sipTokenChars = [NSCharacterSet
+        characterSetWithCharactersInString:
+            @"ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789-_.!~*'()"];
+    NSString *encodedToken = [fcmToken
+        stringByAddingPercentEncodingWithAllowedCharacters:sipTokenChars];
     // pn-timeout=60: gives FreeSWITCH 60 s to wait for re-registration after push wake-up.
     NSString *fullParams = [NSString stringWithFormat:
         @"%@pn-provider=fcm;pn-param=%@;pn-prid=%@;pn-timeout=60",
-        prefix, bundleId, fcmToken];
+        prefix, bundleId, encodedToken];
 
     linphone_account_params_set_contact_uri_parameters(params, fullParams.UTF8String);
     linphone_account_params_set_push_notification_allowed(params, NO); // disable built-in push

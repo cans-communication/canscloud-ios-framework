@@ -1954,32 +1954,37 @@ static void linphone_iphone_audio_devices_list_updated(LinphoneCore *lc) {
     return;
 
   NSLog(@"[LinphoneManager] makeVideoCall: %@", phoneNumber);
-  // Select front camera before dialing — iOS Linphone defaults to back camera.
+  // Dispatch off the main thread — linphone_core_invite_address_with_params with video
+  // enabled internally calls [AVCaptureSession startRunning] which must not block the main thread.
+  NSString *phoneCopy = [phoneNumber copy];
+  LinphoneCore *lc = theLinphoneCore;
   NSString *frontName = [self frontCameraNameForLinphone];
-  if (frontName) {
-    NSLog(@"[LinphoneManager] makeVideoCall: selecting front camera=%@", frontName);
-    linphone_core_set_video_device(theLinphoneCore, [frontName UTF8String]);
-  }
-  // Re-enable capture/display/preview in case a previous call left them disabled (background state).
-  linphone_core_enable_video_capture(theLinphoneCore, YES);
-  linphone_core_enable_video_display(theLinphoneCore, YES);
-  linphone_core_enable_video_preview(theLinphoneCore, YES);
-  linphone_core_enable_self_view(theLinphoneCore, YES);
+  dispatch_async(dispatch_get_global_queue(DISPATCH_QUEUE_PRIORITY_HIGH, 0), ^{
+    if (frontName) {
+      NSLog(@"[LinphoneManager] makeVideoCall: selecting front camera=%@", frontName);
+      linphone_core_set_video_device(lc, [frontName UTF8String]);
+    }
+    // Re-enable capture/display/preview in case a previous call left them disabled (background state).
+    linphone_core_enable_video_capture(lc, YES);
+    linphone_core_enable_video_display(lc, YES);
+    linphone_core_enable_video_preview(lc, YES);
+    linphone_core_enable_self_view(lc, YES);
 
-  LinphoneAddress *addr =
-      linphone_core_interpret_url(theLinphoneCore, [phoneNumber UTF8String]);
-  if (!addr)
-    return;
+    LinphoneAddress *addr =
+        linphone_core_interpret_url(lc, [phoneCopy UTF8String]);
+    if (!addr)
+      return;
 
-  LinphoneCallParams *params =
-      linphone_core_create_call_params(theLinphoneCore, NULL);
-  linphone_call_params_enable_video(params, TRUE);
-  linphone_call_params_enable_audio(params, TRUE);
+    LinphoneCallParams *params =
+        linphone_core_create_call_params(lc, NULL);
+    linphone_call_params_enable_video(params, TRUE);
+    linphone_call_params_enable_audio(params, TRUE);
 
-  linphone_core_invite_address_with_params(theLinphoneCore, addr, params);
+    linphone_core_invite_address_with_params(lc, addr, params);
 
-  linphone_address_unref(addr);
-  linphone_call_params_unref(params);
+    linphone_address_unref(addr);
+    linphone_call_params_unref(params);
+  });
 }
 
 - (void)acceptVideoCall {
@@ -2003,24 +2008,24 @@ static void linphone_iphone_audio_devices_list_updated(LinphoneCore *lc) {
   }
 
   if (currentCall) {
-    // (1) Release the .playback ringtone session before Linphone reconfigures to
-    //     .playAndRecord + .voiceChat. AppDelegate observes CansCallAnsweredByUser
-    //     and calls stopForegroundRingtone → setActive(false) synchronously.
+    // Release the .playback ringtone session before Linphone reconfigures
     [[NSNotificationCenter defaultCenter]
         postNotificationName:@"CansCallAnsweredByUser"
         object:nil];
-    // (2) Configure AVAudioSession category/mode (.playAndRecord + .voiceChat) now —
-    //     BEFORE acceptWithParams so iOS grants the correct audio route.
-    //     Do NOT call activateAudioSession here: with use_callkit=1 it is a no-op
-    //     until RTP streams exist. Activation happens at StreamsRunning instead.
+    // Configure AVAudioSession category/mode (.playAndRecord + .voiceChat)
     CansBase *cansBase = [CansBase new];
     [cansBase configureLinphoneAudioSession];
 
-    LinphoneCallParams *params =
-        linphone_core_create_call_params(theLinphoneCore, currentCall);
-    linphone_call_params_enable_video(params, TRUE);
-    linphone_call_accept_with_params(currentCall, params);
-    linphone_call_params_unref(params);
+    // Dispatch Linphone accept off the main thread — linphone_call_accept_with_params
+    LinphoneCall *callToAccept = currentCall;
+    LinphoneCore *lc = theLinphoneCore;
+    dispatch_async(dispatch_get_global_queue(DISPATCH_QUEUE_PRIORITY_HIGH, 0), ^{
+      LinphoneCallParams *params =
+          linphone_core_create_call_params(lc, callToAccept);
+      linphone_call_params_enable_video(params, TRUE);
+      linphone_call_accept_with_params(callToAccept, params);
+      linphone_call_params_unref(params);
+    });
   }
 }
 
@@ -2064,16 +2069,11 @@ static void linphone_iphone_audio_devices_list_updated(LinphoneCore *lc) {
   }
 
   if (currentCall) {
-    // (1) Release the .playback ringtone session before Linphone reconfigures to
-    //     .playAndRecord + .voiceChat. AppDelegate observes CansCallAnsweredByUser
-    //     and calls stopForegroundRingtone → setActive(false) synchronously.
+    // Release the .playback ringtone session before Linphone reconfigures
     [[NSNotificationCenter defaultCenter]
         postNotificationName:@"CansCallAnsweredByUser"
         object:nil];
-    // (2) Configure AVAudioSession category/mode (.playAndRecord + .voiceChat) now —
-    //     BEFORE acceptWithParams so iOS grants the correct audio route.
-    //     Do NOT call activateAudioSession here: with use_callkit=1 it is a no-op
-    //     until RTP streams exist. Activation happens at StreamsRunning instead.
+    // Configure AVAudioSession category/mode (.playAndRecord + .voiceChat) now —
     CansBase *cansBase = [CansBase new];
     [cansBase configureLinphoneAudioSession];
 

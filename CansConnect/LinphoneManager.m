@@ -264,11 +264,12 @@ static void linphone_iphone_chat_room_state_changed(LinphoneCore *lc, LinphoneCh
       // Keep alive is essential for background stability
       linphone_core_enable_keep_alive(theLinphoneCore, true);
 
-      // Ghost-call prevention: if no RTP media is received for 20 seconds,
+      // Ghost-call prevention: if no RTP media is received for this many seconds,
       // Linphone terminates the call with LinphoneCallError. Without this, Device B
       // stays frozen indefinitely when Device A loses its network mid-call.
-      linphone_core_set_nortp_timeout(theLinphoneCore, 20);
-      NSLog(@"[LinphoneManager] nortp_timeout set to 20s — ghost call protection active.");
+      int nortpTimeout = linphone_config_get_int(linphone_core_get_config(theLinphoneCore), "rtp", "nortp_timeout", 20);
+      linphone_core_set_nortp_timeout(theLinphoneCore, nortpTimeout);
+      NSLog(@"[LinphoneManager] nortp_timeout set to %ds — ghost call protection active.", nortpTimeout);
 
       // Session timers (RFC 4028): re-negotiation every 200 s keeps the signaling
       // path alive and lets both sides detect a dead peer via re-INVITE failure,

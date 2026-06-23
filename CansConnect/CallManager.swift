@@ -489,6 +489,17 @@ import AVFoundation
                           remoteParams?.videoDirection.rawValue ?? -1,
                           video ? 1 : 0,
                           displayName)
+                    // Busy-decline: reject second incoming call if a call is already active.
+                    // `max_calls=1` (set in LinphoneManager.createLinphoneCore) handles this at the SIP level (auto 486),
+                    // but add an explicit guard here as belt-and-suspenders.
+                    let otherActiveCalls = core.calls.filter { c in
+                        c !== call && c.state != .Released && c.state != .End && c.state != .Error
+                    }
+                    if !otherActiveCalls.isEmpty {
+                        NSLog("[CallManager] Busy-declining incoming call — \(otherActiveCalls.count) active call(s) exist")
+                        try? call.decline(reason: .Busy)
+                        return
+                    }
                     if (CallManager.callKitEnabled()) {
                         let uuid = CallManager.instance().providerDelegate.uuids["\(callId!)"]
                         if (uuid != nil) {

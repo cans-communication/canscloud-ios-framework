@@ -60,3 +60,7 @@ ringer_dev_id=AQ: Audio Queue Device
 
 [video]
 display_filter_auto_rotate=0
+
+[rtp]
+#Terminate call if no RTP packets received for this many seconds (ghost-call protection)
+nortp_timeout=20

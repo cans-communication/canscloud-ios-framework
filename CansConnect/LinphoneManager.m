@@ -264,6 +264,19 @@ static void linphone_iphone_chat_room_state_changed(LinphoneCore *lc, LinphoneCh
       // Keep alive is essential for background stability
       linphone_core_enable_keep_alive(theLinphoneCore, true);
 
+      // Ghost-call prevention: if no RTP media is received for 20 seconds,
+      // Linphone terminates the call with LinphoneCallError. Without this, Device B
+      // stays frozen indefinitely when Device A loses its network mid-call.
+      linphone_core_set_nortp_timeout(theLinphoneCore, 20);
+      NSLog(@"[LinphoneManager] nortp_timeout set to 20s — ghost call protection active.");
+
+      // Session timers (RFC 4028): re-negotiation every 200 s keeps the signaling
+      // path alive and lets both sides detect a dead peer via re-INVITE failure,
+      // providing a second layer of protection on top of RTP timeout.
+      linphone_core_set_session_expires_enabled(theLinphoneCore, TRUE);
+      linphone_core_set_session_expires_value(theLinphoneCore, 200);
+      linphone_core_set_session_expires_min_value(theLinphoneCore, 90);
+
       LinphoneCoreCbs *cbs = linphone_factory_create_core_cbs(factory);
       linphone_core_cbs_set_registration_state_changed(
           cbs, linphone_iphone_registration_state);
@@ -3395,10 +3408,11 @@ static void linphone_iphone_info_received(LinphoneCore *lc, LinphoneCall *call, 
         ? [[cleanParts componentsJoinedByString:@";"] stringByAppendingString:@";"]
         : @"";
 
-    // APNs VoIP format: pn-param uses the .voip sub-bundle ID expected by the push server
+    // APNs VoIP format: pn-param uses the .voip sub-bundle ID expected by the push server.
+    // pn-timeout=60: gives FreeSWITCH 60 s to wait for re-registration after VoIP push wake-up.
     NSString *voipBundleId = [NSString stringWithFormat:@"%@.voip", bundleId];
     NSString *fullParams = [NSString stringWithFormat:
-        @"%@pn-provider=apns;pn-param=%@;pn-prid=%@",
+        @"%@pn-provider=apns;pn-param=%@;pn-prid=%@;pn-timeout=60",
         prefix, voipBundleId, voipToken];
 
     linphone_account_params_set_contact_uri_parameters(params, fullParams.UTF8String);
@@ -3431,9 +3445,19 @@ static void linphone_iphone_info_received(LinphoneCore *lc, LinphoneCall *call, 
     LinphoneAccountParams *params =
         linphone_account_params_clone(linphone_account_get_params(targetAcc));
 
-    // Strip existing pn-* params, keep everything else (e.g. app-login-type=cans)
     const char *existing = linphone_account_params_get_contact_uri_parameters(params);
     NSString *existingStr = existing ? [NSString stringWithUTF8String:existing] : @"";
+
+    // VoIP APNs must remain the active push channel — it is the only mechanism that can
+    // wake a force-killed app. If it is already set, skip FCM overwrite entirely.
+    if ([existingStr containsString:@"pn-provider=apns"]) {
+      NSLog(@"[LinphoneManager] injectFCMToken: VoIP APNs already registered — skipping FCM overwrite");
+      linphone_account_params_unref(params);
+      if (completion) completion(NO);
+      return;
+    }
+
+    // Strip existing pn-* params, keep everything else (e.g. app-login-type=cans)
     NSMutableArray *cleanParts = [NSMutableArray array];
     for (NSString *part in [existingStr componentsSeparatedByString:@";"]) {
       if (part.length > 0 && ![part hasPrefix:@"pn-"]) {

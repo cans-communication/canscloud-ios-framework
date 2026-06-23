@@ -3409,9 +3409,14 @@ static void linphone_iphone_info_received(LinphoneCore *lc, LinphoneCall *call, 
         ? [[cleanParts componentsJoinedByString:@";"] stringByAppendingString:@";"]
         : @"";
 
-    // APNs VoIP format: pn-param uses the .voip sub-bundle ID expected by the push server.
-    // pn-timeout=60: gives FreeSWITCH 60 s to wait for re-registration after VoIP push wake-up.
-    NSString *voipBundleId = [NSString stringWithFormat:@"%@.voip", bundleId];
+    // APNs VoIP format: pn-param must match Flexisip's configured push client ID.
+    // Flexisip registers separate clients for sandbox (*.voip.dev) and production (*.voip.prod).
+    // pn-timeout=60: gives Flexisip 60 s to wait for re-registration after VoIP push wake-up.
+#if DEBUG
+    NSString *voipBundleId = [NSString stringWithFormat:@"%@.voip.dev", bundleId];
+#else
+    NSString *voipBundleId = [NSString stringWithFormat:@"%@.voip.prod", bundleId];
+#endif
     NSString *fullParams = [NSString stringWithFormat:
         @"%@pn-provider=apns;pn-param=%@;pn-prid=%@;pn-timeout=60",
         prefix, voipBundleId, voipToken];

@@ -3414,11 +3414,7 @@ static void linphone_iphone_info_received(LinphoneCore *lc, LinphoneCall *call, 
     // DEBUG sends to sandbox push client (.voip.dev); Release sends to production (.voip).
     NSString *teamId = @"N27H9XFR3R";
     NSString *services = @"remote&voip";
-#if DEBUG
-    NSString *voipBundleId = [NSString stringWithFormat:@"%@.voip.dev", bundleId];
-#else
-    NSString *voipBundleId = [NSString stringWithFormat:@"%@.voip", bundleId];
-#endif
+    NSString *voipBundleId = bundleId;
     NSString *pnPrid = [NSString stringWithFormat:@"%@:remote&%@:voip", voipToken, voipToken];
 #if DEBUG
     NSString *pnProvider = @"apns.dev";

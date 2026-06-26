@@ -1733,6 +1733,7 @@ static void linphone_iphone_audio_devices_list_updated(LinphoneCore *lc) {
       [NSString stringWithFormat:@"sip:%@@%@", extension, realm];
   LinphoneAddress *identity = linphone_address_new(identityStr.UTF8String);
   if (identity) {
+    linphone_address_set_port(identity, (int)[port integerValue]);
     linphone_account_params_set_identity_address(params, identity);
   }
 

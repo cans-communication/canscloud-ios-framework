@@ -1706,7 +1706,7 @@ static void linphone_iphone_audio_devices_list_updated(LinphoneCore *lc) {
                      forKey:[NSString stringWithFormat:@"com.canscloud.domainUUID.%@", sipAddress]];
 
               dispatch_async(dispatch_get_main_queue(), ^{
-                [self setupLinphoneWithExtension:ext ha1:sipCredsHA1 domain:domainName port:@"8446" transport:@"tcp"];
+                [self setupLinphoneWithExtension:ext ha1:sipCredsHA1 domain:domainName port:@"8444" transport:@"tcp"];
               });
             }] resume];
       }] resume];

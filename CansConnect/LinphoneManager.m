@@ -3411,12 +3411,12 @@ static void linphone_iphone_info_received(LinphoneCore *lc, LinphoneCall *call, 
         : @"";
 
     // pn-param format: {teamId}.{voipBundleId}.{services}
-    // pn-prid format:  {token}:remote&{token}:voip  (using VoIP token for both until remote token plumbing is added)
+    // pn-prid format:  {token}:voip  (voip-only until remote-notification token is plumbed through)
     // DEBUG sends to sandbox push client (.voip.dev); Release sends to production (.voip).
-    NSString *teamId = @"N27H9XFR3R";
-    NSString *services = @"remote&voip";
+    NSString *teamId = [[NSBundle mainBundle] objectForInfoDictionaryKey:@"CansAPNSTeamId"] ?: @"N27H9XFR3R";
+    NSString *services = @"voip";
     NSString *voipBundleId = bundleId;
-    NSString *pnPrid = [NSString stringWithFormat:@"%@:remote&%@:voip", voipToken, voipToken];
+    NSString *pnPrid = voipToken;
 #if DEBUG
     NSString *pnProvider = @"apns.dev";
 #else

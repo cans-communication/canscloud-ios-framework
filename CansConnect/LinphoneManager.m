@@ -398,11 +398,11 @@ static void linphone_iphone_chat_room_state_changed(LinphoneCore *lc, LinphoneCh
       const char *cp = linphone_account_params_get_contact_uri_parameters(
           linphone_account_get_params(acc));
       NSString *cpStr = cp ? [NSString stringWithUTF8String:cp] : @"";
-      NSString *bundleId = [[NSBundle mainBundle] bundleIdentifier] ?: @"";
-      BOOL hasPushParam = [cpStr containsString:
-          [NSString stringWithFormat:@"pn-param=%@", bundleId]];
-      if (!hasPushParam) {
-        NSLog(@"[LinphoneManager] Registration OK — pn-param missing, requesting FCM injection");
+      // "pn-provider=apns" is the reliable indicator that VoIP APNs push is registered.
+      // Do NOT check "pn-param=<bundleId>" — the actual pn-param includes the Apple Team ID
+      BOOL hasVoIPAPNs = [cpStr containsString:@"pn-provider=apns"];
+      if (!hasVoIPAPNs) {
+        NSLog(@"[LinphoneManager] Registration OK — VoIP APNs push not set, requesting FCM injection");
         dispatch_async(dispatch_get_main_queue(), ^{
           [[NSNotificationCenter defaultCenter]
               postNotificationName:@"CansInjectFCMToken"
@@ -3409,17 +3409,25 @@ static void linphone_iphone_info_received(LinphoneCore *lc, LinphoneCall *call, 
         ? [[cleanParts componentsJoinedByString:@";"] stringByAppendingString:@";"]
         : @"";
 
-    // APNs VoIP format: pn-param must match Flexisip's configured push client ID.
-    // Flexisip registers separate clients for sandbox (*.voip.dev) and production (*.voip.prod).
-    // pn-timeout=60: gives Flexisip 60 s to wait for re-registration after VoIP push wake-up.
+    // pn-param format: {teamId}.{voipBundleId}.{services}
+    // pn-prid format:  {token}:remote&{token}:voip  (using VoIP token for both until remote token plumbing is added)
+    // DEBUG sends to sandbox push client (.voip.dev); Release sends to production (.voip).
+    NSString *teamId = @"N27H9XFR3R";
+    NSString *services = @"remote&voip";
 #if DEBUG
     NSString *voipBundleId = [NSString stringWithFormat:@"%@.voip.dev", bundleId];
 #else
-    NSString *voipBundleId = [NSString stringWithFormat:@"%@.voip.prod", bundleId];
+    NSString *voipBundleId = [NSString stringWithFormat:@"%@.voip", bundleId];
+#endif
+    NSString *pnPrid = [NSString stringWithFormat:@"%@:remote&%@:voip", voipToken, voipToken];
+#if DEBUG
+    NSString *pnProvider = @"apns.dev";
+#else
+    NSString *pnProvider = @"apns";
 #endif
     NSString *fullParams = [NSString stringWithFormat:
-        @"%@pn-provider=apns;pn-param=%@;pn-prid=%@;pn-timeout=60",
-        prefix, voipBundleId, voipToken];
+        @"%@pn-provider=%@;pn-param=%@.%@.%@;pn-prid=%@;pn-timeout=0",
+        prefix, pnProvider, teamId, voipBundleId, services, pnPrid];
 
     linphone_account_params_set_contact_uri_parameters(params, fullParams.UTF8String);
     linphone_account_params_set_push_notification_allowed(params, NO);
@@ -3427,7 +3435,7 @@ static void linphone_iphone_info_received(LinphoneCore *lc, LinphoneCall *call, 
     linphone_account_params_unref(params);
     linphone_core_refresh_registers(theLinphoneCore);
 
-    NSLog(@"[LinphoneManager] VoIP token injected (pn-param=%@)", voipBundleId);
+    NSLog(@"[LinphoneManager] VoIP token injected — pn-param=%@.%@.%@", teamId, voipBundleId, services);
     if (completion) completion(YES);
   });
 }

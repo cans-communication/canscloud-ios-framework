@@ -2236,11 +2236,13 @@ static void linphone_iphone_audio_devices_list_updated(LinphoneCore *lc) {
 
 - (void)sendTextMessage:(NSString *)peerUri text:(NSString *)text requestId:(NSString *)requestId {
     if (!theLinphoneCore) return;
-    LinphoneAddress *addr = linphone_core_interpret_url(theLinphoneCore, peerUri.UTF8String);
-    if (!addr) return;
 
-    LinphoneChatRoom *room = linphone_core_get_chat_room(theLinphoneCore, addr);
-    linphone_address_unref(addr);
+    // Use the account-aware helper (same one getChatHistoryJSON uses) so the ChatRoom
+    // is always bound to the default account's identity/contact. The single-arg
+    // linphone_core_get_chat_room(addr) can return a DB-restored room with no
+    // account association, causing the outbound proxy to receive a MESSAGE with no
+    // Contact header and an R-URI missing the proxy port — proxy drops it silently.
+    LinphoneChatRoom *room = [self getOrCreateSpecificChatRoom:peerUri];
 
     if (!room) {
         // Mirror Android waitForRoomCreated failure path — emit NotDelivered so JS
@@ -2277,11 +2279,9 @@ static void linphone_iphone_audio_devices_list_updated(LinphoneCore *lc) {
 
 - (void)sendImageMessage:(NSString *)peerUri filePath:(NSString *)filePath requestId:(NSString *)requestId {
     if (!theLinphoneCore) return;
-    LinphoneAddress *addr = linphone_core_interpret_url(theLinphoneCore, peerUri.UTF8String);
-    if (!addr) return;
 
-    LinphoneChatRoom *room = linphone_core_get_chat_room(theLinphoneCore, addr);
-    linphone_address_unref(addr);
+    // See sendTextMessage above for the reason we route through getOrCreateSpecificChatRoom.
+    LinphoneChatRoom *room = [self getOrCreateSpecificChatRoom:peerUri];
 
     if (!room) {
         // Mirror Android waitForRoomCreated failure path — emit NotDelivered.
@@ -2534,8 +2534,10 @@ static void linphone_iphone_chat_room_state_changed(LinphoneCore *lc,
     const char *localUserC = linphone_address_get_username(localAddr);
     NSString *targetPeer  = peerUserC  ? [NSString stringWithUTF8String:peerUserC]  : @"";
     NSString *targetLocal = localUserC ? [NSString stringWithUTF8String:localUserC] : @"";
+#if DEBUG
     NSLog(@"[LinphoneManager] getOrCreateSpecificChatRoom: peer=%s local=%s peerUser=%@ localUser=%@",
           peerStr ?: "?", localStr ?: "?", targetPeer, targetLocal);
+#endif
     if (peerStr) ms_free(peerStr);
     if (localStr) ms_free(localStr);
 
@@ -2564,7 +2566,9 @@ static void linphone_iphone_chat_room_state_changed(LinphoneCore *lc,
                 break;
             }
         }
+#if DEBUG
         NSLog(@"[LinphoneManager] getOrCreateSpecificChatRoom: stage0=%p", room);
+#endif
     }
 
 #pragma clang diagnostic push
@@ -2572,7 +2576,9 @@ static void linphone_iphone_chat_room_state_changed(LinphoneCore *lc,
     // Stage 1: direct peer + local address lookup
     if (!room) {
         room = linphone_core_get_chat_room_2(theLinphoneCore, remoteAddr, localAddr);
+#if DEBUG
         NSLog(@"[LinphoneManager] getOrCreateSpecificChatRoom: stage1=%p", room);
+#endif
     }
 
     if (!room) {
@@ -2586,12 +2592,16 @@ static void linphone_iphone_chat_room_state_changed(LinphoneCore *lc,
             bctbx_list_free(participants);
             linphone_chat_room_params_unref(params);
         }
+#if DEBUG
         NSLog(@"[LinphoneManager] getOrCreateSpecificChatRoom: stage2=%p", room);
+#endif
     }
 
     if (!room) {
+#if DEBUG
         // Stage 3: create a new Basic chat room
         NSLog(@"[LinphoneManager] getOrCreateSpecificChatRoom: stage3 creating new room (no existing room found)");
+#endif
         LinphoneChatRoomParams *params = linphone_core_create_default_chat_room_params(theLinphoneCore);
         if (params) {
             linphone_chat_room_params_set_backend(params, LinphoneChatRoomBackendBasic);
@@ -2601,15 +2611,14 @@ static void linphone_iphone_chat_room_state_changed(LinphoneCore *lc,
             bctbx_list_free(participants);
             linphone_chat_room_params_unref(params);
         }
+#if DEBUG
         NSLog(@"[LinphoneManager] getOrCreateSpecificChatRoom: stage3=%p", room);
+#endif
     }
 #pragma clang diagnostic pop
 
     linphone_address_unref(remoteAddr);
 
-    if (room) {
-        linphone_chat_room_mark_as_read(room);
-    }
     return room;
 }
 
@@ -2624,7 +2633,9 @@ static void linphone_iphone_chat_room_state_changed(LinphoneCore *lc,
     NSMutableArray *messagesArray = [NSMutableArray array];
 
     if (room) {
-        // mark_as_read already called inside getOrCreateSpecificChatRoom
+        // Opening the chat detail screen is the read event; mark_as_read belongs here,
+        // not in the resolver (send paths must not clear unread as a side effect).
+        linphone_chat_room_mark_as_read(room);
 
         const bctbx_list_t *history = linphone_chat_room_get_history(room, 0);
         int historyCount = (int)bctbx_list_size(history);

@@ -2236,11 +2236,13 @@ static void linphone_iphone_audio_devices_list_updated(LinphoneCore *lc) {
 
 - (void)sendTextMessage:(NSString *)peerUri text:(NSString *)text requestId:(NSString *)requestId {
     if (!theLinphoneCore) return;
-    LinphoneAddress *addr = linphone_core_interpret_url(theLinphoneCore, peerUri.UTF8String);
-    if (!addr) return;
 
-    LinphoneChatRoom *room = linphone_core_get_chat_room(theLinphoneCore, addr);
-    linphone_address_unref(addr);
+    // Use the account-aware helper (same one getChatHistoryJSON uses) so the ChatRoom
+    // is always bound to the default account's identity/contact. The single-arg
+    // linphone_core_get_chat_room(addr) can return a DB-restored room with no
+    // account association, causing the outbound proxy to receive a MESSAGE with no
+    // Contact header and an R-URI missing the proxy port — proxy drops it silently.
+    LinphoneChatRoom *room = [self getOrCreateSpecificChatRoom:peerUri];
 
     if (!room) {
         // Mirror Android waitForRoomCreated failure path — emit NotDelivered so JS
@@ -2277,11 +2279,9 @@ static void linphone_iphone_audio_devices_list_updated(LinphoneCore *lc) {
 
 - (void)sendImageMessage:(NSString *)peerUri filePath:(NSString *)filePath requestId:(NSString *)requestId {
     if (!theLinphoneCore) return;
-    LinphoneAddress *addr = linphone_core_interpret_url(theLinphoneCore, peerUri.UTF8String);
-    if (!addr) return;
 
-    LinphoneChatRoom *room = linphone_core_get_chat_room(theLinphoneCore, addr);
-    linphone_address_unref(addr);
+    // See sendTextMessage above for the reason we route through getOrCreateSpecificChatRoom.
+    LinphoneChatRoom *room = [self getOrCreateSpecificChatRoom:peerUri];
 
     if (!room) {
         // Mirror Android waitForRoomCreated failure path — emit NotDelivered.

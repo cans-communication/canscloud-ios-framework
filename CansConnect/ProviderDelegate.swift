@@ -102,13 +102,8 @@ class ProviderDelegate: NSObject {
 		update.localizedCallerName = displayName
 
 		let callInfo = callInfos[uuid]
-		let silence = callInfo?.silenceCallKitUI ?? false
-		NSLog("[ProviderDelegate] reportIncomingCall: uuid=%@ callId=%@ hasVideo=%d silenceUI=%d",
-		      uuid.uuidString, callInfo?.callId ?? "nil", hasVideo ? 1 : 0, silence ? 1 : 0)
 
         provider?.reportNewIncomingCall(with: uuid, update: update) { [weak self] error in
-            NSLog("[ProviderDelegate] reportNewIncomingCall completion: uuid=%@ error=%@ silenceUI=%d",
-                  uuid.uuidString, error == nil ? "nil" : (error! as NSError).description, silence ? 1 : 0)
             if error == nil {
                 // Foreground path: silence the CallKit banner ONLY AFTER it has finished
                 // rendering. On iOS 16/17 the banner appears ~150–400ms after completion
@@ -120,13 +115,10 @@ class ProviderDelegate: NSObject {
                 // Multiple sequential ends are scheduled (600ms, 1000ms) as belt-and-
                 // suspenders: if the first misses the render window, the second catches it.
                 if callInfo?.silenceCallKitUI ?? false {
-                    NSLog("[ProviderDelegate] silenceCallKitUI branch (completion): scheduling delayed endCall for uuid=%@ at +600ms and +1000ms", uuid.uuidString)
                     DispatchQueue.main.asyncAfter(deadline: .now() + 0.6) {
-                        NSLog("[ProviderDelegate] silenceCallKitUI +600ms: ending uuid=%@ (.remoteEnded)", uuid.uuidString)
                         CallManager.instance().providerDelegate?.endCall(uuid: uuid, reason: .remoteEnded)
                     }
                     DispatchQueue.main.asyncAfter(deadline: .now() + 1.0) { [weak self] in
-                        NSLog("[ProviderDelegate] silenceCallKitUI +1000ms: forcing dismiss uuid=%@ (belt-and-suspenders reportCall(endedAt:))", uuid.uuidString)
                         self?.provider?.reportCall(with: uuid, endedAt: Date(), reason: .remoteEnded)
                     }
                     return
@@ -137,8 +129,6 @@ class ProviderDelegate: NSObject {
                     CallManager.instance().providerDelegate?.endCallNotExist(uuid: uuid, timeout: .now() + 10)
                 }
             } else {
-                NSLog("[ProviderDelegate] reportNewIncomingCall ERROR: uuid=%@ code=%d desc=%@",
-                      uuid.uuidString, (error! as NSError).code, error!.localizedDescription)
                 let code = (error as NSError?)?.code
                 switch code {
                 case CXErrorCodeIncomingCallError.filteredByDoNotDisturb.rawValue:
@@ -190,7 +180,6 @@ class ProviderDelegate: NSObject {
 			}
 			let call = CallManager.instance().callByCallId(callId: callId)
 			if (call == nil) {
-                NSLog("[ProviderDelegate] endCallNotExist: callId=%@ not in Linphone after timeout — reporting unanswered", callId ?? "nil")
                 CallManager.instance().providerDelegate?.endCall(uuid: uuid, reason: .unanswered)
 			}
 		}
@@ -348,7 +337,6 @@ extension ProviderDelegate: CXProviderDelegate {
 	}
 
     public func provider(_ provider: CXProvider, didActivate audioSession: AVAudioSession) {
-        NSLog("[ProviderDelegate] didActivate: signalling Linphone audio session active (lc=%@)", CallManager.instance().lc == nil ? "nil" : "set")
         CallManager.instance().lc?.activateAudioSession(activated: true)
         CallManager.instance().callkitAudioSessionActivated = true
     }
@@ -359,11 +347,9 @@ extension ProviderDelegate: CXProviderDelegate {
         // deactivation — the audio pipeline must stay live until the call ends.
         let activeCalls = CallManager.instance().lc?.callsNb ?? 0
         if activeCalls > 0 {
-            NSLog("[ProviderDelegate] didDeactivate: ignoring — %ld active Linphone call(s) in progress", activeCalls)
             CallManager.instance().callkitAudioSessionActivated = nil
             return
         }
-        NSLog("[ProviderDelegate] didDeactivate: no active calls — deactivating Linphone audio session")
         CallManager.instance().lc?.activateAudioSession(activated: false)
         CallManager.instance().callkitAudioSessionActivated = nil
     }

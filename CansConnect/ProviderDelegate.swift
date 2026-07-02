@@ -34,6 +34,11 @@ import os
 	var connected = false
 	var reason: Reason = Reason.None
 	var displayName: String?
+	// Set when the app is in the foreground and is drawing its own incoming-call UI
+	// (RN IncomingCallScreen). We still must call reportNewIncomingCall to satisfy the
+	// iOS 13+ PushKit mandate, but end the call inside the completion handler so the
+	// banner never renders. Reset per-call (fresh CallInfo per incoming push).
+	var silenceCallKitUI = false
 
 	static func newIncomingCallInfo(callId: String) -> CallInfo {
 		let callInfo = CallInfo()
@@ -97,18 +102,43 @@ class ProviderDelegate: NSObject {
 		update.localizedCallerName = displayName
 
 		let callInfo = callInfos[uuid]
-//		Log.directLog(BCTBX_LOG_MESSAGE, text: "CallKit: report new incoming call with call-id: [\(String(describing: callInfo?.callId))] and UUID: [\(uuid.description)]")
-		//CallManager.instance().setHeldOtherCalls(exceptCallid: callInfo?.callId ?? "")
+		let silence = callInfo?.silenceCallKitUI ?? false
+		NSLog("[ProviderDelegate] reportIncomingCall: uuid=%@ callId=%@ hasVideo=%d silenceUI=%d",
+		      uuid.uuidString, callInfo?.callId ?? "nil", hasVideo ? 1 : 0, silence ? 1 : 0)
 
-        provider?.reportNewIncomingCall(with: uuid, update: update) { error in
+        provider?.reportNewIncomingCall(with: uuid, update: update) { [weak self] error in
+            NSLog("[ProviderDelegate] reportNewIncomingCall completion: uuid=%@ error=%@ silenceUI=%d",
+                  uuid.uuidString, error == nil ? "nil" : (error! as NSError).description, silence ? 1 : 0)
             if error == nil {
+                // Foreground path: silence the CallKit banner ONLY AFTER it has finished
+                // rendering. On iOS 16/17 the banner appears ~150–400ms after completion
+                // fires; if we call endCall immediately from the completion, CallKit
+                // accepts the "ended" state into its model BEFORE the banner presents,
+                // then the banner presents and stays stuck for the full 45s ringing timeout
+                // (the observed bug). A 600ms delay pushes endCall past the render window.
+                //
+                // Multiple sequential ends are scheduled (600ms, 1000ms) as belt-and-
+                // suspenders: if the first misses the render window, the second catches it.
+                if callInfo?.silenceCallKitUI ?? false {
+                    NSLog("[ProviderDelegate] silenceCallKitUI branch (completion): scheduling delayed endCall for uuid=%@ at +600ms and +1000ms", uuid.uuidString)
+                    DispatchQueue.main.asyncAfter(deadline: .now() + 0.6) {
+                        NSLog("[ProviderDelegate] silenceCallKitUI +600ms: ending uuid=%@ (.remoteEnded)", uuid.uuidString)
+                        CallManager.instance().providerDelegate?.endCall(uuid: uuid, reason: .remoteEnded)
+                    }
+                    DispatchQueue.main.asyncAfter(deadline: .now() + 1.0) { [weak self] in
+                        NSLog("[ProviderDelegate] silenceCallKitUI +1000ms: forcing dismiss uuid=%@ (belt-and-suspenders reportCall(endedAt:))", uuid.uuidString)
+                        self?.provider?.reportCall(with: uuid, endedAt: Date(), reason: .remoteEnded)
+                    }
+                    return
+                }
                 if CallManager.instance().endCallkit {
                     CallManager.instance().providerDelegate?.endCall(uuid: uuid)
                 } else {
                     CallManager.instance().providerDelegate?.endCallNotExist(uuid: uuid, timeout: .now() + 10)
                 }
             } else {
-//                Log.directLog(BCTBX_LOG_ERROR, text: "CallKit: cannot complete incoming call with call-id: [\(String(describing: callId))] and UUID: [\(uuid.description)] from [\(handle)] caused by [\(error!.localizedDescription)]")
+                NSLog("[ProviderDelegate] reportNewIncomingCall ERROR: uuid=%@ code=%d desc=%@",
+                      uuid.uuidString, (error! as NSError).code, error!.localizedDescription)
                 let code = (error as NSError?)?.code
                 switch code {
                 case CXErrorCodeIncomingCallError.filteredByDoNotDisturb.rawValue:
@@ -120,7 +150,7 @@ class ProviderDelegate: NSObject {
                 }
                 guard let callInfo = callInfo else { return }
                 callInfo.declined = true
-                self.callInfos.updateValue(callInfo, forKey: uuid)
+                self?.callInfos.updateValue(callInfo, forKey: uuid)
                 try? call?.decline(reason: callInfo.reason)
             }
         }

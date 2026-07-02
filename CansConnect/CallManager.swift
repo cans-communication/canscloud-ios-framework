@@ -146,7 +146,10 @@ import AVFoundation
 	// From ios13, display the callkit view when the notification is received.
     // hasVideo: initial value from push payload (default false); overridden by
     // onCallStateChanged(.IncomingReceived) → updateCall once the INVITE arrives.
-	@objc func displayIncomingCall(callId: String, hasVideo: Bool = false) {
+    // silenceUI=true satisfies the iOS 13+ PushKit reportNewIncomingCall mandate
+    // without letting the CallKit banner render — used when the app is Active and
+    // its own RN screen is the only UI.
+	@objc func displayIncomingCall(callId: String, hasVideo: Bool = false, silenceUI: Bool = false) {
         let uuid = CallManager.instance().providerDelegate?.uuids["\(callId)"]
 		if (uuid != nil) {
             let callInfo = providerDelegate?.callInfos[uuid!]
@@ -167,22 +170,23 @@ import AVFoundation
             // check direction: only treat the call as video when direction is not Inactive.
             let rp = call!.remoteParams
             let video = (rp?.videoEnabled ?? false) && (rp?.videoDirection ?? .Inactive) != .Inactive
-			displayIncomingCall(call: call, handle: addr?.asStringUriOnly() ?? "Unknown", hasVideo: video, callId: callId, displayName: displayName)
+			displayIncomingCall(call: call, handle: addr?.asStringUriOnly() ?? "Unknown", hasVideo: video, callId: callId, displayName: displayName, silenceUI: silenceUI)
 		} else {
             // Call not yet in Linphone (push arrived before INVITE processed).
             // Use hasVideo from push payload; updateCall will correct it on IncomingReceived.
-			displayIncomingCall(call: nil, handle: "Calling", hasVideo: hasVideo, callId: callId, displayName: "Calling")
+			displayIncomingCall(call: nil, handle: "Calling", hasVideo: hasVideo, callId: callId, displayName: "Calling", silenceUI: silenceUI)
 		}
 	}
 
-	func displayIncomingCall(call:Call?, handle: String, hasVideo: Bool, callId: String, displayName:String) {
+	func displayIncomingCall(call:Call?, handle: String, hasVideo: Bool, callId: String, displayName:String, silenceUI: Bool = false) {
 		let uuid = UUID()
 		let callInfo = CallInfo.newIncomingCallInfo(callId: callId)
+		callInfo.silenceCallKitUI = silenceUI
 
         providerDelegate?.callInfos.updateValue(callInfo, forKey: uuid)
         providerDelegate?.uuids.updateValue(uuid, forKey: callId)
         providerDelegate?.reportIncomingCall(call:call, uuid: uuid, handle: handle, hasVideo: hasVideo, displayName: displayName)
-		
+
 	}
 
 	@objc func acceptCall(call: OpaquePointer?, hasVideo:Bool) {

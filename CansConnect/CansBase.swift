@@ -219,10 +219,21 @@ import linphonesw
         CallManager.instance().displayIncomingCall(callId: callId, hasVideo: hasVideo)
     }
 
+    /// Foreground variant: satisfies the iOS 13+ PushKit reportNewIncomingCall mandate
+    /// while ensuring the CallKit banner never renders. The end is issued from inside
+    /// reportNewIncomingCall's completion handler (via CallInfo.silenceCallKitUI), which
+    /// is the only race-free moment to dismiss the just-reported call.
+    ///
+    /// Use this instead of reportIncomingVoIPCall + endIncomingCallInCallKit when
+    /// UIApplication.applicationState == .active and the app draws its own incoming-call UI.
+    @objc public static func reportIncomingVoIPCallSilencingUI(callId: String, hasVideo: Bool = false) {
+        CallManager.instance().displayIncomingCall(callId: callId, hasVideo: hasVideo, silenceUI: true)
+    }
+
     /// Immediately ends the CallKit representation of a just-reported incoming call.
-    /// Use this when the app is Active and you reported to CallKit only to satisfy the
-    /// iOS 13+ PushKit mandate — call this right after reportIncomingVoIPCall so the
-    /// banner is dismissed before it renders, letting your custom UI handle the call.
+    /// Prefer reportIncomingVoIPCallSilencingUI for the foreground path — that variant
+    /// avoids the race where the end call fires before reportNewIncomingCall completes,
+    /// which leaves the banner rendered and un-dismissed.
     @objc public static func endIncomingCallInCallKit(callId: String) {
         guard let uuid = CallManager.instance().providerDelegate?.uuids[callId] else { return }
         CallManager.instance().providerDelegate?.endCall(uuid: uuid, reason: .answeredElsewhere)

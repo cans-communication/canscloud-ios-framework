@@ -118,8 +118,8 @@ class ProviderDelegate: NSObject {
                     DispatchQueue.main.asyncAfter(deadline: .now() + 0.6) {
                         CallManager.instance().providerDelegate?.endCall(uuid: uuid, reason: .remoteEnded)
                     }
-                    DispatchQueue.main.asyncAfter(deadline: .now() + 1.0) { [weak self] in
-                        self?.provider?.reportCall(with: uuid, endedAt: Date(), reason: .remoteEnded)
+                    DispatchQueue.main.asyncAfter(deadline: .now() + 1.0) {
+                        CallManager.instance().providerDelegate?.endCall(uuid: uuid, reason: .remoteEnded)
                     }
                     return
                 }

@@ -54,7 +54,6 @@ static void linphone_iphone_info_received(LinphoneCore *lc, LinphoneCall *call, 
 static void linphone_iphone_chat_room_state_changed(LinphoneCore *lc, LinphoneChatRoom *room, LinphoneChatRoomState state);
 
 @interface LinphoneManager () {
-  NSTimer *iterateTimer;
   BOOL _echoTesterRunning;
   // Tracks last-known remote camera state to suppress duplicate/spurious events
   // (mirrors Android's lastRemoteCameraOnState). Reset to -1 (unknown) on End/Error/Released.
@@ -62,8 +61,25 @@ static void linphone_iphone_chat_room_state_changed(LinphoneCore *lc, LinphoneCh
   // callId from a VoIP push that arrived before the core finished initializing.
   // Consumed and cleared inside createLinphoneCore after linphone_core_start.
   NSString *_pendingVoIPCallId;
+  // PausedByRemote watchdog: auto-terminates a call that stays in PausedByRemote
+  // longer than 45s (remote lost internet after sending a hold re-INVITE).
+  dispatch_block_t _pausedByRemoteWatchdog;
+  LinphoneCall *_pausedByRemoteCall;
+  // Video-dead ghost watchdog: 5s polling timer that terminates a video call when
+  // remote video RTP stays below the floor for kVideoDeadThresholdSec seconds.
+  // Complements nortp_timeout, which the SIP proxy (Flexisip) defeats by forwarding
+  // RTCP RRs even after RTP dies from the peer's dropped internet.
+  dispatch_source_t _videoDeadTimer;
+  LinphoneCall *_videoDeadCall;
+  int _videoDeadTicks;
 }
 @end
+
+// Video-dead watchdog constants — mirrors Android L3 (video dead detector) but proactive.
+// Poll every 5s, terminate after 4 consecutive dead ticks = 20s.
+static const NSTimeInterval kVideoDeadCheckIntervalSec = 5.0;
+static const int kVideoDeadThresholdTicks = 4;   // 4 × 5s = 20s
+static const float kVideoDeadBandwidthKbps = 1.0f;
 
 @implementation LinphoneManager
 
@@ -120,21 +136,6 @@ static void linphone_iphone_chat_room_state_changed(LinphoneCore *lc, LinphoneCh
                              value ? [value UTF8String] : NULL);
 }
 
-- (void)startIterateTimer {
-  if (iterateTimer)
-    [iterateTimer invalidate];
-  iterateTimer = [NSTimer scheduledTimerWithTimeInterval:0.02
-                                                  target:self
-                                                selector:@selector(iterate)
-                                                userInfo:nil
-                                                 repeats:YES];
-}
-
-- (void)iterate {
-  if (theLinphoneCore)
-    linphone_core_iterate(theLinphoneCore);
-}
-
 + (NSString *)documentFile:(NSString *)file {
   NSArray *paths = NSSearchPathForDirectoriesInDomains(NSDocumentDirectory,
                                                        NSUserDomainMask, YES);
@@ -161,8 +162,7 @@ static void linphone_iphone_chat_room_state_changed(LinphoneCore *lc, LinphoneCh
   __weak typeof(self) weakSelf = self;
   dispatch_async(dispatch_get_main_queue(), ^{
     if (theLinphoneCore) {
-      NSLog(@"[LinphoneManager] createLinphoneCore: Core already exists. (Timer status: %@)", self->iterateTimer ? @"Running" : @"Stopped");
-      if (!self->iterateTimer) [weakSelf startIterateTimer];
+      NSLog(@"[LinphoneManager] createLinphoneCore: Core already exists, skipping.");
       return;
     }
     NSLog(@"[LinphoneManager] createLinphoneCore: Started on Main Thread");
@@ -267,7 +267,10 @@ static void linphone_iphone_chat_room_state_changed(LinphoneCore *lc, LinphoneCh
       // Ghost-call prevention: if no RTP media is received for this many seconds,
       // Linphone terminates the call with LinphoneCallError. Without this, Device B
       // stays frozen indefinitely when Device A loses its network mid-call.
-      int nortpTimeout = linphone_config_get_int(linphone_core_get_config(theLinphoneCore), "rtp", "nortp_timeout", 20);
+      // Enforce a minimum of 30s so a persisted config with nortp_timeout=0 cannot
+      // silently disable the watchdog.
+      int nortpTimeout = linphone_config_get_int(linphone_core_get_config(theLinphoneCore), "rtp", "nortp_timeout", 30);
+      if (nortpTimeout <= 0 || nortpTimeout > 120) nortpTimeout = 30;
       linphone_core_set_nortp_timeout(theLinphoneCore, nortpTimeout);
       NSLog(@"[LinphoneManager] nortp_timeout set to %ds — ghost call protection active.", nortpTimeout);
 
@@ -310,8 +313,7 @@ static void linphone_iphone_chat_room_state_changed(LinphoneCore *lc, LinphoneCh
       // foreground state where Linphone manages its own ringing.
       linphone_core_enable_vibration_on_incoming_call(theLinphoneCore, true);
 
-      [self startIterateTimer];
-      NSLog(@"[LinphoneManager] Core started and timer running!");
+      NSLog(@"[LinphoneManager] Core started — iterate handled by IosPlatformHelpers.");
 
       // Wire up Swift CallManager so callByCallId and onCallStateChanged work.
       // CallManager is internal (@objc but not public) so we call through CansBase.
@@ -736,6 +738,8 @@ static void linphone_iphone_popup_password_request(LinphoneCore *lc,
   case LinphoneCallPausing:
     return @"Pause";
   case LinphoneCallPaused:
+    return @"Pause";
+  case LinphoneCallPausedByRemote:
     return @"Pause";
   case LinphoneCallResuming:
     return @"Resuming";
@@ -1561,6 +1565,42 @@ static void linphone_iphone_call_state(LinphoneCore *lc, LinphoneCall *call,
       manager->_lastRemoteCameraOnState = -1;
   }
 
+  // PausedByRemote watchdog: nortp_timeout only fires when the call is in StreamsRunning.
+  // If the remote loses internet after sending a hold re-INVITE, the call enters
+  // PausedByRemote and nortp_timeout never fires — we stay frozen until session_expires
+  // (200s). Schedule a 45s timer to terminate if the call does not resume.
+  if (state == LinphoneCallPausedByRemote) {
+      [manager schedulePausedByRemoteWatchdog:call];
+  } else if (state == LinphoneCallStreamsRunning || state == LinphoneCallConnected ||
+             state == LinphoneCallEnd || state == LinphoneCallError ||
+             state == LinphoneCallReleased) {
+      [manager cancelPausedByRemoteWatchdog];
+  }
+
+  // Video-dead ghost watchdog: nortp_timeout can be defeated by the SIP proxy forwarding
+  // RTCP RRs after RTP dies. Poll video download bandwidth every 5s and terminate the call
+  // after 20s of dead video, but only when the remote SDP still advertises video sending
+  // (so intentional audio-only re-INVITEs don't trigger a false positive).
+  if (state == LinphoneCallStreamsRunning) {
+      const LinphoneCallParams *remoteParamsForGhost = linphone_call_get_remote_params(call);
+      BOOL remoteSendsVideo = NO;
+      if (remoteParamsForGhost && linphone_call_params_video_enabled(remoteParamsForGhost)) {
+          LinphoneMediaDirection dir = linphone_call_params_get_video_direction(remoteParamsForGhost);
+          remoteSendsVideo = (dir == LinphoneMediaDirectionSendOnly ||
+                              dir == LinphoneMediaDirectionSendRecv);
+      }
+      if (remoteSendsVideo) {
+          [manager scheduleVideoDeadWatchdog:call];
+      } else {
+          // Remote flipped to audio-only mid-call — stand down the ghost watchdog.
+          [manager cancelVideoDeadWatchdog];
+      }
+  } else if (state == LinphoneCallPaused || state == LinphoneCallPausing ||
+             state == LinphoneCallPausedByRemote || state == LinphoneCallEnd ||
+             state == LinphoneCallError || state == LinphoneCallReleased) {
+      [manager cancelVideoDeadWatchdog];
+  }
+
   // Re-enable mic if the last call ended while muted — mirrors Android onLastCallEnded.
   if (state == LinphoneCallReleased && linphone_core_get_calls_nb(lc) == 0) {
       if (!linphone_core_mic_enabled(lc)) {
@@ -1569,7 +1609,7 @@ static void linphone_iphone_call_state(LinphoneCore *lc, LinphoneCall *call,
       }
   }
 
-  // Bluetooth Auto-Routing on StreamsRunning/Connected
+  // Bluetooth Auto-Routing on StreamsRunning/Connected.
   if (state == LinphoneCallStreamsRunning || state == LinphoneCallConnected) {
       if ([manager isBluetoothAudioRouteAvailable]) {
           [manager routeAudioToBluetooth];
@@ -1886,7 +1926,10 @@ static void linphone_iphone_audio_devices_list_updated(LinphoneCore *lc) {
     if (!call) return NO;
 
     const LinphoneCallParams *remoteParams = linphone_call_get_remote_params(call);
-    const LinphoneCallParams *currentParams = linphone_call_get_current_params(call);
+    // linphone_call_get_current_params refreshes live media stats and crashes when called
+    // during a camera switch (filter graph is in teardown). linphone_call_get_params returns
+    // the negotiated SIP params without touching the media pipeline — safe at any call state.
+    const LinphoneCallParams *currentParams = linphone_call_get_params(call);
 
     BOOL remoteHasVideo = remoteParams ? linphone_call_params_video_enabled(remoteParams) : NO;
     LinphoneMediaDirection remoteDir = remoteParams
@@ -2008,7 +2051,6 @@ static void linphone_iphone_audio_devices_list_updated(LinphoneCore *lc) {
   NSString *frontName = [self frontCameraNameForLinphone];
   NSString *backName  = [self backCameraNameForLinphone];
 
-  // Determine current camera face via AVCaptureDevice uniqueID matching.
   BOOL currentIsFront = frontName && [currentStr isEqualToString:frontName];
   if (currentIsFront) {
     newDeviceStr = backName;
@@ -2030,15 +2072,13 @@ static void linphone_iphone_audio_devices_list_updated(LinphoneCore *lc) {
   }
 
   if (newDeviceStr) {
+    // Local camera swap only. linphone_core_set_video_device dispatches into
+    // _video_stream_change_camera which reconfigures the local capture pipeline
+    // Local camera swap only — no linphone_call_update, no SIP renegotiation.
+    // IosPlatformHelpers drives iterate on the main thread; switchCamera is also
+    // called on the main thread (NativeModuleiOS.methodQueue), so this direct
+    // call is already serialized with iterate. No dispatch needed.
     linphone_core_set_video_device(theLinphoneCore, [newDeviceStr UTF8String]);
-
-    LinphoneCall *call = linphone_core_get_current_call(theLinphoneCore);
-    if (call) {
-      LinphoneCallParams *params =
-          linphone_core_create_call_params(theLinphoneCore, call);
-      linphone_call_update(call, params);
-      linphone_call_params_unref(params);
-    }
   }
 }
 
@@ -3846,6 +3886,131 @@ static void linphone_iphone_info_received(LinphoneCore *lc, LinphoneCall *call, 
           if (completion) completion(NO, msg);
         }
       }] resume];
+}
+
+- (void)schedulePausedByRemoteWatchdog:(LinphoneCall *)call {
+    [self cancelPausedByRemoteWatchdog];
+    _pausedByRemoteCall = call;
+    __weak LinphoneManager *weakSelf = self;
+    dispatch_block_t block = dispatch_block_create(0, ^{
+        LinphoneManager *s = weakSelf;
+        if (!s || !theLinphoneCore || !s->_pausedByRemoteCall) return;
+        LinphoneCallState st = linphone_call_get_state(s->_pausedByRemoteCall);
+        if (st == LinphoneCallPausedByRemote) {
+            linphone_call_terminate(s->_pausedByRemoteCall);
+        }
+        s->_pausedByRemoteCall = NULL;
+        s->_pausedByRemoteWatchdog = NULL;
+    });
+    _pausedByRemoteWatchdog = block;
+    dispatch_after(dispatch_time(DISPATCH_TIME_NOW, 45 * NSEC_PER_SEC),
+                   dispatch_get_main_queue(), block);
+}
+
+- (void)cancelPausedByRemoteWatchdog {
+    if (_pausedByRemoteWatchdog) {
+        dispatch_block_cancel(_pausedByRemoteWatchdog);
+        _pausedByRemoteWatchdog = NULL;
+    }
+    _pausedByRemoteCall = NULL;
+}
+
+// Video-dead ghost watchdog — main-queue timer that polls video download bandwidth
+// and terminates the call when it stays below the floor for kVideoDeadThresholdTicks
+// consecutive ticks (default 20s).
+//
+// Thread safety: called only from linphone_iphone_call_state, which fires on the
+// main queue (Linphone's iterate queue, per `[Ios App] Using dispatch queue
+// com.apple.main-thread`). The timer handler and all linphone_call_get_stats /
+// linphone_call_terminate calls also run on the main queue, so no locking needed.
+- (void)scheduleVideoDeadWatchdog:(LinphoneCall *)call {
+    if (!call) return;
+    if (_videoDeadTimer && _videoDeadCall == call) return; // already watching this call
+    [self cancelVideoDeadWatchdog];
+    _videoDeadCall = call;
+    _videoDeadTicks = 0;
+
+    dispatch_source_t timer = dispatch_source_create(DISPATCH_SOURCE_TYPE_TIMER, 0, 0,
+                                                     dispatch_get_main_queue());
+    if (!timer) return;
+    uint64_t interval = (uint64_t)(kVideoDeadCheckIntervalSec * NSEC_PER_SEC);
+    dispatch_source_set_timer(timer, dispatch_time(DISPATCH_TIME_NOW, interval),
+                              interval, (uint64_t)(0.5 * NSEC_PER_SEC));
+    __weak LinphoneManager *weakSelf = self;
+    dispatch_source_set_event_handler(timer, ^{
+        LinphoneManager *s = weakSelf;
+        if (!s) return;
+        [s videoDeadTick];
+    });
+    _videoDeadTimer = timer;
+    dispatch_resume(timer);
+}
+
+- (void)cancelVideoDeadWatchdog {
+    if (_videoDeadTimer) {
+        dispatch_source_cancel(_videoDeadTimer);
+        _videoDeadTimer = NULL;
+    }
+    _videoDeadCall = NULL;
+    _videoDeadTicks = 0;
+}
+
+// Runs on main queue. Reads live stats and terminates the call after the threshold.
+- (void)videoDeadTick {
+    if (!theLinphoneCore || !_videoDeadCall) {
+        [self cancelVideoDeadWatchdog];
+        return;
+    }
+    LinphoneCall *call = _videoDeadCall;
+    LinphoneCallState st = linphone_call_get_state(call);
+    // Only count ticks while the call is fully running. Transient Updating/Updated
+    // states during re-INVITE negotiation don't count as ghost activity.
+    if (st != LinphoneCallStreamsRunning) {
+        return;
+    }
+
+    // Bypass rule: skip when remote video is intentionally disabled (SDP renegotiated
+    // to audio-only). Local audio mute is NOT a bypass — remote video RTP is
+    // independent of the local mic.
+    const LinphoneCallParams *remoteParams = linphone_call_get_remote_params(call);
+    BOOL remoteSendsVideo = NO;
+    if (remoteParams && linphone_call_params_video_enabled(remoteParams)) {
+        LinphoneMediaDirection dir = linphone_call_params_get_video_direction(remoteParams);
+        remoteSendsVideo = (dir == LinphoneMediaDirectionSendOnly ||
+                            dir == LinphoneMediaDirectionSendRecv);
+    }
+    if (!remoteSendsVideo) {
+        [self cancelVideoDeadWatchdog];
+        return;
+    }
+
+    LinphoneCallStats *stats = linphone_call_get_stats(call, LinphoneStreamTypeVideo);
+    float downloadBw = stats ? linphone_call_stats_get_download_bandwidth(stats) : 0.0f;
+
+    if (downloadBw < kVideoDeadBandwidthKbps) {
+        _videoDeadTicks++;
+        if (_videoDeadTicks >= kVideoDeadThresholdTicks) {
+            LinphoneCallLog *log = linphone_call_get_call_log(call);
+            const char *cCallId = log ? linphone_call_log_get_call_id(log) : NULL;
+            NSString *callId = cCallId ? [NSString stringWithUTF8String:cCallId] : @"";
+
+            // Report to CallKit first so the Recents entry shows .remoteEnded, then
+            // send SIP BYE. Both happen on the main queue → no re-entrancy race with
+            // the state callback (this method already runs on main).
+            if (callId.length > 0) {
+                [CansBase endCallAsRemoteEndedWithCallId:callId];
+            }
+            linphone_call_terminate(call);
+
+            // The subsequent LinphoneCallEnd → Released transitions will call
+            // cancelVideoDeadWatchdog via the state handler; do it here too for safety.
+            [self cancelVideoDeadWatchdog];
+        }
+    } else {
+        // Any healthy tick resets the counter — this makes the watchdog tolerant of
+        // brief bandwidth dips (network hiccups, re-INVITE flushes).
+        _videoDeadTicks = 0;
+    }
 }
 
 @end

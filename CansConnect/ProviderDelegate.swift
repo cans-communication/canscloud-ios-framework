@@ -34,6 +34,11 @@ import os
 	var connected = false
 	var reason: Reason = Reason.None
 	var displayName: String?
+	// Set when the app is in the foreground and is drawing its own incoming-call UI
+	// (RN IncomingCallScreen). We still must call reportNewIncomingCall to satisfy the
+	// iOS 13+ PushKit mandate, but end the call inside the completion handler so the
+	// banner never renders. Reset per-call (fresh CallInfo per incoming push).
+	var silenceCallKitUI = false
 
 	static func newIncomingCallInfo(callId: String) -> CallInfo {
 		let callInfo = CallInfo()
@@ -97,18 +102,33 @@ class ProviderDelegate: NSObject {
 		update.localizedCallerName = displayName
 
 		let callInfo = callInfos[uuid]
-//		Log.directLog(BCTBX_LOG_MESSAGE, text: "CallKit: report new incoming call with call-id: [\(String(describing: callInfo?.callId))] and UUID: [\(uuid.description)]")
-		//CallManager.instance().setHeldOtherCalls(exceptCallid: callInfo?.callId ?? "")
 
-        provider?.reportNewIncomingCall(with: uuid, update: update) { error in
+        provider?.reportNewIncomingCall(with: uuid, update: update) { [weak self] error in
             if error == nil {
+                // Foreground path: silence the CallKit banner ONLY AFTER it has finished
+                // rendering. On iOS 16/17 the banner appears ~150–400ms after completion
+                // fires; if we call endCall immediately from the completion, CallKit
+                // accepts the "ended" state into its model BEFORE the banner presents,
+                // then the banner presents and stays stuck for the full 45s ringing timeout
+                // (the observed bug). A 600ms delay pushes endCall past the render window.
+                //
+                // Multiple sequential ends are scheduled (600ms, 1000ms) as belt-and-
+                // suspenders: if the first misses the render window, the second catches it.
+                if callInfo?.silenceCallKitUI ?? false {
+                    DispatchQueue.main.asyncAfter(deadline: .now() + 0.6) {
+                        CallManager.instance().providerDelegate?.endCall(uuid: uuid, reason: .remoteEnded)
+                    }
+                    DispatchQueue.main.asyncAfter(deadline: .now() + 1.0) {
+                        CallManager.instance().providerDelegate?.endCall(uuid: uuid, reason: .remoteEnded)
+                    }
+                    return
+                }
                 if CallManager.instance().endCallkit {
                     CallManager.instance().providerDelegate?.endCall(uuid: uuid)
                 } else {
                     CallManager.instance().providerDelegate?.endCallNotExist(uuid: uuid, timeout: .now() + 10)
                 }
             } else {
-//                Log.directLog(BCTBX_LOG_ERROR, text: "CallKit: cannot complete incoming call with call-id: [\(String(describing: callId))] and UUID: [\(uuid.description)] from [\(handle)] caused by [\(error!.localizedDescription)]")
                 let code = (error as NSError?)?.code
                 switch code {
                 case CXErrorCodeIncomingCallError.filteredByDoNotDisturb.rawValue:
@@ -120,7 +140,7 @@ class ProviderDelegate: NSObject {
                 }
                 guard let callInfo = callInfo else { return }
                 callInfo.declined = true
-                self.callInfos.updateValue(callInfo, forKey: uuid)
+                self?.callInfos.updateValue(callInfo, forKey: uuid)
                 try? call?.decline(reason: callInfo.reason)
             }
         }
@@ -160,7 +180,6 @@ class ProviderDelegate: NSObject {
 			}
 			let call = CallManager.instance().callByCallId(callId: callId)
 			if (call == nil) {
-                NSLog("[ProviderDelegate] endCallNotExist: callId=%@ not in Linphone after timeout — reporting unanswered", callId ?? "nil")
                 CallManager.instance().providerDelegate?.endCall(uuid: uuid, reason: .unanswered)
 			}
 		}
@@ -318,7 +337,6 @@ extension ProviderDelegate: CXProviderDelegate {
 	}
 
     public func provider(_ provider: CXProvider, didActivate audioSession: AVAudioSession) {
-        NSLog("[ProviderDelegate] didActivate: signalling Linphone audio session active (lc=%@)", CallManager.instance().lc == nil ? "nil" : "set")
         CallManager.instance().lc?.activateAudioSession(activated: true)
         CallManager.instance().callkitAudioSessionActivated = true
     }
@@ -329,11 +347,9 @@ extension ProviderDelegate: CXProviderDelegate {
         // deactivation — the audio pipeline must stay live until the call ends.
         let activeCalls = CallManager.instance().lc?.callsNb ?? 0
         if activeCalls > 0 {
-            NSLog("[ProviderDelegate] didDeactivate: ignoring — %ld active Linphone call(s) in progress", activeCalls)
             CallManager.instance().callkitAudioSessionActivated = nil
             return
         }
-        NSLog("[ProviderDelegate] didDeactivate: no active calls — deactivating Linphone audio session")
         CallManager.instance().lc?.activateAudioSession(activated: false)
         CallManager.instance().callkitAudioSessionActivated = nil
     }

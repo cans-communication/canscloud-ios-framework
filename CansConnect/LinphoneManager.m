@@ -565,31 +565,71 @@ static void linphone_iphone_popup_password_request(LinphoneCore *lc,
 }
 
 - (void)removeAccountAtIndex:(NSInteger)index {
-  const bctbx_list_t *accounts =
-      linphone_core_get_account_list(theLinphoneCore);
-  NSInteger currentIndex = 0;
-
-  for (const bctbx_list_t *it = accounts; it != NULL; it = it->next) {
-    if (currentIndex == index) {
-      LinphoneAccount *account = (LinphoneAccount *)it->data;
-      const LinphoneAccountParams *params =
-          linphone_account_get_params(account);
-      const LinphoneAddress *identity =
-          linphone_account_params_get_identity_address(params);
-      if (identity) {
-        const char *username = linphone_address_get_username(identity);
-        const char *domain = linphone_address_get_domain(identity);
-        const LinphoneAuthInfo *authInfo = linphone_core_find_auth_info(
-            theLinphoneCore, NULL, username, domain);
-        if (authInfo) {
-          linphone_core_remove_auth_info(theLinphoneCore, authInfo);
-        }
-      }
-      linphone_core_remove_account(theLinphoneCore, account);
-      NSLog(@"[CansConnect] Removed account at index: %ld", (long)index);
-      break;
+  // All Linphone core mutations must run on the main thread — matches the
+  // pattern used by setDefaultAccount: and setDefaultAccountSync:. Guards against
+  // race conditions if called from a background thread (framework consumers
+  // outside the RN bridge default main-queue may hit this).
+  void (^work)(void) = ^{
+    if (!theLinphoneCore) {
+      NSLog(@"[CansConnect] removeAccountAtIndex: aborted — theLinphoneCore is nil");
+      return;
     }
-    currentIndex++;
+    const bctbx_list_t *accounts =
+        linphone_core_get_account_list(theLinphoneCore);
+    NSInteger currentIndex = 0;
+
+    for (const bctbx_list_t *it = accounts; it != NULL; it = it->next) {
+      if (currentIndex == index) {
+        LinphoneAccount *account = (LinphoneAccount *)it->data;
+        const LinphoneAccountParams *params =
+            linphone_account_get_params(account);
+        const LinphoneAddress *identity =
+            linphone_account_params_get_identity_address(params);
+
+        NSString *usernameNS = nil;
+        NSString *domainNS = nil;
+        if (identity) {
+          const char *u = linphone_address_get_username(identity);
+          const char *d = linphone_address_get_domain(identity);
+          if (u) usernameNS = [NSString stringWithUTF8String:u];
+          if (d) domainNS = [NSString stringWithUTF8String:d];
+        }
+
+        // Remove the account FIRST. This queues an unregister (REGISTER Expires: 0).
+        // The SIP proxy replies 401 with a fresh nonce; Linphone must re-authenticate
+        // to complete the unregister, which requires the auth info to still be present.
+        linphone_core_remove_account(theLinphoneCore, account);
+        NSLog(@"[CansConnect] Removed account at index: %ld (unregister in flight)", (long)index);
+
+        // Defer auth-info removal so the 401 challenge on the unregister can be answered.
+        // Without this delay, the server keeps the contact + VoIP push token bound to
+        // this device, and subsequent calls to the signed-out user still route here.
+        if (usernameNS.length > 0 && domainNS.length > 0) {
+          dispatch_after(
+              dispatch_time(DISPATCH_TIME_NOW, (int64_t)(3.0 * NSEC_PER_SEC)),
+              dispatch_get_main_queue(), ^{
+                if (!theLinphoneCore) return;
+                const LinphoneAuthInfo *ai = linphone_core_find_auth_info(
+                    theLinphoneCore, NULL, [usernameNS UTF8String], [domainNS UTF8String]);
+                if (ai) {
+                  linphone_core_remove_auth_info(theLinphoneCore, ai);
+                  NSLog(@"[CansConnect] Auth info removed for %@@%@ after unregister settled",
+                        usernameNS, domainNS);
+                }
+              });
+        }
+        break;
+      }
+      currentIndex++;
+    }
+  };
+
+  // Execute synchronously if already on main to preserve caller's sequencing
+  // expectations; dispatch to main otherwise.
+  if ([NSThread isMainThread]) {
+    work();
+  } else {
+    dispatch_async(dispatch_get_main_queue(), work);
   }
 }
 
@@ -1418,6 +1458,44 @@ static void linphone_iphone_call_state(LinphoneCore *lc, LinphoneCall *call,
   LinphoneManager *manager = [LinphoneManager sharedInstance];
   NSString *stateStr = [manager convertCallStateToString:state];
   NSString *msgStr = message ? [NSString stringWithUTF8String:message] : @"";
+
+  // Ghost-call defense: if the INVITE targets a user that no currently-registered
+  // account serves (e.g. sign-out unregister was delayed and the SIP proxy still
+  // routes the previous user's calls here), decline immediately. Linphone's
+  // internal workaround will otherwise re-assign the call to the current default
+  // account and surface it as a normal IncomingCall.
+  if (state == LinphoneCallIncomingReceived || state == LinphoneCallIncomingEarlyMedia) {
+    const LinphoneCallLog *callLog = linphone_call_get_call_log(call);
+    const LinphoneAddress *toAddr = callLog ? linphone_call_log_get_to_address(callLog) : NULL;
+    const char *toUser = toAddr ? linphone_address_get_username(toAddr) : NULL;
+    const char *toDomain = toAddr ? linphone_address_get_domain(toAddr) : NULL;
+    const bctbx_list_t *accts = linphone_core_get_account_list(lc);
+    if (toUser && accts) {
+      BOOL matchesAnyAccount = NO;
+      for (const bctbx_list_t *it = accts; it != NULL; it = it->next) {
+        LinphoneAccount *acct = (LinphoneAccount *)it->data;
+        const LinphoneAccountParams *ap = linphone_account_get_params(acct);
+        const LinphoneAddress *identity = ap ? linphone_account_params_get_identity_address(ap) : NULL;
+        const char *localUser = identity ? linphone_address_get_username(identity) : NULL;
+        const char *localDomain = identity ? linphone_address_get_domain(identity) : NULL;
+        // Match on username AND domain when both sides have a domain — prevents
+        // false-accept if the same username exists on a different SIP domain.
+        // Fall back to username-only when either side's domain is missing.
+        BOOL userMatch = localUser && strcmp(toUser, localUser) == 0;
+        BOOL domainMatch = (!toDomain || !localDomain || strcmp(toDomain, localDomain) == 0);
+        if (userMatch && domainMatch) {
+          matchesAnyAccount = YES;
+          break;
+        }
+      }
+      if (!matchesAnyAccount) {
+        NSLog(@"[LinphoneManager] Declining ghost call: INVITE targets '%s@%s' but no registered account matches",
+              toUser, toDomain ?: "?");
+        linphone_call_decline(call, LinphoneReasonDeclined);
+        return;
+      }
+    }
+  }
 
   // Voicemail Detection via SIP Headers (Logic from Android)
   if (state == LinphoneCallOutgoingEarlyMedia || state == LinphoneCallOutgoingProgress ||

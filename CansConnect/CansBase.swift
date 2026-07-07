@@ -239,6 +239,24 @@ import linphonesw
         CallManager.instance().providerDelegate?.endCall(uuid: uuid, reason: .answeredElsewhere)
     }
 
+    /// Reports the call to CallKit with `.remoteEnded` reason. Used by the video-dead
+    /// ghost watchdog in `LinphoneManager.videoDeadTick` when remote video RTP stays
+    /// below the floor for 20s. Caller is responsible for the SIP-layer terminate
+    /// (`linphone_call_terminate`); this only clears the CallKit UI so the Recents
+    /// entry attributes the drop to the remote peer.
+    ///
+    /// Thread safety: CXProvider is thread-safe; the watchdog invokes this on the
+    /// main queue where the rest of the Linphone iterate loop runs. Safe to call
+    /// multiple times — `endCall` no-ops after the first call for a given UUID.
+    @objc(endCallAsRemoteEndedWithCallId:)
+    public static func endCallAsRemoteEnded(callId: String) {
+        guard let uuid = CallManager.instance().providerDelegate?.uuids[callId] else {
+            NSLog("[CansBase] endCallAsRemoteEnded: no CallKit UUID for callId=%@", callId)
+            return
+        }
+        CallManager.instance().providerDelegate?.endCall(uuid: uuid, reason: .remoteEnded)
+    }
+
     /// Ensures the Linphone core is initialized and processes the push callId.
     /// Call early in didFinishLaunchingWithOptions (callId = "") to pre-warm the core,
     /// and again from the PushKit handler with the real callId.

@@ -251,7 +251,6 @@ import linphonesw
     @objc(endCallAsRemoteEndedWithCallId:)
     public static func endCallAsRemoteEnded(callId: String) {
         guard let uuid = CallManager.instance().providerDelegate?.uuids[callId] else {
-            NSLog("[CansBase] endCallAsRemoteEnded: no CallKit UUID for callId=%@", callId)
             return
         }
         CallManager.instance().providerDelegate?.endCall(uuid: uuid, reason: .remoteEnded)

@@ -2078,7 +2078,6 @@ static void linphone_iphone_audio_devices_list_updated(LinphoneCore *lc) {
     // IosPlatformHelpers drives iterate on the main thread; switchCamera is also
     // called on the main thread (NativeModuleiOS.methodQueue), so this direct
     // call is already serialized with iterate. No dispatch needed.
-    NSLog(@"[LinphoneManager] switchCamera: %@ → %@", currentStr, newDeviceStr);
     linphone_core_set_video_device(theLinphoneCore, [newDeviceStr UTF8String]);
   }
 }
@@ -3898,7 +3897,6 @@ static void linphone_iphone_info_received(LinphoneCore *lc, LinphoneCall *call, 
         if (!s || !theLinphoneCore || !s->_pausedByRemoteCall) return;
         LinphoneCallState st = linphone_call_get_state(s->_pausedByRemoteCall);
         if (st == LinphoneCallPausedByRemote) {
-            NSLog(@"[LinphoneManager] PausedByRemote watchdog: no resume after 45s — terminating call");
             linphone_call_terminate(s->_pausedByRemoteCall);
         }
         s->_pausedByRemoteCall = NULL;
@@ -3946,15 +3944,12 @@ static void linphone_iphone_info_received(LinphoneCore *lc, LinphoneCall *call, 
     });
     _videoDeadTimer = timer;
     dispatch_resume(timer);
-    NSLog(@"[LinphoneManager] Video-dead watchdog: started (interval=%.0fs, threshold=%ds)",
-          kVideoDeadCheckIntervalSec, (int)(kVideoDeadCheckIntervalSec * kVideoDeadThresholdTicks));
 }
 
 - (void)cancelVideoDeadWatchdog {
     if (_videoDeadTimer) {
         dispatch_source_cancel(_videoDeadTimer);
         _videoDeadTimer = NULL;
-        NSLog(@"[LinphoneManager] Video-dead watchdog: cancelled");
     }
     _videoDeadCall = NULL;
     _videoDeadTicks = 0;
@@ -3985,7 +3980,6 @@ static void linphone_iphone_info_received(LinphoneCore *lc, LinphoneCall *call, 
                             dir == LinphoneMediaDirectionSendRecv);
     }
     if (!remoteSendsVideo) {
-        NSLog(@"[LinphoneManager] Video-dead watchdog: remote video disabled — cancelling");
         [self cancelVideoDeadWatchdog];
         return;
     }
@@ -3995,14 +3989,10 @@ static void linphone_iphone_info_received(LinphoneCore *lc, LinphoneCall *call, 
 
     if (downloadBw < kVideoDeadBandwidthKbps) {
         _videoDeadTicks++;
-        NSLog(@"[LinphoneManager] Video-dead watchdog: tick %d/%d (downloadBw=%.2f kbps)",
-              _videoDeadTicks, kVideoDeadThresholdTicks, downloadBw);
         if (_videoDeadTicks >= kVideoDeadThresholdTicks) {
             LinphoneCallLog *log = linphone_call_get_call_log(call);
             const char *cCallId = log ? linphone_call_log_get_call_id(log) : NULL;
             NSString *callId = cCallId ? [NSString stringWithUTF8String:cCallId] : @"";
-            NSLog(@"[LinphoneManager] Video-dead watchdog: THRESHOLD REACHED — "
-                  @"terminating ghost call callId=%@", callId);
 
             // Report to CallKit first so the Recents entry shows .remoteEnded, then
             // send SIP BYE. Both happen on the main queue → no re-entrancy race with
@@ -4019,10 +4009,6 @@ static void linphone_iphone_info_received(LinphoneCore *lc, LinphoneCall *call, 
     } else {
         // Any healthy tick resets the counter — this makes the watchdog tolerant of
         // brief bandwidth dips (network hiccups, re-INVITE flushes).
-        if (_videoDeadTicks > 0) {
-            NSLog(@"[LinphoneManager] Video-dead watchdog: healthy tick (downloadBw=%.2f kbps) "
-                  @"— resetting counter", downloadBw);
-        }
         _videoDeadTicks = 0;
     }
 }

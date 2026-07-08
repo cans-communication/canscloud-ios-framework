@@ -298,6 +298,20 @@ static const float kVideoDeadBandwidthKbps = 1.0f;
 
       linphone_core_add_callbacks(theLinphoneCore, cbs);
 
+      // Publish SIP User-Agent so FreeSwitch (and other proxies) log a
+      // recognizable client instead of "unknown". Format: "CANSCall/<version>(<build>)".
+      // Reads from the app's main bundle, not the framework bundle.
+      NSString *appDisplayName = [[NSBundle mainBundle] objectForInfoDictionaryKey:@"CFBundleDisplayName"];
+      if (appDisplayName.length == 0) {
+        appDisplayName = [[NSBundle mainBundle] objectForInfoDictionaryKey:@"CFBundleName"];
+      }
+      if (appDisplayName.length == 0) appDisplayName = @"CANSCall";
+      NSString *shortVersion = [[NSBundle mainBundle] objectForInfoDictionaryKey:@"CFBundleShortVersionString"] ?: @"0";
+      NSString *buildNumber = [[NSBundle mainBundle] objectForInfoDictionaryKey:@"CFBundleVersion"] ?: @"0";
+      NSString *uaVersion = [NSString stringWithFormat:@"%@(%@)", shortVersion, buildNumber];
+      linphone_core_set_user_agent(theLinphoneCore, appDisplayName.UTF8String, uaVersion.UTF8String);
+      NSLog(@"[LinphoneManager] SIP User-Agent set: %@/%@", appDisplayName, uaVersion);
+
       NSLog(@"[LinphoneManager] Starting core...");
       linphone_core_start(theLinphoneCore);
 

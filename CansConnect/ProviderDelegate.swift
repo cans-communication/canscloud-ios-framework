@@ -69,7 +69,31 @@ class ProviderDelegate: NSObject {
 //        provider = nil
 		super.init()
         provider?.setDelegate(self, queue: nil)
+        NotificationCenter.default.addObserver(
+            self,
+            selector: #selector(handleApplicationDidBecomeActive),
+            name: UIApplication.didBecomeActiveNotification,
+            object: nil
+        )
 	}
+
+    deinit {
+        NotificationCenter.default.removeObserver(self)
+    }
+
+    // When the user answers a video call from the lock screen (or any non-active
+    // state), `provider(_:perform:CXAnswerCallAction)` disables the local camera
+    // capture pipeline (iOS restricts camera access from background). Restore it
+    // once the app foregrounds — otherwise the SDP negotiates video sendrecv but
+    // iOS never pushes frames, so the remote peer sees a black stream.
+    @objc private func handleApplicationDidBecomeActive() {
+        guard let call = CallManager.instance().backgroundContextCall else { return }
+        if CallManager.instance().backgroundContextCameraIsEnabled {
+            call.cameraEnabled = true
+        }
+        CallManager.instance().backgroundContextCall = nil
+        CallManager.instance().backgroundContextCameraIsEnabled = false
+    }
 
 	static var providerConfiguration: CXProviderConfiguration = {
 		let providerConfiguration = CXProviderConfiguration()

@@ -706,47 +706,83 @@ import AVFoundation
     }
     
     @objc func changeRouteToSpeaker() {
-        // lc?.outputAudioDevice = lc?.audioDevices.first { $0.type == AudioDeviceType.Speaker }
-//        UIDevice.current.isProximityMonitoringEnabled = false
+        guard let lc = lc else { return }
+        let speaker = lc.audioDevices.first(where: { $0.type == .Speaker })
+        guard let speaker = speaker else {
+            return
+        }
+        if let call = lc.currentCall {
+            call.outputAudioDevice = speaker
+        } else {
+            lc.outputAudioDevice = speaker
+        }
+        try? AVAudioSession.sharedInstance().overrideOutputAudioPort(.speaker)
     }
-    
+
     @objc public func changeRouteToBluetooth() {
-        // lc?.outputAudioDevice = lc?.audioDevices.first { $0.type == AudioDeviceType.BluetoothA2DP || $0.type == AudioDeviceType.Bluetooth }
-//        UIDevice.current.isProximityMonitoringEnabled = (lc!.callsNb > 0)
+        guard let lc = lc else { return }
+        let bt = lc.audioDevices.first(where: { $0.type == .Bluetooth || $0.type == .BluetoothA2DP })
+        guard let bt = bt else {
+            return
+        }
+        if let call = lc.currentCall {
+            call.outputAudioDevice = bt
+        } else {
+            lc.outputAudioDevice = bt
+        }
+        try? AVAudioSession.sharedInstance().overrideOutputAudioPort(.none)
     }
-    
+
     @objc func changeRouteToDefault() {
         lc?.outputAudioDevice = lc?.defaultOutputAudioDevice
+        try? AVAudioSession.sharedInstance().overrideOutputAudioPort(.none)
     }
     
     @objc func isBluetoothAvailable() -> Bool {
-        // for device in lc!.audioDevices {
-        //     if (device.type == AudioDeviceType.Bluetooth || device.type == AudioDeviceType.BluetoothA2DP) {
-        //         return true;
-        //     }
-        // }
-        return false;
+        guard let lc = lc else { return false }
+        for device in lc.audioDevices {
+            if device.type == .Bluetooth || device.type == .BluetoothA2DP {
+                return true
+            }
+        }
+        return false
     }
-    
+
     @objc func isSpeakerEnabled() -> Bool {
-        // if let outputDevice = lc!.outputAudioDevice {
-        //     return outputDevice.type == AudioDeviceType.Speaker
-        // }
+        guard let lc = lc else { return false }
+        if let call = lc.currentCall, let out = call.outputAudioDevice {
+            return out.type == .Speaker
+        }
+        if let out = lc.outputAudioDevice {
+            return out.type == .Speaker
+        }
         return false
     }
-    
+
     @objc public func isBluetoothEnabled() -> Bool {
-        // if let outputDevice = lc!.outputAudioDevice {
-        //     return (outputDevice.type == AudioDeviceType.Bluetooth || outputDevice.type == AudioDeviceType.BluetoothA2DP)
-        // }
+        guard let lc = lc else { return false }
+        if let call = lc.currentCall, let out = call.outputAudioDevice {
+            return out.type == .Bluetooth || out.type == .BluetoothA2DP
+        }
+        if let out = lc.outputAudioDevice {
+            return out.type == .Bluetooth || out.type == .BluetoothA2DP
+        }
         return false
     }
-    
+
+    /// True when the *current* output route is the earpiece/receiver. Used by the video-call
+    /// auto-route branch in onCallStateChanged — video calls should never default to the receiver.
     @objc func isReceiverEnabled() -> Bool {
-        // if let outputDevice = lc!.outputAudioDevice {
-        //     return outputDevice.type == AudioDeviceType.Microphone
-        // }
-        return false
+        guard let lc = lc else { return true }
+        if let call = lc.currentCall, let out = call.outputAudioDevice {
+            // Linphone reports the receiver route under either .Earpiece or .Microphone (the "default" iPhone card).
+            return out.type == .Earpiece || out.type == .Microphone
+        }
+        if let out = lc.outputAudioDevice {
+            return out.type == .Earpiece || out.type == .Microphone
+        }
+        // Nothing set yet — treat as receiver so the video branch upgrades it to Speaker.
+        return true
     }
 
 }

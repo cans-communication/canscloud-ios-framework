@@ -339,6 +339,17 @@ extension ProviderDelegate: CXProviderDelegate {
     public func provider(_ provider: CXProvider, didActivate audioSession: AVAudioSession) {
         CallManager.instance().lc?.activateAudioSession(activated: true)
         CallManager.instance().callkitAudioSessionActivated = true
+
+        // Video calls must default to the loudspeaker. AVAudioSession `.voiceChat` mode
+        // routes to the earpiece by default; without an explicit override, the user has
+        // to press the CallKit "speaker" button after every video call answer. This override
+        // runs at the exact moment iOS hands the audio session to us, which is the only
+        // moment Linphone's `.voiceChat` default won't immediately overwrite our choice.
+        if let lc = CallManager.instance().lc,
+           let call = lc.currentCall,
+           call.currentParams?.videoEnabled ?? false || call.params?.videoEnabled ?? false {
+            CallManager.instance().changeRouteToSpeaker()
+        }
     }
 
     public func provider(_ provider: CXProvider, didDeactivate audioSession: AVAudioSession) {

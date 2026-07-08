@@ -1477,38 +1477,35 @@ static void linphone_iphone_call_state(LinphoneCore *lc, LinphoneCall *call,
   NSString *stateStr = [manager convertCallStateToString:state];
   NSString *msgStr = message ? [NSString stringWithUTF8String:message] : @"";
 
-  // Ghost-call defense: if the INVITE targets a user that no currently-registered
-  // account serves (e.g. sign-out unregister was delayed and the SIP proxy still
-  // routes the previous user's calls here), decline immediately. Linphone's
-  // internal workaround will otherwise re-assign the call to the current default
-  // account and surface it as a normal IncomingCall.
+  // Default-account gate: decline any incoming INVITE whose TO username/domain
+  // does not match the current default account. Two scenarios this covers:
+  //   1. Ghost calls — sign-out unregister was delayed and the SIP proxy still
+  //      routes the previous user's calls here.
+  //   2. Multi-account routing — user is signed into 9000 and 2000, made 2000
+  //      the default, and a call still arrives for 9000. Without this filter
+  //      Linphone's "workaround to have this call assigned to a known account"
+  //      surfaces it as a normal IncomingCall for the wrong account.
+  // Rejecting here (before kLinphoneCallStateUpdate is posted) means the RN
+  // IncomingCallScreen never appears for non-default targets.
   if (state == LinphoneCallIncomingReceived || state == LinphoneCallIncomingEarlyMedia) {
     const LinphoneCallLog *callLog = linphone_call_get_call_log(call);
     const LinphoneAddress *toAddr = callLog ? linphone_call_log_get_to_address(callLog) : NULL;
     const char *toUser = toAddr ? linphone_address_get_username(toAddr) : NULL;
     const char *toDomain = toAddr ? linphone_address_get_domain(toAddr) : NULL;
-    const bctbx_list_t *accts = linphone_core_get_account_list(lc);
-    if (toUser && accts) {
-      BOOL matchesAnyAccount = NO;
-      for (const bctbx_list_t *it = accts; it != NULL; it = it->next) {
-        LinphoneAccount *acct = (LinphoneAccount *)it->data;
-        const LinphoneAccountParams *ap = linphone_account_get_params(acct);
-        const LinphoneAddress *identity = ap ? linphone_account_params_get_identity_address(ap) : NULL;
-        const char *localUser = identity ? linphone_address_get_username(identity) : NULL;
-        const char *localDomain = identity ? linphone_address_get_domain(identity) : NULL;
-        // Match on username AND domain when both sides have a domain — prevents
-        // false-accept if the same username exists on a different SIP domain.
-        // Fall back to username-only when either side's domain is missing.
-        BOOL userMatch = localUser && strcmp(toUser, localUser) == 0;
-        BOOL domainMatch = (!toDomain || !localDomain || strcmp(toDomain, localDomain) == 0);
-        if (userMatch && domainMatch) {
-          matchesAnyAccount = YES;
-          break;
-        }
-      }
-      if (!matchesAnyAccount) {
-        NSLog(@"[LinphoneManager] Declining ghost call: INVITE targets '%s@%s' but no registered account matches",
-              toUser, toDomain ?: "?");
+    LinphoneAccount *defaultAcct = linphone_core_get_default_account(lc);
+    const LinphoneAccountParams *ap = defaultAcct ? linphone_account_get_params(defaultAcct) : NULL;
+    const LinphoneAddress *identity = ap ? linphone_account_params_get_identity_address(ap) : NULL;
+    const char *localUser = identity ? linphone_address_get_username(identity) : NULL;
+    const char *localDomain = identity ? linphone_address_get_domain(identity) : NULL;
+    if (toUser && localUser) {
+      // Match on username AND domain when both sides have a domain — prevents
+      // false-accept if the same username exists on a different SIP domain.
+      // Fall back to username-only when either side's domain is missing.
+      BOOL userMatch = strcmp(toUser, localUser) == 0;
+      BOOL domainMatch = (!toDomain || !localDomain || strcmp(toDomain, localDomain) == 0);
+      if (!userMatch || !domainMatch) {
+        NSLog(@"[LinphoneManager] Declining call: INVITE targets '%s@%s' but default account is '%s@%s'",
+              toUser, toDomain ?: "?", localUser, localDomain ?: "?");
         linphone_call_decline(call, LinphoneReasonDeclined);
         return;
       }

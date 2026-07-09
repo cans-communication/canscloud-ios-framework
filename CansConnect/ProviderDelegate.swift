@@ -69,7 +69,31 @@ class ProviderDelegate: NSObject {
 //        provider = nil
 		super.init()
         provider?.setDelegate(self, queue: nil)
+        NotificationCenter.default.addObserver(
+            self,
+            selector: #selector(handleApplicationDidBecomeActive),
+            name: UIApplication.didBecomeActiveNotification,
+            object: nil
+        )
 	}
+
+    deinit {
+        NotificationCenter.default.removeObserver(self)
+    }
+
+    // When the user answers a video call from the lock screen (or any non-active
+    // state), `provider(_:perform:CXAnswerCallAction)` disables the local camera
+    // capture pipeline (iOS restricts camera access from background). Restore it
+    // once the app foregrounds — otherwise the SDP negotiates video sendrecv but
+    // iOS never pushes frames, so the remote peer sees a black stream.
+    @objc private func handleApplicationDidBecomeActive() {
+        guard let call = CallManager.instance().backgroundContextCall else { return }
+        if CallManager.instance().backgroundContextCameraIsEnabled {
+            call.cameraEnabled = true
+        }
+        CallManager.instance().backgroundContextCall = nil
+        CallManager.instance().backgroundContextCameraIsEnabled = false
+    }
 
 	static var providerConfiguration: CXProviderConfiguration = {
 		let providerConfiguration = CXProviderConfiguration()
@@ -339,6 +363,17 @@ extension ProviderDelegate: CXProviderDelegate {
     public func provider(_ provider: CXProvider, didActivate audioSession: AVAudioSession) {
         CallManager.instance().lc?.activateAudioSession(activated: true)
         CallManager.instance().callkitAudioSessionActivated = true
+
+        // Video calls must default to the loudspeaker. AVAudioSession `.voiceChat` mode
+        // routes to the earpiece by default; without an explicit override, the user has
+        // to press the CallKit "speaker" button after every video call answer. This override
+        // runs at the exact moment iOS hands the audio session to us, which is the only
+        // moment Linphone's `.voiceChat` default won't immediately overwrite our choice.
+        if let lc = CallManager.instance().lc,
+           let call = lc.currentCall,
+           call.currentParams?.videoEnabled ?? false || call.params?.videoEnabled ?? false {
+            CallManager.instance().changeRouteToSpeaker()
+        }
     }
 
     public func provider(_ provider: CXProvider, didDeactivate audioSession: AVAudioSession) {

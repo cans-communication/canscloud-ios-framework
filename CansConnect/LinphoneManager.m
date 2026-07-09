@@ -1497,7 +1497,14 @@ static void linphone_iphone_call_state(LinphoneCore *lc, LinphoneCall *call,
     const LinphoneAddress *identity = ap ? linphone_account_params_get_identity_address(ap) : NULL;
     const char *localUser = identity ? linphone_address_get_username(identity) : NULL;
     const char *localDomain = identity ? linphone_address_get_domain(identity) : NULL;
-    if (toUser && localUser) {
+    if (!localUser) {
+      // No default account identity (startup race or post sign-out) — cannot
+      // validate ownership so decline to prevent ghost calls slipping through.
+      NSLog(@"[LinphoneManager] Declining call: no default account identity available");
+      linphone_call_decline(call, LinphoneReasonDeclined);
+      return;
+    }
+    if (toUser) {
       // Match on username AND domain when both sides have a domain — prevents
       // false-accept if the same username exists on a different SIP domain.
       // Fall back to username-only when either side's domain is missing.

@@ -1324,10 +1324,20 @@ static void linphone_iphone_popup_password_request(LinphoneCore *lc,
     LinphoneCall *call = linphone_core_get_current_call(theLinphoneCore);
     if (call) {
       linphone_call_set_output_audio_device(call, speaker);
-    } else {
-      linphone_core_set_output_audio_device(theLinphoneCore, speaker);
     }
-    NSLog(@"[LinphoneManager] routeAudioToSpeaker: done");
+  }
+  // Setting Linphone's outputAudioDevice alone leaves iOS routing to the earpiece
+  // when the session is in `.voiceChat` mode. Explicit AVAudioSession override is
+  // required for the RN toggleSpeaker path and the VideoCallContext self-heal at
+  // isCallConnected — otherwise the OS-level route stays on receiver.
+  NSError *err = nil;
+  [[AVAudioSession sharedInstance]
+      overrideOutputAudioPort:AVAudioSessionPortOverrideSpeaker
+                        error:&err];
+  if (err) {
+    NSLog(@"[LinphoneManager] routeAudioToSpeaker: overrideOutputAudioPort err=%@", err);
+  } else {
+    NSLog(@"[LinphoneManager] routeAudioToSpeaker: done (AVAudioSession override applied)");
   }
 }
 
@@ -2108,33 +2118,56 @@ static void linphone_iphone_audio_devices_list_updated(LinphoneCore *lc) {
   // Dispatch on the main queue — linphone_core_iterate runs on the main thread via NSTimer;
   // calling linphone_core_* from any other queue introduces races (core is not thread-safe).
   NSString *phoneCopy = [phoneNumber copy];
-  LinphoneCore *lc = theLinphoneCore;
-  NSString *frontName = [self frontCameraNameForLinphone];
+  __weak typeof(self) weakSelf = self;
   dispatch_async(dispatch_get_main_queue(), ^{
+    if (!theLinphoneCore) return;
+    NSString *frontName = [self frontCameraNameForLinphone];
     if (frontName) {
       NSLog(@"[LinphoneManager] makeVideoCall: selecting front camera=%@", frontName);
-      linphone_core_set_video_device(lc, [frontName UTF8String]);
+      linphone_core_set_video_device(theLinphoneCore, [frontName UTF8String]);
     }
     // Re-enable capture/display/preview in case a previous call left them disabled (background state).
-    linphone_core_enable_video_capture(lc, YES);
-    linphone_core_enable_video_display(lc, YES);
-    linphone_core_enable_video_preview(lc, YES);
-    linphone_core_enable_self_view(lc, YES);
+    linphone_core_enable_video_capture(theLinphoneCore, YES);
+    linphone_core_enable_video_display(theLinphoneCore, YES);
+    linphone_core_enable_video_preview(theLinphoneCore, YES);
+    linphone_core_enable_self_view(theLinphoneCore, YES);
 
     LinphoneAddress *addr =
-        linphone_core_interpret_url(lc, [phoneCopy UTF8String]);
+        linphone_core_interpret_url(theLinphoneCore, [phoneCopy UTF8String]);
     if (!addr)
       return;
 
     LinphoneCallParams *params =
-        linphone_core_create_call_params(lc, NULL);
+        linphone_core_create_call_params(theLinphoneCore, NULL);
     linphone_call_params_enable_video(params, TRUE);
     linphone_call_params_enable_audio(params, TRUE);
 
-    linphone_core_invite_address_with_params(lc, addr, params);
+    linphone_core_invite_address_with_params(theLinphoneCore, addr, params);
 
-    linphone_address_unref(addr);
-    linphone_call_params_unref(params);
+
+    // makeVideoCall bypasses CallKit — provider(_:didActivate:) never fires and the
+    // ProviderDelegate speaker-override branch never runs for outgoing video. Rely on
+    // CallManager.onCallStateChanged StreamsRunning branch as primary; add a delayed
+    // safety pass here so speaker sticks even if the pipeline settles later than the
+    // state callback expected. Bluetooth path is respected by routeAudioToSpeaker's
+    // caller — but here we assume the video default is speaker unless bluetooth is up.
+    // The 800ms + 2000ms cadence brackets typical StreamsRunning arrival window.
+    dispatch_after(dispatch_time(DISPATCH_TIME_NOW, (int64_t)(0.8 * NSEC_PER_SEC)),
+                   dispatch_get_main_queue(), ^{
+      if (!theLinphoneCore) return;
+      typeof(weakSelf) strongSelf = weakSelf;
+      if (strongSelf && ![strongSelf isBluetoothAudioRouteAvailable]) {
+        [strongSelf routeAudioToSpeaker];
+      }
+    });
+    dispatch_after(dispatch_time(DISPATCH_TIME_NOW, (int64_t)(2.0 * NSEC_PER_SEC)),
+                   dispatch_get_main_queue(), ^{
+      if (!theLinphoneCore) return;
+      typeof(weakSelf) strongSelf = weakSelf;
+      if (strongSelf && ![strongSelf isBluetoothAudioRouteAvailable] && ![strongSelf isSpeakerEnabled]) {
+        [strongSelf routeAudioToSpeaker];
+      }
+    });
   });
 }
 
@@ -2169,14 +2202,34 @@ static void linphone_iphone_audio_devices_list_updated(LinphoneCore *lc) {
 
     // Dispatch on the main queue — linphone_core_iterate runs on the main thread via NSTimer;
     // calling linphone_core_* / linphone_call_* from any other queue risks races (core is not thread-safe).
-    LinphoneCall *callToAccept = currentCall;
-    LinphoneCore *lc = theLinphoneCore;
+    __weak typeof(self) weakSelf = self;
     dispatch_async(dispatch_get_main_queue(), ^{
       LinphoneCallParams *params =
-          linphone_core_create_call_params(lc, callToAccept);
+          linphone_core_create_call_params(theLinphoneCore, currentCall);
       linphone_call_params_enable_video(params, TRUE);
-      linphone_call_accept_with_params(callToAccept, params);
-      linphone_call_params_unref(params);
+
+      // acceptVideoCall bypasses CallKit (foreground direct-SIP path only —
+      // requestAnswerCurrentCallViaCallKit already returned false in the caller).
+      // provider(_:didActivate:) never fires, so the ProviderDelegate speaker-override
+      // is unreachable. Rely on CallManager.onCallStateChanged StreamsRunning branch
+      // as primary and add delayed safety passes to survive Linphone's post-accept
+      // audio-pipeline reconfiguration overwriting our override.
+      dispatch_after(dispatch_time(DISPATCH_TIME_NOW, (int64_t)(0.6 * NSEC_PER_SEC)),
+                     dispatch_get_main_queue(), ^{
+        if (!theLinphoneCore) return;
+        typeof(weakSelf) strongSelf = weakSelf;
+        if (strongSelf && ![strongSelf isBluetoothAudioRouteAvailable]) {
+          [strongSelf routeAudioToSpeaker];
+        }
+      });
+      dispatch_after(dispatch_time(DISPATCH_TIME_NOW, (int64_t)(1.5 * NSEC_PER_SEC)),
+                     dispatch_get_main_queue(), ^{
+        if (!theLinphoneCore) return;
+        typeof(weakSelf) strongSelf = weakSelf;
+        if (strongSelf && ![strongSelf isBluetoothAudioRouteAvailable] && ![strongSelf isSpeakerEnabled]) {
+          [strongSelf routeAudioToSpeaker];
+        }
+      });
     });
   }
 }
@@ -2348,8 +2401,22 @@ static void linphone_iphone_audio_devices_list_updated(LinphoneCore *lc) {
       linphone_core_enable_video_capture(theLinphoneCore, YES);
       // Cycle preview off→on so ogl_display is re-created against the current preview window ID.
       linphone_core_enable_video_preview(theLinphoneCore, NO);
-      linphone_core_enable_video_preview(theLinphoneCore, YES);
-      NSLog(@"[LinphoneManager] startVideoPreview: capture+preview re-enabled with front camera");
+
+      // enable_video_capture(YES) can trigger Linphone's internal configureAudioSession()
+      // which resets overrideOutputAudioPort to .none, silently reverting to earpiece.
+      // Re-apply the OS-level speaker override if Linphone's outputAudioDevice is still
+      // Speaker (meaning the user hasn't manually switched away from speaker).
+      LinphoneCall *spCall = linphone_core_get_current_call(theLinphoneCore);
+      if (spCall) {
+        LinphoneAudioDevice *outDev = linphone_call_get_output_audio_device(spCall);
+        if (outDev && linphone_audio_device_get_type(outDev) == LinphoneAudioDeviceTypeSpeaker) {
+          NSError *spErr = nil;
+          [[AVAudioSession sharedInstance]
+              overrideOutputAudioPort:AVAudioSessionPortOverrideSpeaker
+                                error:&spErr];
+          NSLog(@"[LinphoneManager] startVideoPreview: re-applied speaker override after capture restart (err=%@)", spErr);
+        }
+      }
     }
   });
   NSLog(@"[LinphoneManager] startVideoPreview done");

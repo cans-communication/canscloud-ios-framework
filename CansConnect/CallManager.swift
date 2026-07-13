@@ -46,8 +46,8 @@ import AVFoundation
 	var endCallkit: Bool = false
 	var globalState : GlobalState = .Off
 	var actionsToPerformOnceWhenCoreIsOn : [(()->Void)] = []
-    var callkitAudioSessionActivated : Bool? = nil // if "nil", ignore.
-    
+	var callkitAudioSessionActivated : Bool? = nil // if "nil", ignore.
+
     var backgroundContextCall : Call?
     @objc var backgroundContextCameraIsEnabled : Bool = false
 
@@ -70,9 +70,9 @@ import AVFoundation
 
 	@objc static func getAppData(call: OpaquePointer) -> CallAppData? {
 		let sCall = Call.getSwiftObject(cObject: call)
-		return getAppData(sCall: sCall)
+		return CallManager.getAppData(sCall: sCall)
 	}
-	
+
 	static func getAppData(sCall:Call) -> CallAppData? {
 		if (sCall.userData == nil) {
 			return nil
@@ -82,9 +82,9 @@ import AVFoundation
 
 	@objc static func setAppData(call:OpaquePointer, appData: CallAppData) {
 		let sCall = Call.getSwiftObject(cObject: call)
-		setAppData(sCall: sCall, appData: appData)
+		CallManager.setAppData(sCall: sCall, appData: appData)
 	}
-	
+
 	static func setAppData(sCall:Call, appData:CallAppData?) {
 		if (sCall.userData != nil) {
 			Unmanaged<CallAppData>.fromOpaque(sCall.userData!).release()
@@ -129,7 +129,7 @@ import AVFoundation
 			}
 		}
 	}
-	
+
 	@objc func updateCallId(previous: String, current: String) {
         let uuid = CallManager.instance().providerDelegate?.uuids["\(previous)"]
 		if (uuid != nil) {
@@ -370,9 +370,8 @@ import AVFoundation
 		if (!hold) {
 			setHeldOtherCalls(exceptCallid: sCall.callLog?.callId ?? "")
 		}
-		setHeld(call: sCall, hold: hold)
 	}
-	
+
 	func setHeld(call: Call, hold: Bool) {
 		let callid = call.callLog?.callId ?? ""
         let uuid = providerDelegate?.uuids["\(callid)"]
@@ -447,7 +446,7 @@ import AVFoundation
 			CallManager.instance().endCallkit = false
 		}
 	}
-    
+
     public func onAudioDevicesListUpdated(core: Core) {
         let bluetoothAvailable = isBluetoothAvailable();
         var dict = [String: Bool]()
@@ -582,9 +581,7 @@ import AVFoundation
                 case .End,
                      .Error:
 //                    if let addr = call.remoteAddress, let contactName = FastAddressBook.displayName(for: addr.getCobject) {
-//                        let displayName = contactName
-//                    }
-                    
+
 //                    UIDevice.current.isProximityMonitoringEnabled = false
                     if (CallManager.instance().lc!.callsNb == 0) {
                         CallManager.instance().changeRouteToDefault()
@@ -667,36 +664,47 @@ import AVFoundation
                     break
             }
 
-            let readyForRoutechange = CallManager.instance().callkitAudioSessionActivated == nil || (CallManager.instance().callkitAudioSessionActivated == true)
-            if (readyForRoutechange && (cstate == .IncomingReceived || cstate == .OutgoingInit || cstate == .Connected || cstate == .StreamsRunning)) {
-                if ((call.currentParams?.videoEnabled ?? false) && CallManager.instance().isReceiverEnabled()) {
-                    CallManager.instance().changeRouteToSpeaker()
+                // A call is "video" when EITHER the offered params or the negotiated params
+                // have video enabled. For outgoing calls, `currentParams` can be nil/false
+                // at .OutgoingInit and only reflects the negotiation at .Connected onward —
+                // relying on it alone missed the very first auto-route pass and left the
+                // route on earpiece until a later state transition.
+                let isVideoCall = (call.currentParams?.videoEnabled ?? false) || (call.params?.videoEnabled ?? false)
+                if isVideoCall {
+                    // Force speaker for video regardless of Linphone's reported
+                    // outputAudioDevice. Linphone's internal device state and the OS-level
+                    // AVAudioSession route can diverge
+                    // available — otherwise unconditionally upgrade to speaker.
+                    if isBluetoothAvailable() {
+                        CallManager.instance().changeRouteToBluetooth()
+                    } else {
+                        CallManager.instance().changeRouteToSpeaker()
+                    }
                 } else if (isBluetoothAvailable()) {
-                    // Use bluetooth device by default if one is available
+                    // Audio call: use bluetooth device by default if one is available
                     CallManager.instance().changeRouteToBluetooth()
                 }
             }
-        }
         // post Notification kLinphoneCallUpdate
         NotificationCenter.default.post(name: Notification.Name("LinphoneCallUpdate"), object: self, userInfo: [
             AnyHashable("call"): NSValue.init(pointer:UnsafeRawPointer(call.getCobject)),
             AnyHashable("state"): NSNumber(value: cstate.rawValue),
             AnyHashable("message"): message
         ])
-	}
-    
+    }
+
     @objc func terminate() {
         guard
             let lc = CallManager.instance().lc,
             let currentCall = lc.currentCall
         else { return }
-        terminateCall(call: currentCall.getCobject)
+        try? currentCall.terminate()
     }
-    
+
     @objc func getBackgroundContextCall() -> OpaquePointer? {
         return backgroundContextCall?.getCobject
     }
-    
+
     @objc func setBackgroundContextCall(call: OpaquePointer?) {
         if (call == nil) {
             backgroundContextCall = nil
@@ -704,19 +712,37 @@ import AVFoundation
             backgroundContextCall = Call.getSwiftObject(cObject: call!)
         }
     }
-    
+
     @objc func changeRouteToSpeaker() {
+        applySpeakerRoute()
+        // Belt-and-suspenders: Linphone's own audio-pipeline setup (StreamsRunning →
+        // configureAudioSession → activateAudioSession) can override our port-override
+        // between the moment we apply it and the moment the pipeline settles. Re-apply
+        // once at 300ms to survive that window. Idempotent — no harm if already speaker.
+        DispatchQueue.main.asyncAfter(deadline: .now() + 0.3) { [weak self] in
+            self?.applySpeakerRoute()
+        }
+    }
+
+    private func applySpeakerRoute() {
         guard let lc = lc else { return }
         let speaker = lc.audioDevices.first(where: { $0.type == .Speaker })
-        guard let speaker = speaker else {
-            return
+        if let speaker = speaker {
+            if let call = lc.currentCall {
+                call.outputAudioDevice = speaker
+            } else {
+                lc.outputAudioDevice = speaker
+            }
         }
-        if let call = lc.currentCall {
-            call.outputAudioDevice = speaker
-        } else {
-            lc.outputAudioDevice = speaker
+        // AVAudioSession override is the AUTHORITATIVE control for the OS-level route.
+        // Setting Linphone's outputAudioDevice alone leaves iOS in `.voiceChat` mode
+        // which defaults to the earpiece. Apply the override every time regardless of
+        // whether we found a Linphone Speaker device.
+        do {
+            try AVAudioSession.sharedInstance().overrideOutputAudioPort(.speaker)
+        } catch {
+            NSLog("[CallManager] applySpeakerRoute: overrideOutputAudioPort failed: %@", "\(error)")
         }
-        try? AVAudioSession.sharedInstance().overrideOutputAudioPort(.speaker)
     }
 
     @objc public func changeRouteToBluetooth() {
@@ -735,9 +761,8 @@ import AVFoundation
 
     @objc func changeRouteToDefault() {
         lc?.outputAudioDevice = lc?.defaultOutputAudioDevice
-        try? AVAudioSession.sharedInstance().overrideOutputAudioPort(.none)
     }
-    
+
     @objc func isBluetoothAvailable() -> Bool {
         guard let lc = lc else { return false }
         for device in lc.audioDevices {

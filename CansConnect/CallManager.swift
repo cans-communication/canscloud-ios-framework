@@ -664,17 +664,12 @@ import AVFoundation
                     break
             }
 
-                // A call is "video" when EITHER the offered params or the negotiated params
-                // have video enabled. For outgoing calls, `currentParams` can be nil/false
-                // at .OutgoingInit and only reflects the negotiation at .Connected onward —
-                // relying on it alone missed the very first auto-route pass and left the
-                // route on earpiece until a later state transition.
+                // `currentParams` is nil/false until .Connected; also check `params` (offered)
+                // so outgoing video is detected at .OutgoingInit on the first route pass.
                 let isVideoCall = (call.currentParams?.videoEnabled ?? false) || (call.params?.videoEnabled ?? false)
                 if isVideoCall {
-                    // Force speaker for video regardless of Linphone's reported
-                    // outputAudioDevice. Linphone's internal device state and the OS-level
-                    // AVAudioSession route can diverge
-                    // available — otherwise unconditionally upgrade to speaker.
+                    // Linphone device state and OS AVAudioSession route can diverge.
+                    // Bluetooth takes precedence; otherwise force speaker for video.
                     if isBluetoothAvailable() {
                         CallManager.instance().changeRouteToBluetooth()
                     } else {
@@ -715,10 +710,8 @@ import AVFoundation
 
     @objc func changeRouteToSpeaker() {
         applySpeakerRoute()
-        // Belt-and-suspenders: Linphone's own audio-pipeline setup (StreamsRunning →
-        // configureAudioSession → activateAudioSession) can override our port-override
-        // between the moment we apply it and the moment the pipeline settles. Re-apply
-        // once at 300ms to survive that window. Idempotent — no harm if already speaker.
+        // Linphone's StreamsRunning → configureAudioSession resets overrideOutputAudioPort
+        // before the pipeline settles. Re-apply at 300ms to survive that window.
         DispatchQueue.main.asyncAfter(deadline: .now() + 0.3) { [weak self] in
             self?.applySpeakerRoute()
         }
@@ -734,10 +727,8 @@ import AVFoundation
                 lc.outputAudioDevice = speaker
             }
         }
-        // AVAudioSession override is the AUTHORITATIVE control for the OS-level route.
-        // Setting Linphone's outputAudioDevice alone leaves iOS in `.voiceChat` mode
-        // which defaults to the earpiece. Apply the override every time regardless of
-        // whether we found a Linphone Speaker device.
+        // Linphone's outputAudioDevice alone doesn't change the OS route — `.voiceChat`
+        // keeps the earpiece. AVAudioSession override is authoritative; always apply.
         do {
             try AVAudioSession.sharedInstance().overrideOutputAudioPort(.speaker)
         } catch {

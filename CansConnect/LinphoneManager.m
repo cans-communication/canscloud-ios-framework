@@ -1326,18 +1326,14 @@ static void linphone_iphone_popup_password_request(LinphoneCore *lc,
       linphone_call_set_output_audio_device(call, speaker);
     }
   }
-  // Setting Linphone's outputAudioDevice alone leaves iOS routing to the earpiece
-  // when the session is in `.voiceChat` mode. Explicit AVAudioSession override is
-  // required for the RN toggleSpeaker path and the VideoCallContext self-heal at
-  // isCallConnected — otherwise the OS-level route stays on receiver.
+  // `.voiceChat` mode defaults to earpiece; Linphone's outputAudioDevice alone
+  // doesn't change the OS route. Always apply the AVAudioSession override.
   NSError *err = nil;
   [[AVAudioSession sharedInstance]
       overrideOutputAudioPort:AVAudioSessionPortOverrideSpeaker
                         error:&err];
   if (err) {
     NSLog(@"[LinphoneManager] routeAudioToSpeaker: overrideOutputAudioPort err=%@", err);
-  } else {
-    NSLog(@"[LinphoneManager] routeAudioToSpeaker: done (AVAudioSession override applied)");
   }
 }
 
@@ -2145,13 +2141,9 @@ static void linphone_iphone_audio_devices_list_updated(LinphoneCore *lc) {
     linphone_core_invite_address_with_params(theLinphoneCore, addr, params);
 
 
-    // makeVideoCall bypasses CallKit — provider(_:didActivate:) never fires and the
-    // ProviderDelegate speaker-override branch never runs for outgoing video. Rely on
-    // CallManager.onCallStateChanged StreamsRunning branch as primary; add a delayed
-    // safety pass here so speaker sticks even if the pipeline settles later than the
-    // state callback expected. Bluetooth path is respected by routeAudioToSpeaker's
-    // caller — but here we assume the video default is speaker unless bluetooth is up.
-    // The 800ms + 2000ms cadence brackets typical StreamsRunning arrival window.
+    // makeVideoCall bypasses CallKit; provider(_:didActivate:) never fires, so the
+    // ProviderDelegate speaker-override is unreachable. StreamsRunning is the primary
+    // route trigger; 800ms + 2000ms delayed passes cover late pipeline settlement.
     dispatch_after(dispatch_time(DISPATCH_TIME_NOW, (int64_t)(0.8 * NSEC_PER_SEC)),
                    dispatch_get_main_queue(), ^{
       if (!theLinphoneCore) return;
@@ -2208,12 +2200,8 @@ static void linphone_iphone_audio_devices_list_updated(LinphoneCore *lc) {
           linphone_core_create_call_params(theLinphoneCore, currentCall);
       linphone_call_params_enable_video(params, TRUE);
 
-      // acceptVideoCall bypasses CallKit (foreground direct-SIP path only —
-      // requestAnswerCurrentCallViaCallKit already returned false in the caller).
-      // provider(_:didActivate:) never fires, so the ProviderDelegate speaker-override
-      // is unreachable. Rely on CallManager.onCallStateChanged StreamsRunning branch
-      // as primary and add delayed safety passes to survive Linphone's post-accept
-      // audio-pipeline reconfiguration overwriting our override.
+      // Foreground direct-SIP path; CallKit never fires provider(_:didActivate:).
+      // 600ms + 1500ms delayed passes survive Linphone's post-accept audio reconfiguration.
       dispatch_after(dispatch_time(DISPATCH_TIME_NOW, (int64_t)(0.6 * NSEC_PER_SEC)),
                      dispatch_get_main_queue(), ^{
         if (!theLinphoneCore) return;
@@ -2402,10 +2390,9 @@ static void linphone_iphone_audio_devices_list_updated(LinphoneCore *lc) {
       // Cycle preview off→on so ogl_display is re-created against the current preview window ID.
       linphone_core_enable_video_preview(theLinphoneCore, NO);
 
-      // enable_video_capture(YES) can trigger Linphone's internal configureAudioSession()
-      // which resets overrideOutputAudioPort to .none, silently reverting to earpiece.
-      // Re-apply the OS-level speaker override if Linphone's outputAudioDevice is still
-      // Speaker (meaning the user hasn't manually switched away from speaker).
+      // enable_video_capture(YES) triggers Linphone's configureAudioSession(), resetting
+      // overrideOutputAudioPort to .none. Re-apply speaker override only if Linphone
+      // still reports Speaker (i.e., user hasn't manually changed routes).
       LinphoneCall *spCall = linphone_core_get_current_call(theLinphoneCore);
       if (spCall) {
         LinphoneAudioDevice *outDev = linphone_call_get_output_audio_device(spCall);

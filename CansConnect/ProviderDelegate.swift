@@ -235,29 +235,12 @@ extension ProviderDelegate: CXProviderDelegate {
         let callInfo = callInfos[uuid]
         let callId = callInfo?.callId
 
-        // [KILLED-STATE-ANSWER] Diagnostic: log the state of the SIP stack when
-        // CallKit fires the answer action. If the INVITE hasn't reached Linphone
-        // yet (VoIP push arrives before SIP), both lookups return nil → action.fail()
-        // → the call never actually answers even though the banner dismisses.
-        let primaryCall = CallManager.instance().callByCallId(callId: callId)
-        let coreCallsCount = CallManager.instance().lc?.calls.count ?? -1
-        let coreCallStates = CallManager.instance().lc?.calls.map { "\($0.state)" }.joined(separator: ",") ?? "nil"
-        NSLog("[KILLED-STATE-ANSWER] CXAnswerCallAction fired: uuid=%@ callId=%@ primaryLookup=%@ coreCallsCount=%d coreCallStates=[%@]",
-              uuid.uuidString,
-              callId ?? "(nil)",
-              primaryCall == nil ? "MISS" : "HIT",
-              Int32(coreCallsCount),
-              coreCallStates)
-
-        // Primary lookup: match by callId stored in callInfo.
-        // Fallback: if callId is empty or stale (push wakeup before INVITE arrived),
-        // find the first incoming call directly from the core.
-        var call = primaryCall
+        // Fallback to core scan when callId is stale (push woke the app before INVITE arrived).
+        var call = CallManager.instance().callByCallId(callId: callId)
         if call == nil {
             call = CallManager.instance().lc?.calls.first(where: {
                 $0.state == .IncomingReceived || $0.state == .IncomingEarlyMedia
             })
-            NSLog("[KILLED-STATE-ANSWER] fallback lookup: %@", call == nil ? "MISS (no IncomingReceived/IncomingEarlyMedia call)" : "HIT")
             // Sync the stored callId so End/other actions can find the call later.
             if let resolvedCall = call, let realCallId = resolvedCall.callLog?.callId {
                 callInfo?.callId = realCallId
@@ -270,15 +253,10 @@ extension ProviderDelegate: CXProviderDelegate {
         }
 
         guard let call = call else {
-            NSLog("[KILLED-STATE-ANSWER] action.fail() — no call found. INVITE likely hasn't arrived yet or CallManager.lc is nil. Call will remain in IncomingReceived when INVITE lands, and JS resolveInitialRoute will route to IncomingCallScreen.")
             action.fail()
             return
         }
-        NSLog("[KILLED-STATE-ANSWER] call resolved: state=%@ callId=%@ hasVideo=%d — proceeding to acceptCall.",
-              "\(call.state)",
-              call.callLog?.callId ?? "(nil)",
-              (call.params?.videoEnabled ?? false) ? 1 : 0)
-        
+
         // Stop the foreground ringtone before reconfiguring the audio session.
         // This fires when the user answers via either the native CallKit banner or
         // the RN IncomingCallScreen (NativeModuleiOS.answer also posts this, but
@@ -294,37 +272,20 @@ extension ProviderDelegate: CXProviderDelegate {
         CallManager.instance().callkitAudioSessionActivated = false
         CallManager.instance().lc?.configureAudioSession()
 
-        // [KILLED-STATE-ANSWER FIX] Accept the SIP call and fulfill the CallKit action.
-        // Without these two calls the SIP dialog stays in IncomingReceived after the
-        // banner dismisses, CallKit times out, and JS resolveInitialRoute sees an
-        // incoming call → routes to IncomingCallScreen instead of the active call
-        // screen. Foreground direct-SIP path never reaches this handler (no CallKit
-        // UUID is registered when the app draws its own incoming UI), so acceptCall
-        // cannot collide with LinphoneManager.acceptCall's direct linphone_call_accept.
+        // Must call both acceptCall and action.fulfill(). Without both: SIP stays
+        // IncomingReceived, CallKit times out, JS routes to IncomingCallScreen.
+        // Safe from double-accept: foreground direct-SIP path has no CallKit UUID.
         let isVideoCall = (call.currentParams?.videoEnabled ?? false)
             || (call.params?.videoEnabled ?? false)
             || ((call.remoteParams?.videoEnabled ?? false)
                 && (call.remoteParams?.videoDirection ?? .Inactive) != .Inactive)
-        NSLog("[KILLED-STATE-ANSWER] calling CallManager.acceptCall hasVideo=%d and fulfilling CXAnswerCallAction.", isVideoCall ? 1 : 0)
         CallManager.instance().acceptCall(call: call, hasVideo: isVideoCall)
         action.fulfill()
 
-        // Receiving-side speaker safety net (the frequent failure mode QA sees).
-        // For CallKit-answered video calls, three overrides SHOULD fire: (a) didActivate
-        // when iOS hands us the session, (b) StreamsRunning branch in onCallStateChanged
-        // when Linphone signals streams are live, (c) our 300ms retry inside
-        // changeRouteToSpeaker. All three can be defeated intermittently:
-        //   • `callkitAudioSessionActivated = false` above forces
-        //     onCallStateChanged's `readyForRoutechange` to false — if StreamsRunning
-        //     fires before didActivate flips the flag back to true, the primary
-        //     backstop is skipped.
-        //   • didActivate can find `lc.currentCall == nil` before .StreamsRunning
-        //     promotes the accepted call (mitigated by the fallback we just added,
-        //     but still race-sensitive).
-        //   • Linphone re-runs configureAudioSession() during pipeline setup, which
-        //     resets `overrideOutputAudioPort` to `.none`.
-        // Schedule two delayed passes on the main queue to survive all three windows.
-        // Times chosen to bracket typical StreamsRunning arrival + settle time.
+        // All three speaker triggers (didActivate, StreamsRunning, changeRouteToSpeaker
+        // 300ms retry) can be defeated by races: callkitAudioSessionActivated=false blocks
+        // StreamsRunning; didActivate sees currentCall=nil; configureAudioSession() resets
+        // overrideOutputAudioPort. 0.5s + 1.5s passes survive all three windows.
         if isVideoCall {
             DispatchQueue.main.asyncAfter(deadline: .now() + 0.5) {
                 if !CallManager.instance().isBluetoothAvailable() {
@@ -428,17 +389,10 @@ extension ProviderDelegate: CXProviderDelegate {
         CallManager.instance().lc?.activateAudioSession(activated: true)
         CallManager.instance().callkitAudioSessionActivated = true
 
-        // Video calls must default to the loudspeaker. AVAudioSession `.voiceChat` mode
-        // routes to the earpiece by default; without an explicit override, the user has
-        // to press the CallKit "speaker" button after every video call answer. This override
-        //
-        // Receiving-side race: `lc.currentCall` is often still nil at this moment for
-        // incoming calls — Linphone hasn't yet promoted the just-accepted call to "current"
-        // (only reaches "current" at .StreamsRunning). Falling back to `lc.calls` catches
-        // the call in .Connected / .OutgoingProgress and prevents the speaker upgrade from
-        // being silently skipped. Also broaden the video detection to include remoteParams
-        // (the caller's SDP offer) — for incoming, params/currentParams can lag behind
-        // remoteParams which is populated immediately from the INVITE.
+        // `.voiceChat` mode defaults to earpiece; force speaker for video calls.
+        // `currentCall` is nil until .StreamsRunning — fall back to lc.calls to avoid
+        // silently skipping the upgrade. Include remoteParams: for incoming calls it
+        // is populated from the INVITE before params/currentParams are negotiated.
         let lc = CallManager.instance().lc
         let call = lc?.currentCall ?? lc?.calls.first(where: { c in
             c.state != .End && c.state != .Error && c.state != .Released

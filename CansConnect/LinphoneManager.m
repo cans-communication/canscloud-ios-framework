@@ -1327,7 +1327,15 @@ static void linphone_iphone_popup_password_request(LinphoneCore *lc,
     } else {
       linphone_core_set_output_audio_device(theLinphoneCore, speaker);
     }
-    NSLog(@"[LinphoneManager] routeAudioToSpeaker: done");
+  }
+  // `.voiceChat` mode defaults to earpiece; Linphone's outputAudioDevice alone
+  // doesn't change the OS route. Always apply the AVAudioSession override.
+  NSError *err = nil;
+  [[AVAudioSession sharedInstance]
+      overrideOutputAudioPort:AVAudioSessionPortOverrideSpeaker
+                        error:&err];
+  if (err) {
+    NSLog(@"[LinphoneManager] routeAudioToSpeaker: overrideOutputAudioPort err=%@", err);
   }
 }
 
@@ -2108,33 +2116,53 @@ static void linphone_iphone_audio_devices_list_updated(LinphoneCore *lc) {
   // Dispatch on the main queue — linphone_core_iterate runs on the main thread via NSTimer;
   // calling linphone_core_* from any other queue introduces races (core is not thread-safe).
   NSString *phoneCopy = [phoneNumber copy];
-  LinphoneCore *lc = theLinphoneCore;
-  NSString *frontName = [self frontCameraNameForLinphone];
+  __weak typeof(self) weakSelf = self;
   dispatch_async(dispatch_get_main_queue(), ^{
+    if (!theLinphoneCore) return;
+    NSString *frontName = [self frontCameraNameForLinphone];
     if (frontName) {
       NSLog(@"[LinphoneManager] makeVideoCall: selecting front camera=%@", frontName);
-      linphone_core_set_video_device(lc, [frontName UTF8String]);
+      linphone_core_set_video_device(theLinphoneCore, [frontName UTF8String]);
     }
     // Re-enable capture/display/preview in case a previous call left them disabled (background state).
-    linphone_core_enable_video_capture(lc, YES);
-    linphone_core_enable_video_display(lc, YES);
-    linphone_core_enable_video_preview(lc, YES);
-    linphone_core_enable_self_view(lc, YES);
+    linphone_core_enable_video_capture(theLinphoneCore, YES);
+    linphone_core_enable_video_display(theLinphoneCore, YES);
+    linphone_core_enable_video_preview(theLinphoneCore, YES);
+    linphone_core_enable_self_view(theLinphoneCore, YES);
 
     LinphoneAddress *addr =
-        linphone_core_interpret_url(lc, [phoneCopy UTF8String]);
+        linphone_core_interpret_url(theLinphoneCore, [phoneCopy UTF8String]);
     if (!addr)
       return;
 
     LinphoneCallParams *params =
-        linphone_core_create_call_params(lc, NULL);
+        linphone_core_create_call_params(theLinphoneCore, NULL);
     linphone_call_params_enable_video(params, TRUE);
     linphone_call_params_enable_audio(params, TRUE);
 
-    linphone_core_invite_address_with_params(lc, addr, params);
-
-    linphone_address_unref(addr);
+    linphone_core_invite_address_with_params(theLinphoneCore, addr, params);
     linphone_call_params_unref(params);
+    linphone_address_unref(addr);
+
+    // makeVideoCall bypasses CallKit; provider(_:didActivate:) never fires, so the
+    // ProviderDelegate speaker-override is unreachable. StreamsRunning is the primary
+    // route trigger; 800ms + 2000ms delayed passes cover late pipeline settlement.
+    dispatch_after(dispatch_time(DISPATCH_TIME_NOW, (int64_t)(0.8 * NSEC_PER_SEC)),
+                   dispatch_get_main_queue(), ^{
+      if (!theLinphoneCore) return;
+      typeof(weakSelf) strongSelf = weakSelf;
+      if (strongSelf && ![strongSelf isBluetoothAudioRouteAvailable]) {
+        [strongSelf routeAudioToSpeaker];
+      }
+    });
+    dispatch_after(dispatch_time(DISPATCH_TIME_NOW, (int64_t)(2.0 * NSEC_PER_SEC)),
+                   dispatch_get_main_queue(), ^{
+      if (!theLinphoneCore) return;
+      typeof(weakSelf) strongSelf = weakSelf;
+      if (strongSelf && ![strongSelf isBluetoothAudioRouteAvailable] && ![strongSelf isSpeakerEnabled]) {
+        [strongSelf routeAudioToSpeaker];
+      }
+    });
   });
 }
 
@@ -2169,14 +2197,32 @@ static void linphone_iphone_audio_devices_list_updated(LinphoneCore *lc) {
 
     // Dispatch on the main queue — linphone_core_iterate runs on the main thread via NSTimer;
     // calling linphone_core_* / linphone_call_* from any other queue risks races (core is not thread-safe).
-    LinphoneCall *callToAccept = currentCall;
-    LinphoneCore *lc = theLinphoneCore;
+    __weak typeof(self) weakSelf = self;
     dispatch_async(dispatch_get_main_queue(), ^{
       LinphoneCallParams *params =
-          linphone_core_create_call_params(lc, callToAccept);
+          linphone_core_create_call_params(theLinphoneCore, currentCall);
       linphone_call_params_enable_video(params, TRUE);
-      linphone_call_accept_with_params(callToAccept, params);
+      linphone_call_accept_with_params(currentCall, params);
       linphone_call_params_unref(params);
+
+      // Foreground direct-SIP path; CallKit never fires provider(_:didActivate:).
+      // 600ms + 1500ms delayed passes survive Linphone's post-accept audio reconfiguration.
+      dispatch_after(dispatch_time(DISPATCH_TIME_NOW, (int64_t)(0.6 * NSEC_PER_SEC)),
+                     dispatch_get_main_queue(), ^{
+        if (!theLinphoneCore) return;
+        typeof(weakSelf) strongSelf = weakSelf;
+        if (strongSelf && ![strongSelf isBluetoothAudioRouteAvailable]) {
+          [strongSelf routeAudioToSpeaker];
+        }
+      });
+      dispatch_after(dispatch_time(DISPATCH_TIME_NOW, (int64_t)(1.5 * NSEC_PER_SEC)),
+                     dispatch_get_main_queue(), ^{
+        if (!theLinphoneCore) return;
+        typeof(weakSelf) strongSelf = weakSelf;
+        if (strongSelf && ![strongSelf isBluetoothAudioRouteAvailable] && ![strongSelf isSpeakerEnabled]) {
+          [strongSelf routeAudioToSpeaker];
+        }
+      });
     });
   }
 }
@@ -2346,10 +2392,23 @@ static void linphone_iphone_audio_devices_list_updated(LinphoneCore *lc) {
                  dispatch_get_main_queue(), ^{
     if (theLinphoneCore) {
       linphone_core_enable_video_capture(theLinphoneCore, YES);
+      // enable_video_capture(YES) triggers Linphone's configureAudioSession(), resetting
+      // overrideOutputAudioPort to .none. Re-apply speaker override only if Linphone
+      // still reports Speaker (i.e., user hasn't manually changed routes).
+      LinphoneCall *spCall = linphone_core_get_current_call(theLinphoneCore);
+      if (spCall) {
+        LinphoneAudioDevice *outDev = linphone_call_get_output_audio_device(spCall);
+        if (outDev && linphone_audio_device_get_type(outDev) == LinphoneAudioDeviceTypeSpeaker) {
+          NSError *spErr = nil;
+          [[AVAudioSession sharedInstance]
+              overrideOutputAudioPort:AVAudioSessionPortOverrideSpeaker
+                                error:&spErr];
+          NSLog(@"[LinphoneManager] startVideoPreview: re-applied speaker override after capture restart (err=%@)", spErr);
+        }
+      }
       // Cycle preview off→on so ogl_display is re-created against the current preview window ID.
       linphone_core_enable_video_preview(theLinphoneCore, NO);
       linphone_core_enable_video_preview(theLinphoneCore, YES);
-      NSLog(@"[LinphoneManager] startVideoPreview: capture+preview re-enabled with front camera");
     }
   });
   NSLog(@"[LinphoneManager] startVideoPreview done");

@@ -45,7 +45,7 @@ import os
 		callInfo.callId = callId
 		return callInfo
 	}
-	
+
 	static func newOutgoingCallInfo(addr: Address, isSas: Bool, displayName: String) -> CallInfo {
 		let callInfo = CallInfo()
 		callInfo.isOutgoing = true
@@ -115,7 +115,7 @@ class ProviderDelegate: NSObject {
 //        } else {
 //            // Fallback on earlier versions
 //        }
-		
+
 		return providerConfiguration
 	}()
 
@@ -185,7 +185,7 @@ class ProviderDelegate: NSObject {
 	func reportOutgoingCallConnected(uuid:UUID) {
         provider?.reportOutgoingCall(with: uuid, connectedAt: nil)
 	}
-	
+
 	func endCall(uuid: UUID, reason: CXCallEndedReason = .failed) {
         provider?.reportCall(with: uuid, endedAt: .init(), reason: reason)
 		let callId = callInfos[uuid]?.callId
@@ -235,9 +235,7 @@ extension ProviderDelegate: CXProviderDelegate {
         let callInfo = callInfos[uuid]
         let callId = callInfo?.callId
 
-        // Primary lookup: match by callId stored in callInfo.
-        // Fallback: if callId is empty or stale (push wakeup before INVITE arrived),
-        // find the first incoming call directly from the core.
+        // Fallback to core scan when callId is stale (push woke the app before INVITE arrived).
         var call = CallManager.instance().callByCallId(callId: callId)
         if call == nil {
             call = CallManager.instance().lc?.calls.first(where: {
@@ -270,10 +268,37 @@ extension ProviderDelegate: CXProviderDelegate {
             CallManager.instance().backgroundContextCameraIsEnabled = call.params?.videoEnabled ?? false
             call.cameraEnabled = false // Disable camera while app is not on foreground
         }
+
         CallManager.instance().callkitAudioSessionActivated = false
         CallManager.instance().lc?.configureAudioSession()
-        CallManager.instance().acceptCall(call: call, hasVideo: call.params?.videoEnabled ?? false)
+
+        // Must call both acceptCall and action.fulfill(). Without both: SIP stays
+        // IncomingReceived, CallKit times out, JS routes to IncomingCallScreen.
+        // Safe from double-accept: foreground direct-SIP path has no CallKit UUID.
+        let isVideoCall = (call.currentParams?.videoEnabled ?? false)
+            || (call.params?.videoEnabled ?? false)
+            || ((call.remoteParams?.videoEnabled ?? false)
+                && (call.remoteParams?.videoDirection ?? .Inactive) != .Inactive)
+        CallManager.instance().acceptCall(call: call, hasVideo: isVideoCall)
         action.fulfill()
+
+        // All three speaker triggers (didActivate, StreamsRunning, changeRouteToSpeaker
+        // 300ms retry) can be defeated by races: callkitAudioSessionActivated=false blocks
+        // StreamsRunning; didActivate sees currentCall=nil; configureAudioSession() resets
+        // overrideOutputAudioPort. 0.5s + 1.5s passes survive all three windows.
+        if isVideoCall {
+            DispatchQueue.main.asyncAfter(deadline: .now() + 0.5) {
+                if !CallManager.instance().isBluetoothAvailable() {
+                    CallManager.instance().changeRouteToSpeaker()
+                }
+            }
+            DispatchQueue.main.asyncAfter(deadline: .now() + 1.5) {
+                if !CallManager.instance().isBluetoothAvailable()
+                    && !CallManager.instance().isSpeakerEnabled() {
+                    CallManager.instance().changeRouteToSpeaker()
+                }
+            }
+        }
 	}
 
     public func provider(_ provider: CXProvider, perform action: CXSetHeldCallAction) {
@@ -364,15 +389,22 @@ extension ProviderDelegate: CXProviderDelegate {
         CallManager.instance().lc?.activateAudioSession(activated: true)
         CallManager.instance().callkitAudioSessionActivated = true
 
-        // Video calls must default to the loudspeaker. AVAudioSession `.voiceChat` mode
-        // routes to the earpiece by default; without an explicit override, the user has
-        // to press the CallKit "speaker" button after every video call answer. This override
-        // runs at the exact moment iOS hands the audio session to us, which is the only
-        // moment Linphone's `.voiceChat` default won't immediately overwrite our choice.
-        if let lc = CallManager.instance().lc,
-           let call = lc.currentCall,
-           call.currentParams?.videoEnabled ?? false || call.params?.videoEnabled ?? false {
-            CallManager.instance().changeRouteToSpeaker()
+        // `.voiceChat` mode defaults to earpiece; force speaker for video calls.
+        // `currentCall` is nil until .StreamsRunning — fall back to lc.calls to avoid
+        // silently skipping the upgrade. Include remoteParams: for incoming calls it
+        // is populated from the INVITE before params/currentParams are negotiated.
+        let lc = CallManager.instance().lc
+        let call = lc?.currentCall ?? lc?.calls.first(where: { c in
+            c.state != .End && c.state != .Error && c.state != .Released
+        })
+        if let call = call {
+            let isVideoCall = (call.currentParams?.videoEnabled ?? false)
+                || (call.params?.videoEnabled ?? false)
+                || ((call.remoteParams?.videoEnabled ?? false)
+                    && (call.remoteParams?.videoDirection ?? .Inactive) != .Inactive)
+            if isVideoCall {
+                CallManager.instance().changeRouteToSpeaker()
+            }
         }
     }
 
@@ -389,4 +421,3 @@ extension ProviderDelegate: CXProviderDelegate {
         CallManager.instance().callkitAudioSessionActivated = nil
     }
 }
-

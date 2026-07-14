@@ -370,6 +370,7 @@ import AVFoundation
 		if (!hold) {
 			setHeldOtherCalls(exceptCallid: sCall.callLog?.callId ?? "")
 		}
+		setHeld(call: sCall, hold: hold)
 	}
 
 	func setHeld(call: Call, hold: Bool) {
@@ -664,20 +665,27 @@ import AVFoundation
                     break
             }
 
-                // `currentParams` is nil/false until .Connected; also check `params` (offered)
-                // so outgoing video is detected at .OutgoingInit on the first route pass.
-                let isVideoCall = (call.currentParams?.videoEnabled ?? false) || (call.params?.videoEnabled ?? false)
-                if isVideoCall {
-                    // Linphone device state and OS AVAudioSession route can diverge.
-                    // Bluetooth takes precedence; otherwise force speaker for video.
-                    if isBluetoothAvailable() {
+                // Audio route: only update while a call is connecting or active.
+                // Skip terminal/transfer states and when CallKit deferred audio session
+                // activation (callkitAudioSessionActivated == false) — didActivate handles
+                // route setup once the session is live.
+                let isTerminalState = cstate == .End || cstate == .Error || cstate == .Released || cstate == .Referred
+                if !isTerminalState && CallManager.instance().callkitAudioSessionActivated != false {
+                    // `currentParams` is nil/false until .Connected; also check `params` (offered)
+                    // so outgoing video is detected at .OutgoingInit on the first route pass.
+                    let isVideoCall = (call.currentParams?.videoEnabled ?? false) || (call.params?.videoEnabled ?? false)
+                    if isVideoCall {
+                        // Linphone device state and OS AVAudioSession route can diverge.
+                        // Bluetooth takes precedence; otherwise force speaker for video.
+                        if isBluetoothAvailable() {
+                            CallManager.instance().changeRouteToBluetooth()
+                        } else {
+                            CallManager.instance().changeRouteToSpeaker()
+                        }
+                    } else if (isBluetoothAvailable()) {
+                        // Audio call: use bluetooth device by default if one is available
                         CallManager.instance().changeRouteToBluetooth()
-                    } else {
-                        CallManager.instance().changeRouteToSpeaker()
                     }
-                } else if (isBluetoothAvailable()) {
-                    // Audio call: use bluetooth device by default if one is available
-                    CallManager.instance().changeRouteToBluetooth()
                 }
             }
         // post Notification kLinphoneCallUpdate
@@ -752,6 +760,7 @@ import AVFoundation
 
     @objc func changeRouteToDefault() {
         lc?.outputAudioDevice = lc?.defaultOutputAudioDevice
+        try? AVAudioSession.sharedInstance().overrideOutputAudioPort(.none)
     }
 
     @objc func isBluetoothAvailable() -> Bool {

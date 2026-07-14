@@ -1324,6 +1324,8 @@ static void linphone_iphone_popup_password_request(LinphoneCore *lc,
     LinphoneCall *call = linphone_core_get_current_call(theLinphoneCore);
     if (call) {
       linphone_call_set_output_audio_device(call, speaker);
+    } else {
+      linphone_core_set_output_audio_device(theLinphoneCore, speaker);
     }
   }
   // `.voiceChat` mode defaults to earpiece; Linphone's outputAudioDevice alone
@@ -2139,7 +2141,8 @@ static void linphone_iphone_audio_devices_list_updated(LinphoneCore *lc) {
     linphone_call_params_enable_audio(params, TRUE);
 
     linphone_core_invite_address_with_params(theLinphoneCore, addr, params);
-
+    linphone_call_params_unref(params);
+    linphone_address_unref(addr);
 
     // makeVideoCall bypasses CallKit; provider(_:didActivate:) never fires, so the
     // ProviderDelegate speaker-override is unreachable. StreamsRunning is the primary
@@ -2199,6 +2202,8 @@ static void linphone_iphone_audio_devices_list_updated(LinphoneCore *lc) {
       LinphoneCallParams *params =
           linphone_core_create_call_params(theLinphoneCore, currentCall);
       linphone_call_params_enable_video(params, TRUE);
+      linphone_call_accept_with_params(currentCall, params);
+      linphone_call_params_unref(params);
 
       // Foreground direct-SIP path; CallKit never fires provider(_:didActivate:).
       // 600ms + 1500ms delayed passes survive Linphone's post-accept audio reconfiguration.
@@ -2387,9 +2392,6 @@ static void linphone_iphone_audio_devices_list_updated(LinphoneCore *lc) {
                  dispatch_get_main_queue(), ^{
     if (theLinphoneCore) {
       linphone_core_enable_video_capture(theLinphoneCore, YES);
-      // Cycle preview off→on so ogl_display is re-created against the current preview window ID.
-      linphone_core_enable_video_preview(theLinphoneCore, NO);
-
       // enable_video_capture(YES) triggers Linphone's configureAudioSession(), resetting
       // overrideOutputAudioPort to .none. Re-apply speaker override only if Linphone
       // still reports Speaker (i.e., user hasn't manually changed routes).
@@ -2404,6 +2406,9 @@ static void linphone_iphone_audio_devices_list_updated(LinphoneCore *lc) {
           NSLog(@"[LinphoneManager] startVideoPreview: re-applied speaker override after capture restart (err=%@)", spErr);
         }
       }
+      // Cycle preview off→on so ogl_display is re-created against the current preview window ID.
+      linphone_core_enable_video_preview(theLinphoneCore, NO);
+      linphone_core_enable_video_preview(theLinphoneCore, YES);
     }
   });
   NSLog(@"[LinphoneManager] startVideoPreview done");

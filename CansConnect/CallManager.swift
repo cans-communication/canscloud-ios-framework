@@ -493,15 +493,30 @@ import AVFoundation
                           remoteParams?.videoDirection.rawValue ?? -1,
                           video ? 1 : 0,
                           displayName)
-                    // Busy-decline: reject second incoming call if a call is already active.
-                    // `max_calls=1` (set in LinphoneManager.createLinphoneCore) handles this at the SIP level (auto 486),
-                    // but add an explicit guard here as belt-and-suspenders.
+                    // Busy-decline: reject second incoming INVITE while a call is active.
+                    // max_calls=1 would trigger a SIP-level 486 before IncomingReceived, starving
+                    // the "busyDeclined" event JS needs for missed-call history.
                     let otherActiveCalls = core.calls.filter { c in
                         c !== call && c.state != .Released && c.state != .End && c.state != .Error
                     }
                     if !otherActiveCalls.isEmpty {
                         NSLog("[CallManager] Busy-declining incoming call — \(otherActiveCalls.count) active call(s) exist")
+                        // Capture identity before decline() — remoteAddress is nil after .End.
+                        // CansBusyDeclinedCall lets JS write a missed-call entry to chat history.
+                        let callerNumber = call.remoteAddress?.username ?? ""
+                        let hasVideo = (call.remoteParams?.videoEnabled ?? false) && (call.remoteParams?.videoDirection ?? .Inactive) != .Inactive
                         try? call.decline(reason: .Busy)
+                        if !callerNumber.isEmpty {
+                            NotificationCenter.default.post(
+                                name: NSNotification.Name("CansBusyDeclinedCall"),
+                                object: nil,
+                                userInfo: [
+                                    "phoneNumber": callerNumber,
+                                    "isVideo": hasVideo,
+                                    "timestamp": Date().timeIntervalSince1970 * 1000
+                                ]
+                            )
+                        }
                         return
                     }
                     if (CallManager.callKitEnabled()) {
@@ -566,6 +581,7 @@ import AVFoundation
                             // callId may be nil at OutgoingInit (SIP Call-ID not assigned until
                             // the INVITE is sent at OutgoingProgress). Guard both to retry on
                             // the next state transition instead of crashing.
+                            // callId is nil at OutgoingInit (assigned when INVITE is sent); retry on next state.
                             if let callInfo = CallManager.instance().providerDelegate.callInfos[uuid!],
                                let resolvedCallId = callId {
                                 callInfo.callId = resolvedCallId

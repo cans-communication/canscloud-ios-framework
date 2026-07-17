@@ -221,9 +221,7 @@ static const float kVideoDeadBandwidthKbps = 1.0f;
     }
     NSLog(@"[LinphoneManager] Config created at: %p", config);
 
-    linphone_config_set_int(config, "misc", "max_calls", 1);
-
-    // Align with native app storage paths
+    // Match the native app's storage paths.
     [self lpConfigSetString:config
                       value:[LinphoneManager dataFile:@"linphone.db"]
                      forKey:@"uri"
@@ -1485,16 +1483,9 @@ static void linphone_iphone_call_state(LinphoneCore *lc, LinphoneCall *call,
   NSString *stateStr = [manager convertCallStateToString:state];
   NSString *msgStr = message ? [NSString stringWithUTF8String:message] : @"";
 
-  // Default-account gate: decline any incoming INVITE whose TO username/domain
-  // does not match the current default account. Two scenarios this covers:
-  //   1. Ghost calls — sign-out unregister was delayed and the SIP proxy still
-  //      routes the previous user's calls here.
-  //   2. Multi-account routing — user is signed into 9000 and 2000, made 2000
-  //      the default, and a call still arrives for 9000. Without this filter
-  //      Linphone's "workaround to have this call assigned to a known account"
-  //      surfaces it as a normal IncomingCall for the wrong account.
-  // Rejecting here (before kLinphoneCallStateUpdate is posted) means the RN
-  // IncomingCallScreen never appears for non-default targets.
+  // Default-account gate: decline INVITEs not addressed to the current default account.
+  // Guards against ghost calls (stale proxy routing post-sign-out) and wrong-account routing.
+  // Rejecting before kLinphoneCallStateUpdate prevents the IncomingCallScreen from appearing.
   if (state == LinphoneCallIncomingReceived || state == LinphoneCallIncomingEarlyMedia) {
     const LinphoneCallLog *callLog = linphone_call_get_call_log(call);
     const LinphoneAddress *toAddr = callLog ? linphone_call_log_get_to_address(callLog) : NULL;
@@ -1527,7 +1518,38 @@ static void linphone_iphone_call_state(LinphoneCore *lc, LinphoneCall *call,
     }
   }
 
-  // Voicemail Detection via SIP Headers (Logic from Android)
+  // Busy-decline: reject second INVITE before posting kLinphoneCallStateUpdate.
+  // Without this, JS shows IncomingCallScreen and CallKit shows a second native call UI.
+  // Capture remote address before decline() — it's nil after End state.
+  if (state == LinphoneCallIncomingReceived || state == LinphoneCallIncomingEarlyMedia) {
+    BOOL hasActiveCall = NO;
+    const bctbx_list_t *calls = linphone_core_get_calls(lc);
+    while (calls) {
+      LinphoneCall *c = (LinphoneCall *)calls->data;
+      if (c != call) {
+        LinphoneCallState cs = linphone_call_get_state(c);
+        if (cs == LinphoneCallStreamsRunning || cs == LinphoneCallConnected ||
+            cs == LinphoneCallPaused       || cs == LinphoneCallPausedByRemote ||
+            cs == LinphoneCallUpdating     || cs == LinphoneCallUpdatedByRemote) {
+          hasActiveCall = YES;
+          break;
+        }
+      }
+      calls = calls->next;
+    }
+    if (hasActiveCall) {
+      const LinphoneAddress *addr = linphone_call_get_remote_address(call);
+      const char *fromUser = addr ? linphone_address_get_username(addr) : NULL;
+      NSString *callerPhone = fromUser ? [NSString stringWithUTF8String:fromUser] : @"";
+      NSLog(@"[LinphoneManager] Busy-decline: active call exists, declining %@ with LinphoneReasonBusy", callerPhone);
+      // Decline at C level to send SIP 486. Swift CallManager owns the CansBusyDeclinedCall
+      // notification — suppress kLinphoneCallStateUpdate so JS never sees IncomingCall.
+      linphone_call_decline(call, LinphoneReasonBusy);
+      return;
+    }
+  }
+
+  // Voicemail detection via SIP headers.
   if (state == LinphoneCallOutgoingEarlyMedia || state == LinphoneCallOutgoingProgress ||
       state == LinphoneCallConnected || state == LinphoneCallStreamsRunning) {
 
@@ -1557,6 +1579,32 @@ static void linphone_iphone_call_state(LinphoneCore *lc, LinphoneCall *call,
               }
           }
       }
+  }
+
+  // Suppress CallEnd/Error/Released for secondary calls while another call is live —
+  // prevents JS from treating them as the active call ending.
+  BOOL isTerminalStateForPhantom = (state == LinphoneCallEnd ||
+                                    state == LinphoneCallError ||
+                                    state == LinphoneCallReleased);
+  if (isTerminalStateForPhantom) {
+    BOOL hasOtherLiveCall = NO;
+    const bctbx_list_t *allCalls = linphone_core_get_calls(lc);
+    while (allCalls) {
+      LinphoneCall *other = (LinphoneCall *)allCalls->data;
+      if (other != call) {
+        LinphoneCallState os = linphone_call_get_state(other);
+        if (os == LinphoneCallStreamsRunning || os == LinphoneCallConnected ||
+            os == LinphoneCallPaused         || os == LinphoneCallPausedByRemote ||
+            os == LinphoneCallUpdating       || os == LinphoneCallUpdatedByRemote) {
+          hasOtherLiveCall = YES;
+          break;
+        }
+      }
+      allCalls = allCalls->next;
+    }
+    if (hasOtherLiveCall) {
+      return;
+    }
   }
 
   NSLog(@"[LinphoneManager][VideoCall] call_state_changed: state=%@ message=%s", stateStr, message ?: "");
@@ -2984,7 +3032,7 @@ static void linphone_iphone_chat_room_state_changed(LinphoneCore *lc,
         linphone_config_set_string(config, "call_logs", "database_path", dbPath.UTF8String);
     }
 
-    // Chat configuration (mirrors Android CansCenter.configureChatSettings)
+    // Chat persistence settings.
     linphone_config_set_int(config, "misc", "hide_empty_chat_rooms", 0);
     linphone_config_set_int(config, "misc", "load_chat_rooms_from_db", 1);
     linphone_config_set_int(config, "misc", "store_chat_logs", 1);
@@ -3738,12 +3786,29 @@ static void linphone_iphone_info_received(LinphoneCore *lc, LinphoneCall *call, 
   dispatch_async(dispatch_get_main_queue(), ^{
     if (!theLinphoneCore) return;
     if (callId.length > 0) {
+      // If there are active calls and none matches this callId, the push arrived late
+      // for a call already busy-declined/ended. Calling linphone_core_process_push_notification
+      // with a stale callId can terminate the active session — skip it.
+      const bctbx_list_t *calls = linphone_core_get_calls(theLinphoneCore);
+      if (calls != NULL) {
+        BOOL matched = NO;
+        for (const bctbx_list_t *it = calls; it; it = it->next) {
+          LinphoneCall *c = (LinphoneCall *)it->data;
+          LinphoneCallLog *log = linphone_call_get_call_log(c);
+          const char *cid = log ? linphone_call_log_get_call_id(log) : NULL;
+          if (cid && [callId isEqualToString:[NSString stringWithUTF8String:cid]]) {
+            matched = YES;
+            break;
+          }
+        }
+        if (!matched) {
+          return;
+        }
+      }
       linphone_core_process_push_notification(theLinphoneCore, callId.UTF8String);
     } else {
       linphone_core_refresh_registers(theLinphoneCore);
     }
-    NSLog(@"[LinphoneManager] processPushNotification: callId=%@",
-          callId.length > 0 ? callId : @"(empty — refreshed registers)");
   });
 }
 

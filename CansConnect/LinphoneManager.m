@@ -1542,8 +1542,22 @@ static void linphone_iphone_call_state(LinphoneCore *lc, LinphoneCall *call,
       const char *fromUser = addr ? linphone_address_get_username(addr) : NULL;
       NSString *callerPhone = fromUser ? [NSString stringWithUTF8String:fromUser] : @"";
       NSLog(@"[LinphoneManager] Busy-decline: active call exists, declining %@ with LinphoneReasonBusy", callerPhone);
+      // Emit busy-decline only for IncomingEarlyMedia (Swift handles IncomingReceived) so JS can log a missed call.
+      if (state == LinphoneCallIncomingEarlyMedia && callerPhone.length > 0) {
+        const LinphoneCallParams *remoteParams = linphone_call_get_remote_params(call);
+        BOOL hasVideo = remoteParams &&
+          linphone_call_params_video_enabled(remoteParams) &&
+          (linphone_call_params_get_video_direction(remoteParams) != LinphoneMediaDirectionInactive);
+        [[NSNotificationCenter defaultCenter] postNotificationName:@"CansBusyDeclinedCall"
+                                                            object:nil
+                                                          userInfo:@{
+          @"phoneNumber": callerPhone,
+          @"isVideo": @(hasVideo),
+          @"timestamp": @([[NSDate date] timeIntervalSince1970] * 1000.0)
+        }];
+      }
       // Decline at C level to send SIP 486. Swift CallManager owns the CansBusyDeclinedCall
-      // notification — suppress kLinphoneCallStateUpdate so JS never sees IncomingCall.
+      // notification for IncomingReceived — suppress kLinphoneCallStateUpdate so JS never sees IncomingCall.
       linphone_call_decline(call, LinphoneReasonBusy);
       return;
     }
@@ -3794,7 +3808,7 @@ static void linphone_iphone_info_received(LinphoneCore *lc, LinphoneCall *call, 
         BOOL matched = NO;
         for (const bctbx_list_t *it = calls; it; it = it->next) {
           LinphoneCall *c = (LinphoneCall *)it->data;
-          LinphoneCallLog *log = linphone_call_get_call_log(c);
+          const LinphoneCallLog *log = linphone_call_get_call_log(c);
           const char *cid = log ? linphone_call_log_get_call_id(log) : NULL;
           if (cid && [callId isEqualToString:[NSString stringWithUTF8String:cid]]) {
             matched = YES;

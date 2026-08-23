@@ -114,7 +114,11 @@ import AVFoundation
 
 	@objc static func callKitEnabled() -> Bool {
 		#if !targetEnvironment(simulator)
-		return true
+		// MIIT / App Store Guideline 5: no CallKit on the China App Store.
+		// This is the single gate every CallKit path in the SDK funnels through —
+		// outgoing CXStartCallAction, incoming reportNewIncomingCall, hold, and the
+		// call-state bookkeeping in onCallStateChanged all check it.
+		return !CansCallKitPolicy.isDisabled
 		#else
 		return false
 		#endif

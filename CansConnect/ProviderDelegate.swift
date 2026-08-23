@@ -65,8 +65,12 @@ class ProviderDelegate: NSObject {
 	var callInfos: [UUID : CallInfo] = [:]
 
 	override init() {
-        provider = CXProvider(configuration: ProviderDelegate.providerConfiguration)
-//        provider = nil
+        // Where CallKit is barred (China App Store — MIIT), never construct the
+        // CXProvider at all. Every use site is `provider?.` so a nil provider
+        // makes each CallKit call a silent no-op rather than a crash.
+        provider = CansCallKitPolicy.isDisabled
+            ? nil
+            : CXProvider(configuration: ProviderDelegate.providerConfiguration)
 		super.init()
         provider?.setDelegate(self, queue: nil)
         NotificationCenter.default.addObserver(

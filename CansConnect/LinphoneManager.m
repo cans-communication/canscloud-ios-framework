@@ -158,6 +158,53 @@ static const float kVideoDeadBandwidthKbps = 1.0f;
   return [fullPath stringByAppendingPathComponent:file];
 }
 
+// Strips any port from every account's identity address (the AOR).
+//
+// The identity must be host-only. When it carries a port, liblinphone keys a
+// basic chat room's ConferenceId WITH the port in RAM while MainDb persists
+// the same address WITHOUT it, so the IMDN-response path looks the room up
+// port-less, misses, dereferences a null EventLog and takes the process down
+// with SIGSEGV inside Imdn::onImdnMessageDelivered. Rooms reloaded from the
+// DB also stop matching their account.
+//
+// Login no longer writes a ported identity (see setupLinphoneWithExtension),
+// but a port persisted into linphonerc by an older build survives reinstall,
+// so repair it at every startup. The port is untouched on serverAddress,
+// where it belongs; nothing on the wire changes, since From/To never carried
+// it. Mirrors CansCenter.normalizeIdentityAddresses() in the Android SDK.
+- (void)normalizeIdentityAddresses {
+  if (!theLinphoneCore) return;
+  BOOL changed = NO;
+  const bctbx_list_t *accounts = linphone_core_get_account_list(theLinphoneCore);
+  for (const bctbx_list_t *it = accounts; it != NULL; it = it->next) {
+    LinphoneAccount *acc = (LinphoneAccount *)it->data;
+    const LinphoneAccountParams *curParams = linphone_account_get_params(acc);
+    const LinphoneAddress *identity =
+        curParams ? linphone_account_params_get_identity_address(curParams) : NULL;
+    if (!identity || linphone_address_get_port(identity) <= 0) continue;
+
+    NSLog(@"[LinphoneManager] normalizeIdentityAddresses: stripping port %d from identity "
+          @"%s@%s — a ported identity desynchronises chat-room keying (SIGSEGV risk in IMDN handling)",
+          linphone_address_get_port(identity),
+          linphone_address_get_username(identity) ?: "",
+          linphone_address_get_domain(identity) ?: "");
+
+    LinphoneAddress *newIdentity = linphone_address_clone(identity);
+    linphone_address_set_port(newIdentity, 0);
+    LinphoneAccountParams *newParams = linphone_account_params_clone(curParams);
+    linphone_account_params_set_identity_address(newParams, newIdentity);
+    linphone_account_set_params(acc, newParams);
+    linphone_account_params_unref(newParams);
+    linphone_address_unref(newIdentity);
+    changed = YES;
+  }
+  if (changed) {
+    // Account.params is in-memory only; without this the ported identity
+    // comes straight back on the next launch.
+    linphone_core_config_sync(theLinphoneCore);
+  }
+}
+
 - (void)createLinphoneCore {
   __weak typeof(self) weakSelf = self;
   dispatch_async(dispatch_get_main_queue(), ^{
@@ -235,7 +282,12 @@ static const float kVideoDeadBandwidthKbps = 1.0f;
     linphone_config_set_int(config, "app", "publish_presence", 0);
     linphone_config_set_int(config, "sip", "publish_presence", 0);
     linphone_config_set_string(config, "sip", "save_headers", "To, Diversion, Contact, X-Voicemail");
-    linphone_config_set_int(config, "app", "use_callkit", 1);
+    // MIIT / App Store Guideline 5: CallKit must be inert on the China App Store.
+    // Overrides use_callkit=1 from linphonerc-factory. +[LinphoneManager isCallKitEnabled]
+    // reads this key back, so every ObjC caller inherits the same decision.
+    BOOL callKitAllowed = ![CansCallKitPolicy isDisabled];
+    linphone_config_set_int(config, "app", "use_callkit", callKitAllowed ? 1 : 0);
+    NSLog(@"[LinphoneManager] use_callkit=%d (%@)", callKitAllowed ? 1 : 0, [CansCallKitPolicy reason]);
 
     NSLog(@"[LinphoneManager] Attempting to create core with correct API "
           @"(v3)...");
@@ -309,6 +361,13 @@ static const float kVideoDeadBandwidthKbps = 1.0f;
       NSString *uaVersion = [NSString stringWithFormat:@"%@(%@)", shortVersion, buildNumber];
       linphone_core_set_user_agent(theLinphoneCore, appDisplayName.UTF8String, uaVersion.UTF8String);
       NSLog(@"[LinphoneManager] SIP User-Agent set: %@/%@", appDisplayName, uaVersion);
+
+      // Must run before linphone_core_start(): accounts are loaded from
+      // linphonerc by this point but have not registered yet, which is the
+      // only safe window to rewrite Account.params (mutating them on the
+      // main thread after registration risks the same class of crash this
+      // is fixing). See normalizeIdentityAddresses' doc comment.
+      [self normalizeIdentityAddresses];
 
       NSLog(@"[LinphoneManager] Starting core...");
       linphone_core_start(theLinphoneCore);
@@ -1939,7 +1998,17 @@ static void linphone_iphone_audio_devices_list_updated(LinphoneCore *lc) {
       [NSString stringWithFormat:@"sip:%@@%@", extension, realm];
   LinphoneAddress *identity = linphone_address_new(identityStr.UTF8String);
   if (identity) {
-    linphone_address_set_port(identity, (int)[port integerValue]);
+    // Host only — NEVER stamp a port on the identity address. The identity is
+    // the AOR; the port belongs to serverAddress (set below), not here, and
+    // never appears in From/To on the wire anyway. A ported identity
+    // ("sip:9002@host:8444") desyncs liblinphone's chat-room keying:
+    // ConferenceId keeps the port in RAM but MainDb persists it stripped, so
+    // the IMDN-response path looks the room up port-less, misses, and
+    // dereferences a null EventLog — SIGSEGV inside
+    // Imdn::onImdnMessageDelivered. See canscloud-react-native-v6's
+    // PR_DESCRIPTION_CHAT_CRASH.md ("Update 2026-08-18 (later)"), which
+    // root-caused and fixed the same bug on Android; this was flagged there
+    // as iOS's untouched latent copy.
     linphone_account_params_set_identity_address(params, identity);
   }
 

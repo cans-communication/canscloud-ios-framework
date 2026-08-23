@@ -216,6 +216,13 @@ import linphonesw
     /// Must be called synchronously on the main thread before the PushKit completion handler returns.
     /// hasVideo should be parsed from the push payload; defaults to false (audio) when absent.
     @objc public static func reportIncomingVoIPCall(callId: String, hasVideo: Bool = false) {
+        // Belt-and-braces: the host app is not supposed to reach here at all when
+        // CallKit is barred (it should not have registered for PushKit), but a
+        // stale build or a direct-SIP path could still call in.
+        if CansCallKitPolicy.isDisabled {
+            NSLog("[CansBase] reportIncomingVoIPCall ignored — CallKit disabled (%@)", CansCallKitPolicy.reason)
+            return
+        }
         CallManager.instance().displayIncomingCall(callId: callId, hasVideo: hasVideo)
     }
 
@@ -227,6 +234,10 @@ import linphonesw
     /// Use this instead of reportIncomingVoIPCall + endIncomingCallInCallKit when
     /// UIApplication.applicationState == .active and the app draws its own incoming-call UI.
     @objc public static func reportIncomingVoIPCallSilencingUI(callId: String, hasVideo: Bool = false) {
+        if CansCallKitPolicy.isDisabled {
+            NSLog("[CansBase] reportIncomingVoIPCallSilencingUI ignored — CallKit disabled (%@)", CansCallKitPolicy.reason)
+            return
+        }
         CallManager.instance().displayIncomingCall(callId: callId, hasVideo: hasVideo, silenceUI: true)
     }
 

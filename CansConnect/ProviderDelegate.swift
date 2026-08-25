@@ -383,6 +383,11 @@ extension ProviderDelegate: CXProviderDelegate {
 
     public func providerDidReset(_ provider: CXProvider) {
 //		Log.directLog(BCTBX_LOG_MESSAGE, text: "CallKit: did reset.")
+        // CallKit is discarding all call state it holds (system reset, e.g. the app was
+        // killed and relaunched with calls still active in CallKit's view). Without this,
+        // a CallKit-reported call left dangling here never gets a SIP-side BYE — same class
+        // of orphaned-call bug as the direct-SIP foreground path, just via the CallKit leg.
+        CansBase.terminateAllCalls()
 	}
 
     public func provider(_ provider: CXProvider, didActivate audioSession: AVAudioSession) {

@@ -108,19 +108,15 @@ import linphonesw
         CallManager.instance().terminateCall(call: call)
     }
 
-    /// Hangs up every live call, regardless of CallKit registration. Static so callers
-    /// (AppDelegate, ProviderDelegate) can call it without holding a CansBase instance —
-    /// mirrors wireCallManagerCore's rationale.
+    /// Hangs up every live call, regardless of CallKit registration. Static (like
+    /// wireCallManagerCore) so AppDelegate/ProviderDelegate can call it without a CansBase instance.
     ///
-    /// Used from providerDidReset: CallKit has already discarded its own state for every
-    /// call it was tracking at that point, so there's nothing to preserve — terminating
-    /// the matching SIP-side calls here just prevents them being left dangling with no BYE.
+    /// Called from providerDidReset: CallKit already dropped its own state for these calls,
+    /// so terminating the matching SIP calls here just avoids leaving them dangling with no BYE.
     ///
-    /// Do NOT call this from applicationDidEnterBackground — a CallKit-registered call is
-    /// *meant* to keep running when the app backgrounds (that's the entire point of the
-    /// "audio"/"voip" background modes + PushKit); doing so would hang up every normal
-    /// call the instant the user presses Home. Use
-    /// terminateCallsWithoutCallKitRegistration() there instead.
+    /// Do NOT call from applicationDidEnterBackground — CallKit calls are meant to keep running
+    /// in the background (that's the point of the "audio"/"voip" modes + PushKit); this would
+    /// hang up every normal call on Home press. Use terminateCallsWithoutCallKitRegistration() there.
     @objc public static func terminateAllCalls() {
         guard let lc = CallManager.instance().lc else { return }
         for call in lc.calls {
@@ -132,14 +128,12 @@ import linphonesw
         }
     }
 
-    /// Hangs up only calls that have no CallKit registration — i.e. calls answered via
-    /// the direct-SIP foreground path (no CXProvider report; see AppDelegate's
-    /// [CALLKIT-SKIPPED] path). A CallKit-backed call is designed to keep running while
-    /// the app is backgrounded, so it's left untouched here. A call with no CallKit UUID
-    /// has no such background allowance — it's the one left orphaned (still fully
-    /// "connected" on this device, no BYE ever sent to the peer) if the app is later
-    /// killed while backgrounded. Call this from AppDelegate.applicationDidEnterBackground,
-    /// not terminateAllCalls().
+    /// Hangs up only calls with no CallKit registration — i.e. answered via the direct-SIP
+    /// foreground path (no CXProvider report; see AppDelegate's [CALLKIT-SKIPPED] path).
+    /// CallKit-backed calls are left untouched, since they're meant to keep running in the
+    /// background; a call with no CallKit UUID has no such allowance and is left orphaned
+    /// (still "connected" locally, no BYE ever sent) if the app is later killed while
+    /// backgrounded. Call from AppDelegate.applicationDidEnterBackground, not terminateAllCalls().
     @objc public static func terminateCallsWithoutCallKitRegistration() {
         guard let lc = CallManager.instance().lc else { return }
         let trackedUUIDs = CallManager.instance().providerDelegate?.uuids ?? [:]
@@ -154,9 +148,8 @@ import linphonesw
         }
     }
 
-    /// True if any call is currently live AND has no CallKit registration. Lets callers
-    /// (AppDelegate on background) skip holding a background task when there's nothing
-    /// for terminateCallsWithoutCallKitRegistration() to do.
+    /// True if any live call has no CallKit registration. Lets AppDelegate skip holding a
+    /// background task when terminateCallsWithoutCallKitRegistration() has nothing to do.
     @objc public static func hasActiveCallWithoutCallKitRegistration() -> Bool {
         guard let lc = CallManager.instance().lc else { return false }
         let trackedUUIDs = CallManager.instance().providerDelegate?.uuids ?? [:]

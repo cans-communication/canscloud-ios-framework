@@ -2295,23 +2295,32 @@ static void linphone_iphone_audio_devices_list_updated(LinphoneCore *lc) {
   if (!theLinphoneCore)
     return;
 
-  if (remoteView) {
-    linphone_core_set_native_video_window_id(theLinphoneCore,
-                                             (__bridge void *)remoteView);
-    NSLog(@"[LinphoneManager][VideoCall] native video window bound: %@", remoteView);
-  }
+  // Always update — even to NULL. A nil view here means the caller either
+  // explicitly unbound (RN unmounted the surface, e.g. minimizing a video
+  // call) or the react tag no longer resolves (stale handle). Either way,
+  // leaving the previous non-NULL window id in place would keep the core
+  // pointed at a UIView that RN may already be deallocating: the next call
+  // that touches the video graph (e.g. setVideoEnabled: switching device)
+  // retains that dangling pointer and crashes (EXC_BAD_ACCESS in
+  // mediastreamer2's objc_retain — matches the iOS rejoin-video-call crash).
+  linphone_core_set_native_video_window_id(theLinphoneCore,
+                                           remoteView ? (__bridge void *)remoteView : NULL);
+  NSLog(@"[LinphoneManager][VideoCall] native video window %@", remoteView ? @"bound" : @"cleared");
 
+  // Tear down the existing ogl_display before (re)binding. Disabling preview
+  // first forces ogl_display destruction so a subsequent bind creates a fresh
+  // instance properly bound to the new view — and so an unbind (localView ==
+  // nil) actually releases it instead of leaving it attached to a dead view.
+  linphone_core_enable_video_preview(theLinphoneCore, NO);
+  linphone_core_set_native_preview_window_id(theLinphoneCore,
+                                             localView ? (__bridge void *)localView : NULL);
   if (localView) {
-    // Tear down the existing ogl_display before binding the new view.
-    // Disabling preview first forces ogl_display destruction so the subsequent YES call creates
-    // a fresh instance properly bound to the new view.
-    linphone_core_enable_video_preview(theLinphoneCore, NO);
-    linphone_core_set_native_preview_window_id(theLinphoneCore,
-                                               (__bridge void *)localView);
     NSLog(@"[LinphoneManager][VideoCall] native preview window bound: %@", localView);
     linphone_core_enable_video_capture(theLinphoneCore, YES);
     linphone_core_enable_video_preview(theLinphoneCore, YES);
     NSLog(@"[LinphoneManager][VideoCall] preview pipeline re-enabled for new window");
+  } else {
+    NSLog(@"[LinphoneManager][VideoCall] native preview window cleared");
   }
 }
 

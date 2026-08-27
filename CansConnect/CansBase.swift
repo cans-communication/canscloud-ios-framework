@@ -107,6 +107,54 @@ import linphonesw
     @objc public func terminateCall(call: OpaquePointer?) {
         CallManager.instance().terminateCall(call: call)
     }
+
+    /// Hangs up every live call, regardless of CallKit registration. Static (like
+    /// wireCallManagerCore) so AppDelegate/ProviderDelegate can call it without a CansBase instance.
+    ///
+    /// Called from providerDidReset: CallKit already dropped its own state for these calls,
+    /// so terminating the matching SIP calls here just avoids leaving them dangling with no BYE.
+    ///
+    /// Do NOT call from applicationDidEnterBackground — CallKit calls are meant to keep running
+    /// in the background (that's the point of the "audio"/"voip" modes + PushKit); this would
+    /// hang up every normal call on Home press. Use terminateCallsWithoutCallKitRegistration() there.
+    @objc public static func terminateAllCalls() {
+        guard let lc = CallManager.instance().lc else { return }
+        for call in lc.calls {
+            do {
+                try call.terminate()
+            } catch {
+                NSLog("[CansBase] terminateAllCalls: failed to terminate a call: %@", error.localizedDescription)
+            }
+        }
+    }
+
+    /// Hangs up only calls with no CallKit registration — i.e. answered via the direct-SIP
+    /// foreground path (no CXProvider report; see AppDelegate's [CALLKIT-SKIPPED] path).
+    /// CallKit-backed calls are left untouched, since they're meant to keep running in the
+    /// background; a call with no CallKit UUID has no such allowance and is left orphaned
+    /// (still "connected" locally, no BYE ever sent) if the app is later killed while
+    /// backgrounded. Call from AppDelegate.applicationDidEnterBackground, not terminateAllCalls().
+    @objc public static func terminateCallsWithoutCallKitRegistration() {
+        guard let lc = CallManager.instance().lc else { return }
+        let trackedUUIDs = CallManager.instance().providerDelegate?.uuids ?? [:]
+        for call in lc.calls {
+            let callId = call.callLog?.callId ?? ""
+            guard trackedUUIDs[callId] == nil else { continue }
+            do {
+                try call.terminate()
+            } catch {
+                NSLog("[CansBase] terminateCallsWithoutCallKitRegistration: failed to terminate a call: %@", error.localizedDescription)
+            }
+        }
+    }
+
+    /// True if any live call has no CallKit registration. Lets AppDelegate skip holding a
+    /// background task when terminateCallsWithoutCallKitRegistration() has nothing to do.
+    @objc public static func hasActiveCallWithoutCallKitRegistration() -> Bool {
+        guard let lc = CallManager.instance().lc else { return false }
+        let trackedUUIDs = CallManager.instance().providerDelegate?.uuids ?? [:]
+        return lc.calls.contains { trackedUUIDs[$0.callLog?.callId ?? ""] == nil }
+    }
     
     @objc public func acceptCall(call: OpaquePointer?, hasVideo:Bool) {
         CallManager.instance().acceptCall(call: call, hasVideo: hasVideo)

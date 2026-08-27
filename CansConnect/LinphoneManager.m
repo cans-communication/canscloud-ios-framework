@@ -2295,24 +2295,23 @@ static void linphone_iphone_audio_devices_list_updated(LinphoneCore *lc) {
   if (!theLinphoneCore)
     return;
 
-  if (remoteView) {
-    linphone_core_set_native_video_window_id(theLinphoneCore,
-                                             (__bridge void *)remoteView);
-    NSLog(@"[LinphoneManager][VideoCall] native video window bound: %@", remoteView);
-  }
+  // Always apply, even if remoteView is nil. Passing NULL clears the old window ID,
+  // preventing mediastreamer2 from hitting a dangling UIView and causing an
+  // EXC_BAD_ACCESS crash on rejoin (e.g., via setVideoEnabled:).
+  linphone_core_set_native_video_window_id(theLinphoneCore,
+                                           remoteView ? (__bridge void *)remoteView : NULL);
 
+  // Disable preview first to force ogl_display teardown, so binding creates
+  // a fresh instance and unbinding (localView == nil) actually releases it.
+  linphone_core_enable_video_preview(theLinphoneCore, NO);
+  linphone_core_set_native_preview_window_id(theLinphoneCore,
+                                             localView ? (__bridge void *)localView : NULL);
   if (localView) {
-    // Tear down the existing ogl_display before binding the new view.
-    // Disabling preview first forces ogl_display destruction so the subsequent YES call creates
-    // a fresh instance properly bound to the new view.
-    linphone_core_enable_video_preview(theLinphoneCore, NO);
-    linphone_core_set_native_preview_window_id(theLinphoneCore,
-                                               (__bridge void *)localView);
-    NSLog(@"[LinphoneManager][VideoCall] native preview window bound: %@", localView);
     linphone_core_enable_video_capture(theLinphoneCore, YES);
     linphone_core_enable_video_preview(theLinphoneCore, YES);
-    NSLog(@"[LinphoneManager][VideoCall] preview pipeline re-enabled for new window");
   }
+  NSLog(@"[LinphoneManager][VideoCall] video=%@ preview=%@",
+        remoteView ? @"bound" : @"cleared", localView ? @"bound" : @"cleared");
 }
 
 - (void)acceptCall {

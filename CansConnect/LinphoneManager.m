@@ -2295,9 +2295,9 @@ static void linphone_iphone_audio_devices_list_updated(LinphoneCore *lc) {
   if (!theLinphoneCore)
     return;
 
-// Always apply, even if NULL (unmounted/stale view). This clears the old window ID, 
-// preventing mediastreamer2 from hitting a dangling UIView and causing an 
-// EXC_BAD_ACCESS crash on rejoin (e.g., via setVideoEnabled:).
+  // Always apply, even if remoteView is nil. Passing NULL clears the old window ID,
+  // preventing mediastreamer2 from hitting a dangling UIView and causing an
+  // EXC_BAD_ACCESS crash on rejoin (e.g., via setVideoEnabled:).
   linphone_core_set_native_video_window_id(theLinphoneCore,
                                            remoteView ? (__bridge void *)remoteView : NULL);
 

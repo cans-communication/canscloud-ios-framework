@@ -246,13 +246,13 @@ static const float kVideoDeadBandwidthKbps = 1.0f;
       NSLog(@"[LinphoneManager] Core created successfully at: %p",
             theLinphoneCore);
 
-      // Disabled "delivered" IMDN reports instead of stripping ports (required for Flexisip `px7` REGISTER).
-      // Prevents a SIGSEGV crash during auto-sent delivery reports while UI delivery relies on `X-CANS-CTRL` custom acks. "Displayed" IMDN left untouched.
+      // Disable native "delivered" IMDN — its auto-sent report crashes in
+      // Imdn::onImdnMessageDelivered (SIGSEGV). Safe because delivery UI runs
+      // on our own X-CANS-CTRL acks, not IMDN. "Displayed" IMDN stays on.
       LinphoneImNotifPolicy *imNotifPolicy = linphone_core_get_im_notif_policy(theLinphoneCore);
       if (imNotifPolicy) {
         linphone_im_notif_policy_set_send_imdn_delivered(imNotifPolicy, FALSE);
         linphone_im_notif_policy_set_recv_imdn_delivered(imNotifPolicy, FALSE);
-        NSLog(@"[SIP-AOR] IMDN 'delivered' notifications disabled (send+recv) to avoid onImdnMessageDelivered crash path.");
       }
 
       linphone_core_enable_video_capture(theLinphoneCore, TRUE);
@@ -1948,21 +1948,11 @@ static void linphone_iphone_audio_devices_list_updated(LinphoneCore *lc) {
       [NSString stringWithFormat:@"sip:%@@%@", extension, realm];
   LinphoneAddress *identity = linphone_address_new(identityStr.UTF8String);
   if (identity) {
-    // TEMPORARY REVERT (2026-09-03, isolation test): port restored here to
-    // check whether px7.cans.cc (Flexisip, production edge) actually needs
-    // it in the Request-URI to route REGISTER — it 503'd immediately with
-    // the port removed, while sitmms.cans.cc (FreeSWITCH, direct login)
-    // tolerated a port-less identity fine. See pending-task.md 2026-09-03.
-    // If px7 registers OK with this restored, the port removal is confirmed
-    // as the cause and the real fix needs to keep the port on the wire while
-    // only normalizing it at the MainDb chat-room-keying boundary. If px7
-    // still 503s, the port was never the problem — look at the apns.dev
-    // push param instead. Do not leave this reverted without following up.
+    // Keep the port on the identity — px7.cans.cc (Flexisip, production edge)
+    // 503s on REGISTER without it. Unlike Android, don't strip it here; see
+    // ios-chat-crash-and-imdn.md for why a port-less identity was tried and
+    // abandoned for this crash.
     linphone_address_set_port(identity, (int)[port integerValue]);
-    char *identityDump = linphone_address_as_string(identity);
-    NSLog(@"[SIP-AOR] setupLinphoneWithExtension: identity=%s (port RESTORED for isolation test, requestedPort=%@)",
-          identityDump ?: "?", port);
-    if (identityDump) ms_free(identityDump);
     linphone_account_params_set_identity_address(params, identity);
   }
 
@@ -2813,10 +2803,11 @@ static void linphone_iphone_chat_room_state_changed(LinphoneCore *lc,
     const char *localUserC = linphone_address_get_username(localAddr);
     NSString *targetPeer  = peerUserC  ? [NSString stringWithUTF8String:peerUserC]  : @"";
     NSString *targetLocal = localUserC ? [NSString stringWithUTF8String:localUserC] : @"";
-    // [SIP-AOR] local= shows whether this device's own identity carries a port —
-    // needed to confirm/refute the port as a contributor to the MainDb crash above.
+#if DEBUG
+    // [SIP-AOR] grep both platforms — identity domains must match (AOR ≠ proxy host).
     NSLog(@"[SIP-AOR] getOrCreateSpecificChatRoom: peer=%s local=%s peerUser=%@ localUser=%@",
           peerStr ?: "?", localStr ?: "?", targetPeer, targetLocal);
+#endif
     if (peerStr) ms_free(peerStr);
     if (localStr) ms_free(localStr);
 
@@ -3271,19 +3262,6 @@ static void lm_chat_msg_state_changed(LinphoneChatMessage *msg, LinphoneChatMess
 
     NSString *statusStr = lm_chatMessageStateToString(state);
     NSLog(@"[LinphoneManager] lm_chat_msg_state_changed: id=%@, status=%@, chatWith=%@", msgId, statusStr, chatWith);
-    // [SIP-AOR] This callback runs downstream of Sal::processResponseEventCb /
-    // message_delivery_update — the exact path that has crashed inside MainDb's
-    // ConferenceId lookup (Imdn::onImdnMessageDelivered → ...::getChatMessage()).
-    // If that crash is port-related, this is the last log we will see before it.
-    LinphoneCore *lmCore = linphone_chat_room_get_core(room);
-    LinphoneAccount *lmAcc = lmCore ? linphone_core_get_default_account(lmCore) : NULL;
-    const LinphoneAddress *lmIdentity = lmAcc
-        ? linphone_account_params_get_identity_address(linphone_account_get_params(lmAcc))
-        : NULL;
-    char *lmIdentityDump = lmIdentity ? linphone_address_as_string(lmIdentity) : NULL;
-    NSLog(@"[SIP-AOR] lm_chat_msg_state_changed: id=%@ status=%@ localIdentity=%s",
-          msgId, statusStr, lmIdentityDump ?: "?");
-    if (lmIdentityDump) ms_free(lmIdentityDump);
 
     NSDictionary *dict = @{
         @"id":        msgId,
@@ -3323,18 +3301,6 @@ static void lm_incoming_msg_state_changed(LinphoneChatMessage *msg, LinphoneChat
     NSString *statusStr = lm_chatMessageStateToString(state);
     NSLog(@"[LinphoneManager] lm_incoming_msg_state_changed: id=%@, status=%@, chatWith=%@",
           msgId, statusStr, chatWith);
-    // [SIP-AOR] Same crash-adjacent path as lm_chat_msg_state_changed — see the
-    // comment there. Kept here too since a Delivered/DeliveredToUser transition on
-    // an *incoming* message notification can walk the same MainDb code.
-    LinphoneCore *lmiCore = linphone_chat_room_get_core(room);
-    LinphoneAccount *lmiAcc = lmiCore ? linphone_core_get_default_account(lmiCore) : NULL;
-    const LinphoneAddress *lmiIdentity = lmiAcc
-        ? linphone_account_params_get_identity_address(linphone_account_get_params(lmiAcc))
-        : NULL;
-    char *lmiIdentityDump = lmiIdentity ? linphone_address_as_string(lmiIdentity) : NULL;
-    NSLog(@"[SIP-AOR] lm_incoming_msg_state_changed: id=%@ status=%@ localIdentity=%s",
-          msgId, statusStr, lmiIdentityDump ?: "?");
-    if (lmiIdentityDump) ms_free(lmiIdentityDump);
 
     NSDictionary *dict = @{
         @"id":        msgId,

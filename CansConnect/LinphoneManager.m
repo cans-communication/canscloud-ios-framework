@@ -2985,10 +2985,12 @@ static void linphone_iphone_chat_room_state_changed(LinphoneCore *lc,
 
 - (void)deleteMessage:(NSString *)peerUri msgId:(NSString *)msgId {
     if (!theLinphoneCore || !peerUri || !msgId) return;
-    LinphoneAddress *addr = linphone_core_interpret_url(theLinphoneCore, peerUri.UTF8String);
-    if (!addr) return;
 
-    LinphoneChatRoom *room = linphone_core_get_chat_room(theLinphoneCore, addr);
+    // Route through the account-aware helper (see sendTextMessage above) rather than
+    // the single-arg linphone_core_get_chat_room(addr), which resolves by peer address
+    // alone and can return a stale/duplicate basic chatroom left over from a different
+    // local account on this device — deleting from the wrong room's history.
+    LinphoneChatRoom *room = [self getOrCreateSpecificChatRoom:peerUri];
     if (room) {
         const bctbx_list_t *history = linphone_chat_room_get_history(room, 0);
         for (const bctbx_list_t *it = history; it != NULL; it = it->next) {
@@ -3001,16 +3003,13 @@ static void linphone_iphone_chat_room_state_changed(LinphoneCore *lc,
             }
         }
     }
-    linphone_address_unref(addr);
 }
 
 - (void)markAsRead:(NSString *)peerUri {
-    if (!theLinphoneCore) return;
-    LinphoneAddress *addr = linphone_core_interpret_url(theLinphoneCore, peerUri.UTF8String);
-    if (!addr) return;
-    LinphoneChatRoom *room = linphone_core_get_chat_room(theLinphoneCore, addr);
+    if (!theLinphoneCore || !peerUri) return;
+
+    LinphoneChatRoom *room = [self getOrCreateSpecificChatRoom:peerUri];
     if (room) linphone_chat_room_mark_as_read(room);
-    linphone_address_unref(addr);
 }
 
 // Mirrors Android NativeModuleAndroid.chatCleanupAll.

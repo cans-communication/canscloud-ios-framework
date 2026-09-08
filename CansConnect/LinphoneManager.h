@@ -184,6 +184,14 @@ extern NSString *const kCansCustomRegistrationEvent;
 - (void)injectVoIPToken:(NSString *)voipToken
              forAccount:(nullable LinphoneAccount *)account
       completionHandler:(nullable void (^)(BOOL success))completion;
+// Registers a standard (non-PushKit) remote-notification APNs token alongside the VoIP
+// token, so Flexisip can push a plain alert-payload notification for chat messages —
+// VoIP push is reserved for calls only (Apple policy) and never wakes the app for anything
+// else. Safe to call before or after injectVoIPToken:; the combined contact URI params are
+// (re)applied whichever token arrives last. See applyCombinedAPNsPushParamsForAccount: (.m).
+- (void)injectRemoteAPNsToken:(NSString *)remoteToken
+                    forAccount:(nullable LinphoneAccount *)account
+             completionHandler:(nullable void (^)(BOOL success))completion;
 - (void)removeFCMTokenForAccount:(nullable LinphoneAccount *)account;
 - (void)processPushNotification:(NSString *)callId;
 

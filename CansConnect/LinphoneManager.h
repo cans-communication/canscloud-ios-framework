@@ -184,7 +184,7 @@ extern NSString *const kCansCustomRegistrationEvent;
 - (void)injectVoIPToken:(NSString *)voipToken
              forAccount:(nullable LinphoneAccount *)account
       completionHandler:(nullable void (^)(BOOL success))completion;
-// ROLLED BACK : No-op stub. Previously merged VoIP and remote APNs tokens into a combined Contact URI for chat push notifications, but it was reverted after suspecting it broke killed-app call push (no CallKit UI). Kept callable to avoid changing AppDelegate.swift callback; see commented-out code in .m for details on the unresolved chat notification issue.
+// ROLLED BACK : No-op stub. Previously merged VoIP and remote APNs tokens into a combined Contact URI for chat push notifications, but it was reverted after suspecting it broke killed-app call push (no CallKit UI). Kept callable to avoid changing AppDelegate.swift callback.
 - (void)injectRemoteAPNsToken:(NSString *)remoteToken
                    forAccount:(nullable LinphoneAccount *)account
             completionHandler:(nullable void (^)(BOOL success))completion;

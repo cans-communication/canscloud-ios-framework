@@ -72,10 +72,10 @@ static void linphone_iphone_chat_room_state_changed(LinphoneCore *lc, LinphoneCh
   dispatch_source_t _videoDeadTimer;
   LinphoneCall *_videoDeadCall;
   int _videoDeadTicks;
-  // ROLLED BACK : Dual APNs push (VoIP + remote token combined) reverted to VoIP-only due to killed-app CallKit regression. Unwritten token fields are kept solely for the commented-out implementation below documenting the unresolved chat notification issue.
-  NSString *_lastVoIPPushToken;
+  // ROLLED BACK : Dual APNs push (VoIP + remote token combined) reverted to VoIP-only due to
+  // killed-app CallKit regression. _lastRemoteAPNsToken is retained by injectRemoteAPNsToken:
+  // below (stored but not applied) for potential future rework.
   NSString *_lastRemoteAPNsToken;
-  NSUInteger _pushParamsApplyGeneration;
 }
 @end
 
@@ -1953,9 +1953,9 @@ static void linphone_iphone_audio_devices_list_updated(LinphoneCore *lc) {
   LinphoneAddress *identity = linphone_address_new(identityStr.UTF8String);
   if (identity) {
     // Keep the port on the identity — px7.cans.cc (Flexisip, production edge)
-    // 503s on REGISTER without it. Unlike Android, don't strip it here; see
-    // ios-chat-crash-and-imdn.md for why a port-less identity was tried and
-    // abandoned for this crash.
+    // 503s on REGISTER without it. Unlike Android, don't strip it here; a
+    // port-less identity was tried as a fix for a separate chat crash and
+    // reverted after it broke REGISTER on this edge.
     linphone_address_set_port(identity, (int)[port integerValue]);
     linphone_account_params_set_identity_address(params, identity);
   }
@@ -3724,9 +3724,13 @@ static void linphone_iphone_info_received(LinphoneCore *lc, LinphoneCall *call, 
                    forAccount:(LinphoneAccount *)account
             completionHandler:(void (^)(BOOL))completion {
   dispatch_async(dispatch_get_main_queue(), ^{
+    if (!remoteToken.length) {
+      if (completion) completion(NO);
+      return;
+    }
     _lastRemoteAPNsToken = remoteToken;
     NSLog(@"[LinphoneManager] injectRemoteAPNsToken: rolled back — not applying (see comment above injectVoIPToken:)");
-    if (completion) completion(NO);
+    if (completion) completion(YES);
   });
 }
 

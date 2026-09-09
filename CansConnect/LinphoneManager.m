@@ -72,6 +72,10 @@ static void linphone_iphone_chat_room_state_changed(LinphoneCore *lc, LinphoneCh
   dispatch_source_t _videoDeadTimer;
   LinphoneCall *_videoDeadCall;
   int _videoDeadTicks;
+  // ROLLED BACK : Dual APNs push (VoIP + remote token combined) reverted to VoIP-only due to
+  // killed-app CallKit regression. _lastRemoteAPNsToken is retained by injectRemoteAPNsToken:
+  // below (stored but not applied) for potential future rework.
+  NSString *_lastRemoteAPNsToken;
 }
 @end
 
@@ -245,6 +249,15 @@ static const float kVideoDeadBandwidthKbps = 1.0f;
     if (theLinphoneCore) {
       NSLog(@"[LinphoneManager] Core created successfully at: %p",
             theLinphoneCore);
+
+      // Disable native "delivered" IMDN — its auto-sent report crashes in
+      // Imdn::onImdnMessageDelivered (SIGSEGV). Safe because delivery UI runs
+      // on our own X-CANS-CTRL acks, not IMDN. "Displayed" IMDN stays on.
+      LinphoneImNotifPolicy *imNotifPolicy = linphone_core_get_im_notif_policy(theLinphoneCore);
+      if (imNotifPolicy) {
+        linphone_im_notif_policy_set_send_imdn_delivered(imNotifPolicy, FALSE);
+        linphone_im_notif_policy_set_recv_imdn_delivered(imNotifPolicy, FALSE);
+      }
 
       linphone_core_enable_video_capture(theLinphoneCore, TRUE);
       linphone_core_enable_video_display(theLinphoneCore, TRUE);
@@ -1939,6 +1952,10 @@ static void linphone_iphone_audio_devices_list_updated(LinphoneCore *lc) {
       [NSString stringWithFormat:@"sip:%@@%@", extension, realm];
   LinphoneAddress *identity = linphone_address_new(identityStr.UTF8String);
   if (identity) {
+    // Keep the port on the identity — px7.cans.cc (Flexisip, production edge)
+    // 503s on REGISTER without it. Unlike Android, don't strip it here; a
+    // port-less identity was tried as a fix for a separate chat crash and
+    // reverted after it broke REGISTER on this edge.
     linphone_address_set_port(identity, (int)[port integerValue]);
     linphone_account_params_set_identity_address(params, identity);
   }
@@ -2791,7 +2808,8 @@ static void linphone_iphone_chat_room_state_changed(LinphoneCore *lc,
     NSString *targetPeer  = peerUserC  ? [NSString stringWithUTF8String:peerUserC]  : @"";
     NSString *targetLocal = localUserC ? [NSString stringWithUTF8String:localUserC] : @"";
 #if DEBUG
-    NSLog(@"[LinphoneManager] getOrCreateSpecificChatRoom: peer=%s local=%s peerUser=%@ localUser=%@",
+    // [SIP-AOR] grep both platforms — identity domains must match (AOR ≠ proxy host).
+    NSLog(@"[SIP-AOR] getOrCreateSpecificChatRoom: peer=%s local=%s peerUser=%@ localUser=%@",
           peerStr ?: "?", localStr ?: "?", targetPeer, targetLocal);
 #endif
     if (peerStr) ms_free(peerStr);
@@ -2971,10 +2989,12 @@ static void linphone_iphone_chat_room_state_changed(LinphoneCore *lc,
 
 - (void)deleteMessage:(NSString *)peerUri msgId:(NSString *)msgId {
     if (!theLinphoneCore || !peerUri || !msgId) return;
-    LinphoneAddress *addr = linphone_core_interpret_url(theLinphoneCore, peerUri.UTF8String);
-    if (!addr) return;
 
-    LinphoneChatRoom *room = linphone_core_get_chat_room(theLinphoneCore, addr);
+    // Route through the account-aware helper (see sendTextMessage above) rather than
+    // the single-arg linphone_core_get_chat_room(addr), which resolves by peer address
+    // alone and can return a stale/duplicate basic chatroom left over from a different
+    // local account on this device — deleting from the wrong room's history.
+    LinphoneChatRoom *room = [self getOrCreateSpecificChatRoom:peerUri];
     if (room) {
         const bctbx_list_t *history = linphone_chat_room_get_history(room, 0);
         for (const bctbx_list_t *it = history; it != NULL; it = it->next) {
@@ -2987,16 +3007,13 @@ static void linphone_iphone_chat_room_state_changed(LinphoneCore *lc,
             }
         }
     }
-    linphone_address_unref(addr);
 }
 
 - (void)markAsRead:(NSString *)peerUri {
-    if (!theLinphoneCore) return;
-    LinphoneAddress *addr = linphone_core_interpret_url(theLinphoneCore, peerUri.UTF8String);
-    if (!addr) return;
-    LinphoneChatRoom *room = linphone_core_get_chat_room(theLinphoneCore, addr);
+    if (!theLinphoneCore || !peerUri) return;
+
+    LinphoneChatRoom *room = [self getOrCreateSpecificChatRoom:peerUri];
     if (room) linphone_chat_room_mark_as_read(room);
-    linphone_address_unref(addr);
 }
 
 // Mirrors Android NativeModuleAndroid.chatCleanupAll.
@@ -3631,8 +3648,6 @@ static void linphone_iphone_info_received(LinphoneCore *lc, LinphoneCall *call, 
     }
 }
 
-
-
 // ── Push Notification ────────────────────────────────────────────────────
 
 + (BOOL)isCallKitEnabled {
@@ -3700,6 +3715,21 @@ static void linphone_iphone_info_received(LinphoneCore *lc, LinphoneCall *call, 
     linphone_core_refresh_registers(theLinphoneCore);
 
     NSLog(@"[LinphoneManager] VoIP token injected — pn-param=%@.%@.%@", teamId, voipBundleId, services);
+    if (completion) completion(YES);
+  });
+}
+
+// ROLLED BACK : Converted to a no-op stub so the APNs token call site keeps working without modifying account registration. _lastRemoteAPNsToken is preserved for potential future use.
+- (void)injectRemoteAPNsToken:(NSString *)remoteToken
+                   forAccount:(LinphoneAccount *)account
+            completionHandler:(void (^)(BOOL))completion {
+  dispatch_async(dispatch_get_main_queue(), ^{
+    if (!remoteToken.length) {
+      if (completion) completion(NO);
+      return;
+    }
+    _lastRemoteAPNsToken = remoteToken;
+    NSLog(@"[LinphoneManager] injectRemoteAPNsToken: rolled back — not applying (see comment above injectVoIPToken:)");
     if (completion) completion(YES);
   });
 }

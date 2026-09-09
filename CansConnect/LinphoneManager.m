@@ -72,14 +72,9 @@ static void linphone_iphone_chat_room_state_changed(LinphoneCore *lc, LinphoneCh
   dispatch_source_t _videoDeadTimer;
   LinphoneCall *_videoDeadCall;
   int _videoDeadTicks;
-  // Dual APNs push registration: VoIP token wakes the app for calls (force-quit-safe,
-  // mandatory); remote token lets Flexisip push a plain alert-payload notification for
-  // chat messages, which the VoIP-only channel can never do (Apple disallows using VoIP
-  // push for anything but calls). Combined into one contact URI param string whenever
-  // either is (re)injected — see applyCombinedAPNsPushParamsForAccount:.
+  // ROLLED BACK : Dual APNs push (VoIP + remote token combined) reverted to VoIP-only due to killed-app CallKit regression. Unwritten token fields are kept solely for the commented-out implementation below documenting the unresolved chat notification issue.
   NSString *_lastVoIPPushToken;
   NSString *_lastRemoteAPNsToken;
-  // Debounce generation for applyCombinedAPNsPushParamsForAccount: — see its comment.
   NSUInteger _pushParamsApplyGeneration;
 }
 @end
@@ -3653,8 +3648,6 @@ static void linphone_iphone_info_received(LinphoneCore *lc, LinphoneCall *call, 
     }
 }
 
-
-
 // ── Push Notification ────────────────────────────────────────────────────
 
 + (BOOL)isCallKitEnabled {
@@ -3665,143 +3658,6 @@ static void linphone_iphone_info_received(LinphoneCore *lc, LinphoneCall *call, 
 #else
     return NO;
 #endif
-}
-
-// Debounced entry point. VoIP token, remote APNs token, and NativeModuleiOS's own
-// Registration-OK re-injection fallbacks can each call this within milliseconds of
-// each other (worst case at cold launch: up to 3 calls back to back). Each apply
-// clones+replaces the account's params and forces a brand-new REGISTER transaction
-// (linphoneAccountIsServerConfigChanged) — observed firing that repeatedly in a tight
-// burst right before chat MESSAGE delivery to a peer silently failed, even though
-// every individual REGISTER itself still reported 200 OK. Coalesce a burst into
-// exactly one real apply, ~300ms after the last call in the burst.
-- (void)applyCombinedAPNsPushParamsForAccount:(LinphoneAccount *)account {
-  if (!theLinphoneCore) return;
-  if (!_lastVoIPPushToken.length) {
-    // VoIP token is mandatory (calls must keep working); nothing to apply yet.
-    return;
-  }
-
-  __weak typeof(self) weakSelf = self;
-  NSUInteger myGeneration = ++_pushParamsApplyGeneration;
-  dispatch_after(dispatch_time(DISPATCH_TIME_NOW, (int64_t)(0.3 * NSEC_PER_SEC)),
-                 dispatch_get_main_queue(), ^{
-    typeof(self) strongSelf = weakSelf;
-    if (!strongSelf || myGeneration != strongSelf->_pushParamsApplyGeneration) {
-      // A newer call arrived during the debounce window — it owns applying now.
-      return;
-    }
-    [strongSelf reallyApplyCombinedAPNsPushParamsForAccount:account];
-  });
-}
-
-// Builds and applies one combined contact URI param string from whichever of
-// _lastVoIPPushToken / _lastRemoteAPNsToken are currently known, using Flexisip's
-// documented dual-service APNs format:
-//   pn-param=<teamId>.<bundleId>.voip&remote
-//   pn-prid=<voipToken>:voip&<remoteToken>:remote
-// so the proxy can push VoIP (calls, force-quit-safe, mandatory CallKit report) and
-// remote (plain alert-payload notification, e.g. chat messages) independently — VoIP
-// push alone can never surface a non-call notification (Apple disallows reporting
-// anything but a call via reportNewIncomingCall). Falls back to VoIP-only when the
-// remote token hasn't arrived yet (first-launch race); called again once it does.
-// Only ever reached via the debounced applyCombinedAPNsPushParamsForAccount: above —
-// do not call this directly.
-- (void)reallyApplyCombinedAPNsPushParamsForAccount:(LinphoneAccount *)account {
-  if (!theLinphoneCore) return;
-  LinphoneAccount *targetAcc = account ?: linphone_core_get_default_account(theLinphoneCore);
-  if (!targetAcc) {
-    NSLog(@"[LinphoneManager] applyCombinedAPNsPushParams: no account available");
-    return;
-  }
-  if (!_lastVoIPPushToken.length) {
-    // VoIP token is mandatory (calls must keep working); nothing to apply yet.
-    return;
-  }
-
-  NSString *bundleId = [[NSBundle mainBundle] bundleIdentifier] ?: @"";
-  LinphoneAccountParams *params =
-      linphone_account_params_clone(linphone_account_get_params(targetAcc));
-
-  // Strip existing pn-* params, keep everything else (e.g. app-login-type=cans)
-  const char *existing = linphone_account_params_get_contact_uri_parameters(params);
-  NSString *existingStr = existing ? [NSString stringWithUTF8String:existing] : @"";
-  NSMutableArray *cleanParts = [NSMutableArray array];
-  for (NSString *part in [existingStr componentsSeparatedByString:@";"]) {
-    if (part.length > 0 && ![part hasPrefix:@"pn-"]) {
-      [cleanParts addObject:part];
-    }
-  }
-  NSString *prefix = cleanParts.count > 0
-      ? [[cleanParts componentsJoinedByString:@";"] stringByAppendingString:@";"]
-      : @"";
-
-  // DEBUG sends to sandbox push client (.dev); Release sends to production.
-  NSString *teamId = [[NSBundle mainBundle] objectForInfoDictionaryKey:@"CansAPNSTeamId"] ?: @"N27H9XFR3R";
-#if DEBUG
-  NSString *pnProvider = @"apns.dev";
-#else
-  NSString *pnProvider = @"apns";
-#endif
-
-  // DIAGNOSTIC (2026-09-07, see pending-task.md): the debounce fix (above) confirmed
-  // fixed the REGISTER-refresh storm — exactly one "Combined APNs push params applied"
-  // per launch now. But cross-device log correlation showed chat MESSAGE delivery is
-  // STILL broken even same-registrar (both devices on sitmms.cans.cc:8446): sender got
-  // 202 Accepted, receiver's REGISTER was 200 OK with a live, keepalive-confirmed TCP
-  // channel, yet nothing ever arrived. The one thing different from the last known-good
-  // state (foreground chat worked before this feature) is this dual pn-param/pn-prid
-  // ("...voip&remote") format — Flexisip's own convention, sent here to a plain
-  // FreeSWITCH registrar that was never validated against it. Forcing VoIP-only here
-  // isolates whether that format itself is what's breaking routing. Flip back to NO
-  // once confirmed/refuted on-device.
-  //
-  // Flipped to 0 (2026-09-07): root cause was actually the unquoted ':' in pn-prid
-  // (see the quoting fix a few lines below), not the dual-format Contact itself. With
-  // that fix in place, re-testing the dual-format path (this flag off) to confirm
-  // killed-app chat delivery now works via the "&remote" APNs channel. Flip back to 1
-  // only if this re-test shows the dual format is independently broken.
-#define CANS_DIAGNOSTIC_FORCE_VOIP_ONLY_PUSH 0
-
-  // pn-prid is wrapped in SIP quotes below because its value embeds a literal,
-  // unescaped ':' (the "<token>:voip" / "<token>:remote" suffix Flexisip's dual-push
-  // convention requires). An unquoted URI-parameter value containing ':' isn't valid
-  // per SIP grammar (token doesn't include ':'); FreeSWITCH still accepts it on
-  // REGISTER but then echoes the same malformed Contact verbatim into the Route/To of
-  // any MESSAGE it relays back to this device, which belle-sip then fails to reparse
-  // ("Missing mandatory header [To]"), replying 400 and silently dropping every
-  // inbound chat message and IMDN receipt from other platforms. Quoting matches the
-  // fix already applied to Android's FCM pn-prid for the same class of bug
-  // (CansFirebaseMessagingService.kt). Only pn-prid's value is quoted — pn-provider,
-  // pn-param, and pn-timeout are untouched, since Flexisip parses those to route
-  // between VoIP (PushKit, calls) and remote (plain alert, chat) pushes.
-  NSString *fullParams;
-#if CANS_DIAGNOSTIC_FORCE_VOIP_ONLY_PUSH
-  fullParams = [NSString stringWithFormat:
-      @"%@pn-provider=%@;pn-param=%@.%@.voip;pn-prid=\"%@:voip\";pn-timeout=0",
-      prefix, pnProvider, teamId, bundleId, _lastVoIPPushToken];
-  NSLog(@"[LinphoneManager] DIAGNOSTIC: forcing VoIP-only push params (dual-format bypassed)");
-#else
-  if (_lastRemoteAPNsToken.length > 0) {
-    fullParams = [NSString stringWithFormat:
-        @"%@pn-provider=%@;pn-param=%@.%@.voip&remote;pn-prid=\"%@:voip&%@:remote\";pn-timeout=0",
-        prefix, pnProvider, teamId, bundleId, _lastVoIPPushToken, _lastRemoteAPNsToken];
-  } else {
-    fullParams = [NSString stringWithFormat:
-        @"%@pn-provider=%@;pn-param=%@.%@.voip;pn-prid=\"%@:voip\";pn-timeout=0",
-        prefix, pnProvider, teamId, bundleId, _lastVoIPPushToken];
-  }
-#endif
-
-  linphone_account_params_set_contact_uri_parameters(params, fullParams.UTF8String);
-  linphone_account_params_set_push_notification_allowed(params, NO);
-  linphone_account_set_params(targetAcc, params);
-  linphone_account_params_unref(params);
-  linphone_core_refresh_registers(theLinphoneCore);
-
-  NSLog(@"[LinphoneManager] Combined APNs push params applied — voip=%@ remote=%@",
-        _lastVoIPPushToken.length ? @"yes" : @"no",
-        _lastRemoteAPNsToken.length ? @"yes" : @"no");
 }
 
 - (void)injectVoIPToken:(NSString *)voipToken
@@ -3819,30 +3675,58 @@ static void linphone_iphone_info_received(LinphoneCore *lc, LinphoneCall *call, 
       return;
     }
 
-    _lastVoIPPushToken = voipToken;
-    [self applyCombinedAPNsPushParamsForAccount:targetAcc];
+    NSString *bundleId = [[NSBundle mainBundle] bundleIdentifier] ?: @"";
+    LinphoneAccountParams *params =
+        linphone_account_params_clone(linphone_account_get_params(targetAcc));
+
+    // Strip existing pn-* params, keep everything else (e.g. app-login-type=cans)
+    const char *existing = linphone_account_params_get_contact_uri_parameters(params);
+    NSString *existingStr = existing ? [NSString stringWithUTF8String:existing] : @"";
+    NSMutableArray *cleanParts = [NSMutableArray array];
+    for (NSString *part in [existingStr componentsSeparatedByString:@";"]) {
+      if (part.length > 0 && ![part hasPrefix:@"pn-"]) {
+        [cleanParts addObject:part];
+      }
+    }
+    NSString *prefix = cleanParts.count > 0
+        ? [[cleanParts componentsJoinedByString:@";"] stringByAppendingString:@";"]
+        : @"";
+
+    // pn-param format: {teamId}.{voipBundleId}.{services}
+    // pn-prid format:  {token}:voip  (voip-only until remote-notification token is plumbed through)
+    // DEBUG sends to sandbox push client (.voip.dev); Release sends to production (.voip).
+    NSString *teamId = [[NSBundle mainBundle] objectForInfoDictionaryKey:@"CansAPNSTeamId"] ?: @"N27H9XFR3R";
+    NSString *services = @"voip";
+    NSString *voipBundleId = bundleId;
+    NSString *pnPrid = voipToken;
+#if DEBUG
+    NSString *pnProvider = @"apns.dev";
+#else
+    NSString *pnProvider = @"apns";
+#endif
+    NSString *fullParams = [NSString stringWithFormat:
+        @"%@pn-provider=%@;pn-param=%@.%@.%@;pn-prid=%@;pn-timeout=0",
+        prefix, pnProvider, teamId, voipBundleId, services, pnPrid];
+
+    linphone_account_params_set_contact_uri_parameters(params, fullParams.UTF8String);
+    linphone_account_params_set_push_notification_allowed(params, NO);
+    linphone_account_set_params(targetAcc, params);
+    linphone_account_params_unref(params);
+    linphone_core_refresh_registers(theLinphoneCore);
+
+    NSLog(@"[LinphoneManager] VoIP token injected — pn-param=%@.%@.%@", teamId, voipBundleId, services);
     if (completion) completion(YES);
   });
 }
 
+// ROLLED BACK : Converted to a no-op stub so the APNs token call site keeps working without modifying account registration. _lastRemoteAPNsToken is preserved for potential future use.
 - (void)injectRemoteAPNsToken:(NSString *)remoteToken
-                    forAccount:(LinphoneAccount *)account
-             completionHandler:(void (^)(BOOL))completion {
+                   forAccount:(LinphoneAccount *)account
+            completionHandler:(void (^)(BOOL))completion {
   dispatch_async(dispatch_get_main_queue(), ^{
-    if (!theLinphoneCore || !remoteToken.length) {
-      if (completion) completion(NO);
-      return;
-    }
-    LinphoneAccount *targetAcc = account ?: linphone_core_get_default_account(theLinphoneCore);
-    if (!targetAcc) {
-      NSLog(@"[LinphoneManager] injectRemoteAPNsToken: no account available");
-      if (completion) completion(NO);
-      return;
-    }
-
     _lastRemoteAPNsToken = remoteToken;
-    [self applyCombinedAPNsPushParamsForAccount:targetAcc];
-    if (completion) completion(YES);
+    NSLog(@"[LinphoneManager] injectRemoteAPNsToken: rolled back — not applying (see comment above injectVoIPToken:)");
+    if (completion) completion(NO);
   });
 }
 

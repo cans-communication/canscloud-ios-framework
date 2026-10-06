@@ -1,6 +1,6 @@
 Pod::Spec.new do |s|
   s.name             = 'CansConnect'
-  s.version          = '1.0.14'
+  s.version          = '1.0.15'
   s.summary          = 'CansConnect ios sdk development for CANScall'
   s.homepage         = 'https://cans.cc'
   s.license          = { :type => 'MIT' }

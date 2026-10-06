@@ -4,6 +4,7 @@
 //
 
 #import "LinphoneManager.h"
+#import "CANSAccountPermissionStore.h"
 #import <CommonCrypto/CommonDigest.h>
 #import <CansConnect/CansConnect-Swift.h>
 
@@ -620,6 +621,13 @@ static void linphone_iphone_popup_password_request(LinphoneCore *lc,
           const char *d = linphone_address_get_domain(identity);
           if (u) usernameNS = [NSString stringWithUTF8String:u];
           if (d) domainNS = [NSString stringWithUTF8String:d];
+        }
+
+        // Permissions only; token and domain UUID remain unchanged. Since account keys use 
+        // `<extension>@<sign-in domain>` while identity domains come from SIP credentials, drop all lists for this username.
+        if (usernameNS.length > 0) {
+          [[[CANSAccountPermissionStore alloc] initWithDefaults:[NSUserDefaults standardUserDefaults]]
+              removePermissionsForUsername:usernameNS];
         }
 
         // Remove the account FIRST. This queues an unregister (REGISTER Expires: 0).
@@ -1923,6 +1931,10 @@ static void linphone_iphone_audio_devices_list_updated(LinphoneCore *lc) {
               [[NSUserDefaults standardUserDefaults]
                   setObject:domainId
                      forKey:[NSString stringWithFormat:@"com.canscloud.domainUUID.%@", sipAddress]];
+              // Always overwritten: a response without `permissions` clears the old list.
+              [[[CANSAccountPermissionStore alloc] initWithDefaults:[NSUserDefaults standardUserDefaults]]
+                  setPermissions:[CANSAccountPermissionStore permissionsFromUser:user]
+                   forSipAddress:sipAddress];
 
               dispatch_async(dispatch_get_main_queue(), ^{
                 [self setupLinphoneWithExtension:ext ha1:sipCredsHA1 domain:domainName port:@"8444" transport:@"tcp"];
@@ -3089,7 +3101,14 @@ static void linphone_iphone_chat_room_state_changed(LinphoneCore *lc,
     NSLog(@"[LinphoneManager] configureChatSettings: done for user=%@", currentUser);
 }
 
+- (NSArray<NSString *> *)getAccountPermissions:(NSString *)sipAddress {
+    return [[[CANSAccountPermissionStore alloc] initWithDefaults:[NSUserDefaults standardUserDefaults]]
+        permissionsForSipAddress:sipAddress];
+}
+
 - (void)removeAccountAll {
+    [[[CANSAccountPermissionStore alloc] initWithDefaults:[NSUserDefaults standardUserDefaults]]
+        removeAllPermissions];
     if (!theLinphoneCore) return;
     [self chatCleanupAll];
     linphone_core_clear_accounts(theLinphoneCore);

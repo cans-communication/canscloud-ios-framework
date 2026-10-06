@@ -623,11 +623,13 @@ static void linphone_iphone_popup_password_request(LinphoneCore *lc,
           if (d) domainNS = [NSString stringWithUTF8String:d];
         }
 
-        // Permissions only; token and domain UUID remain unchanged. Since account keys use 
-        // `<extension>@<sign-in domain>` while identity domains come from SIP credentials, drop all lists for this username.
-        if (usernameNS.length > 0) {
+        // Permissions only; token and domain UUID remain unchanged. The list is keyed by
+        // `<extension>@<sign-in domain>`, which the identity can't rebuild, so the store looks up
+        // the sign-in address recorded for this identity and removes that list alone.
+        if (usernameNS.length > 0 && domainNS.length > 0) {
           [[[CANSAccountPermissionStore alloc] initWithDefaults:[NSUserDefaults standardUserDefaults]]
-              removePermissionsForUsername:usernameNS];
+              removePermissionsForIdentityAddress:[NSString stringWithFormat:@"%@@%@", usernameNS,
+                                                                             domainNS]];
         }
 
         // Remove the account FIRST. This queues an unregister (REGISTER Expires: 0).
@@ -1932,9 +1934,16 @@ static void linphone_iphone_audio_devices_list_updated(LinphoneCore *lc) {
                   setObject:domainId
                      forKey:[NSString stringWithFormat:@"com.canscloud.domainUUID.%@", sipAddress]];
               // Always overwritten: a response without `permissions` clears the old list.
-              [[[CANSAccountPermissionStore alloc] initWithDefaults:[NSUserDefaults standardUserDefaults]]
-                  setPermissions:[CANSAccountPermissionStore permissionsFromUser:user]
-                   forSipAddress:sipAddress];
+              CANSAccountPermissionStore *permissionStore = [[CANSAccountPermissionStore alloc]
+                  initWithDefaults:[NSUserDefaults standardUserDefaults]];
+              [permissionStore setPermissions:[CANSAccountPermissionStore permissionsFromUser:user]
+                                forSipAddress:sipAddress];
+              // Same identity `setupLinphoneWithExtension:` builds below (its realm, no port).
+              NSString *identityDomain =
+                  [[domainName componentsSeparatedByString:@":"] firstObject];
+              [permissionStore
+                    setSignInAddress:sipAddress
+                  forIdentityAddress:[NSString stringWithFormat:@"%@@%@", ext, identityDomain]];
 
               dispatch_async(dispatch_get_main_queue(), ^{
                 [self setupLinphoneWithExtension:ext ha1:sipCredsHA1 domain:domainName port:@"8444" transport:@"tcp"];

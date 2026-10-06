@@ -6,6 +6,8 @@
 #import "CANSAccountPermissionStore.h"
 
 static NSString *const kCANSAccountPermissionsKeyPrefix = @"com.canscloud.accountPermissions.";
+static NSString *const kCANSSignInAddressKeyPrefix =
+    @"com.canscloud.accountPermissionsSignInAddress.";
 
 /// String entries of `value` when it is an array, otherwise `nil`.
 static NSArray<NSString *> *_Nullable CANSStringEntries(id _Nullable value) {
@@ -54,14 +56,25 @@ static NSArray<NSString *> *_Nullable CANSStringEntries(id _Nullable value) {
   }
 }
 
-- (void)removePermissionsForUsername:(NSString *)username {
-  if (username.length == 0) return;
-  [self removeKeysWithPrefix:[NSString stringWithFormat:@"%@%@@", kCANSAccountPermissionsKeyPrefix,
-                                                        username]];
+- (void)setSignInAddress:(NSString *)sipAddress forIdentityAddress:(NSString *)identityAddress {
+  if (sipAddress.length == 0 || identityAddress.length == 0) return;
+  [_defaults setObject:sipAddress
+                forKey:[kCANSSignInAddressKeyPrefix stringByAppendingString:identityAddress]];
+}
+
+- (void)removePermissionsForIdentityAddress:(NSString *)identityAddress {
+  if (identityAddress.length == 0) return;
+  NSString *signInKey = [kCANSSignInAddressKeyPrefix stringByAppendingString:identityAddress];
+  id recorded = [_defaults objectForKey:signInKey];
+  NSString *sipAddress =
+      [recorded isKindOfClass:[NSString class]] && [recorded length] > 0 ? recorded : identityAddress;
+  [_defaults removeObjectForKey:[[self class] keyForSipAddress:sipAddress]];
+  [_defaults removeObjectForKey:signInKey];
 }
 
 - (void)removeAllPermissions {
   [self removeKeysWithPrefix:kCANSAccountPermissionsKeyPrefix];
+  [self removeKeysWithPrefix:kCANSSignInAddressKeyPrefix];
 }
 
 - (void)removeKeysWithPrefix:(NSString *)prefix {

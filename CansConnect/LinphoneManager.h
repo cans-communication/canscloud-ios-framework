@@ -47,6 +47,7 @@ extern NSString *const kCansCustomRegistrationEvent;
 // Permission codes from the last `sign-in/cc` response. `nil` indicates unknown (older sign-in or SIP), 
 // and an empty array means none.
 - (nullable NSArray<NSString *> *)getAccountPermissions:(NSString *)sipAddress;
+- (nullable NSString *)getSignInUser:(NSString *)sipAddress;
 - (void)startCall:(NSString *)phoneNumber;
 - (NSInteger)callsCount;
 - (void)acceptCall;

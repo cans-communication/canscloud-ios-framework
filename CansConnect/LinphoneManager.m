@@ -623,7 +623,7 @@ static void linphone_iphone_popup_password_request(LinphoneCore *lc,
           if (d) domainNS = [NSString stringWithUTF8String:d];
         }
 
-        // Permissions only; token and domain UUID remain unchanged. The list is keyed by
+        // Permissions and the stored sign-in `user` only; token and domain UUID remain unchanged. The list is keyed by
         // `<extension>@<sign-in domain>`, which the identity can't rebuild, so the store looks up
         // the sign-in address recorded for this identity and removes that list alone.
         if (usernameNS.length > 0 && domainNS.length > 0) {
@@ -1938,6 +1938,9 @@ static void linphone_iphone_audio_devices_list_updated(LinphoneCore *lc) {
                   initWithDefaults:[NSUserDefaults standardUserDefaults]];
               [permissionStore setPermissions:[CANSAccountPermissionStore permissionsFromUser:user]
                                 forSipAddress:sipAddress];
+              // Same key, same rule: always overwritten, so a stale user can't survive a sign-in.
+              [permissionStore setSignInUser:[CANSAccountPermissionStore signInUserJSONFromUser:user]
+                               forSipAddress:sipAddress];
               // Same identity `setupLinphoneWithExtension:` builds below (its realm, no port).
               NSString *identityDomain =
                   [[domainName componentsSeparatedByString:@":"] firstObject];
@@ -3113,6 +3116,11 @@ static void linphone_iphone_chat_room_state_changed(LinphoneCore *lc,
 - (NSArray<NSString *> *)getAccountPermissions:(NSString *)sipAddress {
     return [[[CANSAccountPermissionStore alloc] initWithDefaults:[NSUserDefaults standardUserDefaults]]
         permissionsForSipAddress:sipAddress];
+}
+
+- (NSString *)getSignInUser:(NSString *)sipAddress {
+    return [[[CANSAccountPermissionStore alloc] initWithDefaults:[NSUserDefaults standardUserDefaults]]
+        signInUserForSipAddress:sipAddress];
 }
 
 - (void)removeAccountAll {

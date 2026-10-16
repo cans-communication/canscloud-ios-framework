@@ -172,6 +172,9 @@ static const float kVideoDeadBandwidthKbps = 1.0f;
     }
     NSLog(@"[LinphoneManager] createLinphoneCore: Started on Main Thread");
 
+    [[[CANSSignInUserStore alloc] initWithDefaults:[NSUserDefaults standardUserDefaults]]
+        removeLegacyAccountPermissions];
+
     LinphoneFactory *factory = linphone_factory_get();
     if (!factory) {
       NSLog(@"[LinphoneManager] FATAL ERROR: linphone_factory_get() returned "
@@ -623,9 +626,9 @@ static void linphone_iphone_popup_password_request(LinphoneCore *lc,
           if (d) domainNS = [NSString stringWithUTF8String:d];
         }
 
-        // Permissions and the stored sign-in `user` only; token and domain UUID remain unchanged. The list is keyed by
+        // The stored sign-in `user` only; token and domain UUID remain unchanged. It is keyed by
         // `<extension>@<sign-in domain>`, which the identity can't rebuild, so the store looks up
-        // the sign-in address recorded for this identity and removes that list alone.
+        // the sign-in address recorded for this identity and removes that user alone.
         if (usernameNS.length > 0 && domainNS.length > 0) {
           [[[CANSSignInUserStore alloc] initWithDefaults:[NSUserDefaults standardUserDefaults]]
               removeSignInDataForIdentityAddress:[NSString stringWithFormat:@"%@@%@", usernameNS,
@@ -1933,12 +1936,10 @@ static void linphone_iphone_audio_devices_list_updated(LinphoneCore *lc) {
               [[NSUserDefaults standardUserDefaults]
                   setObject:domainId
                      forKey:[NSString stringWithFormat:@"com.canscloud.domainUUID.%@", sipAddress]];
-              // Always overwritten: a response without `permissions` clears the old list.
+              // Always overwritten, so a stale user can't survive a sign-in: a response without
+              // a `user` dictionary removes the old one.
               CANSSignInUserStore *signInUserStore = [[CANSSignInUserStore alloc]
                   initWithDefaults:[NSUserDefaults standardUserDefaults]];
-              [signInUserStore setPermissions:[CANSSignInUserStore permissionsFromUser:user]
-                                forSipAddress:sipAddress];
-              // Same key, same rule: always overwritten, so a stale user can't survive a sign-in.
               [signInUserStore setSignInUser:[CANSSignInUserStore signInUserJSONFromUser:user]
                                forSipAddress:sipAddress];
               // Same identity `setupLinphoneWithExtension:` builds below (its realm, no port).
@@ -3111,11 +3112,6 @@ static void linphone_iphone_chat_room_state_changed(LinphoneCore *lc,
     linphone_core_enable_video_display(theLinphoneCore, TRUE);
 
     NSLog(@"[LinphoneManager] configureChatSettings: done for user=%@", currentUser);
-}
-
-- (NSArray<NSString *> *)getAccountPermissions:(NSString *)sipAddress {
-    return [[[CANSSignInUserStore alloc] initWithDefaults:[NSUserDefaults standardUserDefaults]]
-        permissionsForSipAddress:sipAddress];
 }
 
 - (NSString *)getSignInUser:(NSString *)sipAddress {

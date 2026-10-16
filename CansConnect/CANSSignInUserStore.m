@@ -5,20 +5,11 @@
 
 #import "CANSSignInUserStore.h"
 
-static NSString *const kCANSAccountPermissionsKeyPrefix = @"com.canscloud.accountPermissions.";
+// Written by `1.0.15` only; kept to remove what it left behind.
+static NSString *const kCANSLegacyAccountPermissionsKeyPrefix = @"com.canscloud.accountPermissions.";
 static NSString *const kCANSSignInUserKeyPrefix = @"com.canscloud.signInUser.";
 static NSString *const kCANSSignInAddressKeyPrefix =
     @"com.canscloud.accountPermissionsSignInAddress.";
-
-/// String entries of `value` when it is an array, otherwise `nil`.
-static NSArray<NSString *> *_Nullable CANSStringEntries(id _Nullable value) {
-  if (![value isKindOfClass:[NSArray class]]) return nil;
-  NSMutableArray<NSString *> *strings = [NSMutableArray array];
-  for (id entry in (NSArray *)value) {
-    if ([entry isKindOfClass:[NSString class]]) [strings addObject:entry];
-  }
-  return [strings copy];
-}
 
 /// `text` when it parses as a JSON object, otherwise `nil`.
 static NSString *_Nullable CANSJSONObjectText(id _Nullable text) {
@@ -38,32 +29,6 @@ static NSString *_Nullable CANSJSONObjectText(id _Nullable text) {
     _defaults = defaults;
   }
   return self;
-}
-
-+ (NSString *)permissionsKeyForSipAddress:(NSString *)sipAddress {
-  return [kCANSAccountPermissionsKeyPrefix stringByAppendingString:sipAddress];
-}
-
-+ (NSArray<NSString *> *)permissionsFromUser:(id)user {
-  if (![user isKindOfClass:[NSDictionary class]]) return nil;
-  return CANSStringEntries(((NSDictionary *)user)[@"permissions"]);
-}
-
-- (NSArray<NSString *> *)permissionsForSipAddress:(NSString *)sipAddress {
-  if (sipAddress.length == 0) return nil;
-  return CANSStringEntries(
-      [_defaults objectForKey:[[self class] permissionsKeyForSipAddress:sipAddress]]);
-}
-
-- (void)setPermissions:(NSArray<NSString *> *)permissions forSipAddress:(NSString *)sipAddress {
-  if (sipAddress.length == 0) return;
-  NSString *key = [[self class] permissionsKeyForSipAddress:sipAddress];
-  NSArray<NSString *> *strings = CANSStringEntries(permissions);
-  if (strings) {
-    [_defaults setObject:strings forKey:key];
-  } else {
-    [_defaults removeObjectForKey:key];
-  }
 }
 
 + (NSString *)signInUserJSONFromUser:(id)user {
@@ -103,15 +68,18 @@ static NSString *_Nullable CANSJSONObjectText(id _Nullable text) {
   id recorded = [_defaults objectForKey:signInKey];
   NSString *sipAddress =
       [recorded isKindOfClass:[NSString class]] && [recorded length] > 0 ? recorded : identityAddress;
-  [_defaults removeObjectForKey:[[self class] permissionsKeyForSipAddress:sipAddress]];
   [_defaults removeObjectForKey:[kCANSSignInUserKeyPrefix stringByAppendingString:sipAddress]];
   [_defaults removeObjectForKey:signInKey];
 }
 
 - (void)removeAllSignInData {
-  [self removeKeysWithPrefix:kCANSAccountPermissionsKeyPrefix];
   [self removeKeysWithPrefix:kCANSSignInUserKeyPrefix];
   [self removeKeysWithPrefix:kCANSSignInAddressKeyPrefix];
+}
+
+- (void)removeLegacyAccountPermissions {
+  // The trailing "." keeps `com.canscloud.accountPermissionsSignInAddress.*` out of the match.
+  [self removeKeysWithPrefix:kCANSLegacyAccountPermissionsKeyPrefix];
 }
 
 - (void)removeKeysWithPrefix:(NSString *)prefix {

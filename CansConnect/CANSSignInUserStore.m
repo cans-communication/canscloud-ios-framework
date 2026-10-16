@@ -1,9 +1,9 @@
 //
-//  CANSAccountPermissionStore.m
+//  CANSSignInUserStore.m
 //  CansConnect
 //
 
-#import "CANSAccountPermissionStore.h"
+#import "CANSSignInUserStore.h"
 
 static NSString *const kCANSAccountPermissionsKeyPrefix = @"com.canscloud.accountPermissions.";
 static NSString *const kCANSSignInUserKeyPrefix = @"com.canscloud.signInUser.";
@@ -28,7 +28,7 @@ static NSString *_Nullable CANSJSONObjectText(id _Nullable text) {
   return [parsed isKindOfClass:[NSDictionary class]] ? text : nil;
 }
 
-@implementation CANSAccountPermissionStore {
+@implementation CANSSignInUserStore {
   NSUserDefaults *_defaults;
 }
 
@@ -40,7 +40,7 @@ static NSString *_Nullable CANSJSONObjectText(id _Nullable text) {
   return self;
 }
 
-+ (NSString *)keyForSipAddress:(NSString *)sipAddress {
++ (NSString *)permissionsKeyForSipAddress:(NSString *)sipAddress {
   return [kCANSAccountPermissionsKeyPrefix stringByAppendingString:sipAddress];
 }
 
@@ -51,12 +51,13 @@ static NSString *_Nullable CANSJSONObjectText(id _Nullable text) {
 
 - (NSArray<NSString *> *)permissionsForSipAddress:(NSString *)sipAddress {
   if (sipAddress.length == 0) return nil;
-  return CANSStringEntries([_defaults objectForKey:[[self class] keyForSipAddress:sipAddress]]);
+  return CANSStringEntries(
+      [_defaults objectForKey:[[self class] permissionsKeyForSipAddress:sipAddress]]);
 }
 
 - (void)setPermissions:(NSArray<NSString *> *)permissions forSipAddress:(NSString *)sipAddress {
   if (sipAddress.length == 0) return;
-  NSString *key = [[self class] keyForSipAddress:sipAddress];
+  NSString *key = [[self class] permissionsKeyForSipAddress:sipAddress];
   NSArray<NSString *> *strings = CANSStringEntries(permissions);
   if (strings) {
     [_defaults setObject:strings forKey:key];
@@ -96,18 +97,18 @@ static NSString *_Nullable CANSJSONObjectText(id _Nullable text) {
                 forKey:[kCANSSignInAddressKeyPrefix stringByAppendingString:identityAddress]];
 }
 
-- (void)removePermissionsForIdentityAddress:(NSString *)identityAddress {
+- (void)removeSignInDataForIdentityAddress:(NSString *)identityAddress {
   if (identityAddress.length == 0) return;
   NSString *signInKey = [kCANSSignInAddressKeyPrefix stringByAppendingString:identityAddress];
   id recorded = [_defaults objectForKey:signInKey];
   NSString *sipAddress =
       [recorded isKindOfClass:[NSString class]] && [recorded length] > 0 ? recorded : identityAddress;
-  [_defaults removeObjectForKey:[[self class] keyForSipAddress:sipAddress]];
+  [_defaults removeObjectForKey:[[self class] permissionsKeyForSipAddress:sipAddress]];
   [_defaults removeObjectForKey:[kCANSSignInUserKeyPrefix stringByAppendingString:sipAddress]];
   [_defaults removeObjectForKey:signInKey];
 }
 
-- (void)removeAllPermissions {
+- (void)removeAllSignInData {
   [self removeKeysWithPrefix:kCANSAccountPermissionsKeyPrefix];
   [self removeKeysWithPrefix:kCANSSignInUserKeyPrefix];
   [self removeKeysWithPrefix:kCANSSignInAddressKeyPrefix];
